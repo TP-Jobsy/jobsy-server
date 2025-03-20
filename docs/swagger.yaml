@@ -1,0 +1,1480 @@
+openapi: 3.0.0
+info:
+  title: Jobsy API
+  version: "1.0.0"
+  description: API для регистрации, входа, подтверждения e-mail, восстановления пароля и управления профилями фрилансера и заказчика.
+tags:
+  - name: auth
+    description: Вход, регистрация, авторизация, подтверждение e-mail и восстановление пароля
+  - name: freelancer
+    description: Эндпоинты для работы с профилем фрилансера и его портфолио
+  - name: client
+    description: Эндпоинты для работы с профилем заказчика и его проектами
+  - name: admin
+    description: Административные операции
+  - name: ai
+    description: AI-помощник
+  - name: skills
+  - name: categories
+  
+paths:
+
+  /auth/me:
+    get:
+      tags:
+        - auth
+      summary: Получить информацию о текущем пользователе
+      description: Возвращает данные пользователя, если запрос содержит действительный JWT-токен. Если токен отсутствует или недействителен, возвращается ошибка 401
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Информация о пользователе получена успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Пользователь не аутентифицирован
+          
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: Регистрация нового пользователя
+      description: Регистрирует пользователя и отправляет код подтверждения на e-mail
+      requestBody:
+        description: Данные для регистрации
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Пользователь успешно зарегистрирован, код подтверждения отправлен на e-mail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          description: Неверные данные запроса
+          
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: Вход пользователя
+      description: Аутентифицирует пользователя и возвращает JWT токен
+      requestBody:
+        description: Учетные данные для входа
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Вход выполнен успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Неверные учетные данные
+          
+  /auth/confirm-email:
+    post:
+      tags:
+        - auth
+      summary: Подтверждение e-mail
+      description: Проверяет код подтверждения, отправленный на e-mail пользователя при регистрации
+      requestBody:
+        description: Данные для подтверждения почты
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmEmailRequest'
+      responses:
+        '200':
+          description: Почта успешно подтверждена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+        '400':
+          description: Неверный или просроченный код подтверждения
+          
+  /auth/password-reset/request:
+    post:
+      tags:
+        - auth
+      summary: Запрос на восстановление пароля
+      description: Инициирует процесс восстановления пароля, отправляя 4-значный код на e-mail пользователя
+      requestBody:
+        description: Укажите e-mail пользователя для отправки кода восстановления
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+      responses:
+        '200':
+          description: Код для восстановления пароля отправлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+        '404':
+          description: Пользователь с указанным e-mail не найден
+        
+  /auth/password-reset/confirm:
+    post:
+      tags:
+        - auth
+      summary: Подтверждение восстановления пароля
+      description: Проверяет код восстановления и обновляет пароль пользователя
+      requestBody:
+        description: Данные для смены пароля
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRequest'
+      responses:
+        '200':
+          description: Пароль успешно обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+        '400':
+          description: Неверный или просроченный код восстановления
+          
+  /auth/logout:
+    post:
+      tags:
+        - auth
+      summary: Выход пользователя
+      description: Завершает сессию пользователя. Если реализован механизм аннулирования JWT, сервер также может добавить токен в черный список.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Пользователь успешно вышел из системы
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'  
+                
+  /freelancers:
+    get:
+      tags:
+        - freelancer
+      summary: Просмотр списка фрилансеров
+      description: Возвращает список фрилансеров с базовой информацией
+      responses:
+        '200':
+          description: Список фрилансеров получен успешно.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FreelancerProfile'
+        '404':
+          description: Фрилансеры не найдены
+          
+  /freelancers/{id}:
+    get:
+      tags:
+        - freelancer
+      summary: Получить детальную информацию о фрилансере
+      description: Возвращает детальную информацию о фрилансере по его ID
+      parameters:
+        - name: id
+          in: path
+          description: ID фрилансера.
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Информация о фрилансере получена успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FreelancerProfile'
+        '404':
+          description: Фрилансер не найден  
+          
+  /profile/freelancer:
+    get:
+      tags:
+        - freelancer
+      summary: Получить профиль фрилансера
+      description: Возвращает информацию профиля фрилансера
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Профиль фрилансера получен успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FreelancerProfile'
+        '404':
+          description: Профиль фрилансера не найден
+    put:
+      tags:
+        - freelancer
+      summary: Обновить профиль фрилансера
+      description: Обновляет данные профиля фрилансера
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Данные для обновления профиля фрилансера
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FreelancerProfileUpdate'
+      responses:
+        '200':
+          description: Профиль фрилансера обновлён успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FreelancerProfile'
+        '400':
+          description: Ошибка обновления профил
+    delete:
+      tags:
+        - freelancer
+      summary: Удалить (деактивировать) аккаунт фрилансера
+      description: Фрилансер может удалить (деактивировать) свой аккаунт. После этого аккаунт помечается как неактивный и пользователь не сможет войти в систему
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Аккаунт фрилансера успешно деактивирован.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+        '404':
+          description: Аккаунт не найден     
+          
+  /profile/freelancer/portfolio:
+    get:
+      tags:
+        - freelancer
+      summary: Получить портфолио фрилансера
+      description: Возвращает список элементов портфолио для фрилансера
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список элементов портфолио получен успешно
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FreelancerPortfolio'
+    post:
+      tags:
+        - freelancer
+      summary: Добавить новый элемент портфолио
+      description: Создаёт новую запись в портфолио фрилансера
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Данные нового элемента портфолио
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FreelancerPortfolioCreate'
+      responses:
+        '201':
+          description: Элемент портфолио создан успешно.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FreelancerPortfolio'
+        '400':
+          description: Ошибка создания элемента портфолио
+          
+  /profile/freelancer/portfolio/{id}:
+    put:
+      tags:
+        - freelancer
+      summary: Обновить элемент портфолио фрилансера
+      description: Обновляет данные элемента портфолио
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID элемента портфолио
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Данные для обновления элемента портфолио
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FreelancerPortfolioUpdate'
+      responses:
+        '200':
+          description: Элемент портфолио обновлён успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FreelancerPortfolio'
+        '400':
+          description: Ошибка обновления элемента портфолио
+    delete:
+      tags:
+        - freelancer
+      summary: Удалить элемент портфолио фрилансера
+      description: Удаляет указанный элемент портфолио
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID элемента портфолио для удаления
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Элемент портфолио удалён успешно
+        '404':
+          description: Элемент портфолио не найден
+          
+  /clients:
+    get:
+      tags:
+        - client
+      summary: Просмотр списка клиентов
+      description: Возвращает список клиентов с базовой информацией.
+      responses:
+        '200':
+          description: Список клиентов получен успешно.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClientProfile'
+        '404':
+          description: Клиенты не найдены.
+          
+  /clients/{id}:
+    get:
+      tags:
+        - client
+      summary: Получить детальную информацию о клиенте
+      description: Возвращает детальную информацию о клиенте по его ID
+      parameters:
+        - name: id
+          in: path
+          description: ID клиента
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Информация о клиенте получена успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientProfile'
+        '404':
+          description: Клиент не найден
+          
+  /profile/client:
+    get:
+      tags:
+        - client
+      summary: Получить профиль заказчика
+      description: Возвращает данные профиля заказчика
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Профиль заказчика получен успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientProfile'
+        '404':
+          description: Профиль заказчика не найден
+    put:
+      tags:
+        - client
+      summary: Обновить профиль заказчика
+      description: Обновляет данные профиля заказчика
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Данные для обновления профиля заказчика
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientProfileUpdate'
+      responses:
+        '200':
+          description: Профиль заказчика обновлён успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientProfile'
+        '400':
+          description: Ошибка обновления профиля
+    delete:
+      tags:
+        - client
+      summary: Удалить (деактивировать) аккаунт заказчика
+      description: Заказчик может удалить (деактивировать) свой аккаунт. После деактивации аккаунт помечается как неактивный и пользователь не сможет войти в систему
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Аккаунт заказчика успешно деактивирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+        '404':
+          description: Аккаунт не найден
+          
+  /projects:
+    get:
+      tags:
+        - client
+      summary: Получить список проектов
+      description: >
+        Возвращает список всех проектов. При передаче query-параметра "status" возвращаются проекты с указанным статусом
+        Допустимые значения статуса: open (открытые), in_progress (в работе), completed (завершённые)
+      parameters:
+        - name: status
+          in: query
+          description: Фильтр по статусу проекта.
+          required: false
+          schema:
+            type: string
+            enum: [open, in_progress, completed]
+      responses:
+        '200':
+          description: Список проектов получен успешно
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+        '404':
+          description: Проекты не найдены
+    post:
+      tags:
+        - client
+      summary: Создать новый проект
+      description: Клиент может создать новый проект. При создании проект получает статус "open"
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Данные нового проекта
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectCreate'
+      responses:
+        '201':
+          description: Проект успешно создан.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          description: Ошибка создания проекта
+
+  /projects/{id}:
+    put:
+      tags:
+        - client
+      summary: Обновить проект
+      description: Клиент может обновить проект, если его статус "open". Проекты в работе или завершённые редактировать нельзя
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID проекта
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Данные для обновления проекта
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectUpdate'
+      responses:
+        '200':
+          description: Проект успешно обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          description: Проект нельзя обновить, так как его статус не "open"
+    delete:
+      tags:
+        - client
+      summary: Удалить проект
+      description: Клиент может удалить проект, если его статус "open". Проекты в работе или завершённые удалять нельзя
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID проекта для удаления.
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Проект успешно удалён.
+        '400':
+          description: Проект нельзя удалить, так как его статус не "open"
+          
+  /admin/freelancers:
+    get:
+      tags:
+        - admin
+      summary: Просмотр списка фрилансеров
+      description: Возвращает список всех фрилансеров с базовой информацией
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список фрилансеров получен успешно
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FreelancerProfile'
+        '404':
+          description: Фрилансеры не найдены
+
+  /admin/freelancers/{id}:
+    get:
+      tags:
+        - admin
+      summary: Получить детальную информацию о фрилансере
+      description: Возвращает детальную информацию о фрилансере по его ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID фрилансера
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Информация о фрилансере получена успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FreelancerProfile'
+        '404':
+          description: Фрилансер не найден
+    delete:
+      tags:
+        - admin
+      summary: Деактивировать аккаунт фрилансера
+      description: Администратор может деактивировать аккаунт фрилансера по его ID, что эквивалентно удалению аккаунта из системы
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID фрилансера для деактивации
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Аккаунт фрилансера успешно деактивирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+        '404':
+          description: Фрилансер не найден
+          
+  /admin/clients:
+    get:
+      tags:
+        - admin
+      summary: Просмотр списка клиентов
+      description: Возвращает список всех клиентов с базовой информацией
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список клиентов получен успешно
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClientProfile'
+        '404':
+          description: Клиенты не найдены
+
+  /admin/clients/{id}:
+    get:
+      tags:
+        - admin
+      summary: Получить детальную информацию о клиенте
+      description: Возвращает детальную информацию о клиенте по его ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID клиента
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Информация о клиенте получена успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientProfile'
+        '404':
+          description: Клиент не найден  
+    delete:
+      tags:
+        - admin
+      summary: Деактивировать аккаунт клиента
+      description: Администратор может деактивировать аккаунт клиента по его ID (например, установив is_active = false)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID клиента для деактивации
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Аккаунт клиента успешно деактивирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+        '404':
+          description: Клиент не найден        
+
+  /admin/clients/{id}/projects:
+    get:
+      tags:
+        - admin
+      summary: Просмотр проектов клиента
+      description: Возвращает список всех проектов, созданных указанным клиентом
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID клиента
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список проектов клиента получен успешно
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+        '404':
+          description: Проекты для данного клиента не найдены
+
+  /admin/projects/{id}:
+    get:
+      tags:
+        - admin
+      summary: Получить детальную информацию о проекте
+      description: Возвращает детальную информацию о проекте по его ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID проекта
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Информация о проекте получена успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '404':
+          description: Проект не найден
+          
+    put:
+      tags:
+        - admin
+      summary: Изменить проект
+      description: Администратор может изменить данные проекта по его ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID проекта
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Новые данные проекта для обновления
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectUpdate'
+      responses:
+        '200':
+          description: Проект успешно обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          description: Ошибка обновления проекта
+        '404':
+          description: Проект не найден
+          
+    delete:
+      tags:
+        - admin
+      summary: Удалить проект
+      description: Администратор может удалить проект по его ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID проекта для удаления
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Проект успешно удалён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+        '404':
+          description: Проект не найден
+
+  /admin/freelancers/{id}/portfolio:
+    get:
+      tags:
+        - admin
+      summary: Просмотр портфолио фрилансера
+      description: Возвращает список элементов портфолио указанного фрилансера
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID фрилансера
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список элементов портфолио получен успешно
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FreelancerPortfolio'
+        '404':
+          description: Портфолио не найдено
+
+  /admin/freelancers/{id}/portfolio/{portfolioId}:
+    get:
+      tags:
+        - admin
+      summary: Получить детальную информацию о элементе портфолио
+      description: Возвращает детальную информацию о конкретном элементе портфолио фрилансера
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID фрилансера
+          required: true
+          schema:
+            type: integer
+        - name: portfolioId
+          in: path
+          description: ID элемента портфолио
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Информация об элементе портфолио получена успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FreelancerPortfolio'
+        '404':
+          description: Элемент портфолио не найден
+    put:
+      tags:
+        - admin
+      summary: Обновить элемент портфолио фрилансера
+      description: Обновляет данные конкретного элемента портфолио фрилансера
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID фрилансера
+          required: true
+          schema:
+            type: integer
+        - name: portfolioId
+          in: path
+          description: ID элемента портфолио
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Данные для обновления элемента портфолио
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FreelancerPortfolioUpdate'
+      responses:
+        '200':
+          description: Элемент портфолио успешно обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FreelancerPortfolio'
+        '400':
+          description: Ошибка обновления элемента портфолио
+        '404':
+          description: Элемент портфолио не найден
+    delete:
+      tags:
+        - admin
+      summary: Удалить элемент портфолио фрилансера
+      description: Удаляет указанный элемент портфолио фрилансера
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID фрилансера.
+          required: true
+          schema:
+            type: integer
+        - name: portfolioId
+          in: path
+          description: ID элемента портфолио для удаления
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Элемент портфолио успешно удалён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+        '404':
+          description: Элемент портфолио не найден
+  
+  /ai/project-description:
+    post:
+      tags:
+        - ai
+      summary: Сгенерировать описание проекта с помощью AI
+      description: >
+        Генерирует детальное описание проекта на основе переданных ключевых слов или начальной идеи
+        Опционально можно указать ID проекта для обновления существующего проекта
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Данные для генерации описания проекта
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                project_id:
+                  type: integer
+                  example: 1
+                  description: (Опционально) ID проекта, для которого требуется сгенерировать описание
+                input_text:
+                  type: string
+                  example: "Нужно мобильное приложение для управления задачами"
+                  description: Ключевые слова или краткая идея, на основе которой будет сгенерировано подробное описание
+              required:
+                - input_text
+      responses:
+        '200':
+          description: Описание проекта сгенерировано успешно
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  generated_description:
+                    type: string
+                    example: "Сгенерированное подробное описание проекта, включающее функциональные требования, технические детали и рекомендации по дизайну"
+        '400':
+          description: Ошибка генерации описания проекта
+  
+  /categories:
+    get:
+      tags:
+        - categories
+      summary: Получить список категорий
+      description: Возвращает список всех категорий (общедоступно)
+      responses:
+        '200':
+          description: Список категорий получен успешно
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+        '404':
+          description: Категории не найдены
+  
+  /categories/{categoryId}/specializations:
+    get:
+      tags:
+        - categories
+      summary: Получить специализации для категории
+      description: Возвращает список специализаций, принадлежащих указанной категории (общедоступно)
+      parameters:
+        - name: categoryId
+          in: path
+          description: ID категории
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список специализаций получен успешно
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Specialization'
+        '404':
+          description: Специализации не найдены для данной категории
+  
+  /skills:
+    get:
+      tags:
+        - skills
+      summary: Получить список навыков
+      description: Возвращает список всех навыков (общедоступно)
+      responses:
+        '200':
+          description: Список навыков получен успешно
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Skill'
+        '404':
+          description: Навыки не найдены  
+          
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        email:
+          type: string
+          example: "user@example.com"
+        first_name:
+          type: string
+          example: "Иван"
+        last_name:
+          type: string
+          example: "Иванов"
+        role:
+          type: string
+          example: "client"
+        is_verified:
+          type: boolean
+          example: true
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          example: "user@example.com"
+        password:
+          type: string
+          example: "SecretPassword123!"
+        first_name:
+          type: string
+          example: "Иван"
+        last_name:
+          type: string
+          example: "Иванов"
+        phone:
+          type: string
+          example: "+79991234567"
+        role:
+          type: string
+          enum: [client, freelancer]
+          example: "client"
+      required:
+        - email
+        - password
+        - first_name
+        - last_name
+        - role
+    RegisterResponse:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          example: 1
+        message:
+          type: string
+          example: "Регистрация успешна. Проверьте свою почту для подтверждения"
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          example: "user@example.com"
+        password:
+          type: string
+          example: "SecretPassword123!"
+      required:
+        - email
+        - password
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        user:
+          $ref: '#/components/schemas/User'
+    ConfirmEmailRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          example: "user@example.com"
+        confirmation_code:
+          type: string
+          example: "1234"
+      required:
+        - email
+        - confirmation_code
+    PasswordResetRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          example: "user@example.com"
+      required:
+        - email
+    PasswordResetConfirmRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          example: "user@example.com"
+        reset_code:
+          type: string
+          example: "1234"
+        new_password:
+          type: string
+          example: "NewSecretPassword456!"
+      required:
+        - email
+        - reset_code
+        - new_password
+    DefaultResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Операция выполнена успешно"
+    FreelancerProfile:
+        type: object
+        properties:
+          id:
+            type: integer
+            example: 1
+          user_id:
+            type: integer
+            example: 1
+          birth_date:
+            type: string
+            format: date
+            example: "2000-01-01"
+          hourly_rate:
+            type: number
+            example: 50.0
+          category_id:
+            type: integer
+            example: 2
+          specialization_id:
+            type: integer
+            example: 5
+          experience_level:
+            type: string
+            enum: [beginner, middle, expert]
+            example: "middle"
+          about_me:
+            type: string
+            example: "Опытный фронтендер с 5-летним стажем"
+          created_at:
+            type: string
+            format: date-time
+          updated_at:
+            type: string
+            format: date-time
+    FreelancerProfileUpdate:
+      type: object
+      properties:
+        birth_date:
+          type: string
+          format: date
+          example: "2000-01-01"
+        hourly_rate:
+          type: number
+          example: 50.0
+        category_id:
+          type: integer
+          example: 2
+        specialization_id:
+          type: integer
+          example: 5
+        experience_level:
+          type: string
+          enum: [beginner, middle, expert]
+          example: "middle"
+        about_me:
+          type: string
+          example: "Опытный фронтендер с 5-летним стажем"
+    FreelancerPortfolio:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        freelancer_id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Проект A"
+        description:
+          type: string
+          example: "Описание проекта A"
+        role_in_project:
+          type: string
+          example: "Frontend Developer"
+        project_link:
+          type: string
+          example: "https://github.com/example/projectA"
+    FreelancerPortfolioCreate:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "Проект A"
+        description:
+          type: string
+          example: "Описание проекта A"
+        role_in_project:
+          type: string
+          example: "Frontend Developer"
+        project_link:
+          type: string
+          example: "https://github.com/example/projectA"
+      required:
+        - title
+        - description
+    FreelancerPortfolioUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "Проект A Updated"
+        description:
+          type: string
+          example: "Обновлённое описание проекта A"
+        role_in_project:
+          type: string
+          example: "Senior Frontend Developer"
+        project_link:
+          type: string
+          example: "https://github.com/example/projectA"
+    ClientProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 1
+        company_name:
+          type: string
+          example: "ООО Рога и Копыта"
+        country:
+          type: string
+          example: "Россия"
+        city:
+          type: string
+          example: "Москва"
+        position_in_company:
+          type: string
+          example: "Директор"
+        field_description:
+          type: string
+          example: "Разработка IT-решений"
+    ClientProfileUpdate:
+      type: object
+      properties:
+        company_name:
+          type: string
+          example: "ООО Рога и Копыта"
+        country:
+          type: string
+          example: "Россия"
+        city:
+          type: string
+          example: "Москва"
+        position_in_company:
+          type: string
+          example: "Директор"
+        field_description:
+          type: string
+          example: "Разработка IT-решений"
+    Project:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        client_id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Название проекта"
+        description:
+          type: string
+          example: "Описание проекта..."
+        category_id:
+          type: integer
+          example: 2
+        specialization_id:
+          type: integer
+          example: 5
+        complexity:
+          type: string
+          enum: [easy, medium, hard]
+          example: "easy"
+        payment_type:
+          type: string
+          enum: [hourly, fixed]
+          example: "fixed"
+        min_rate:
+          type: number
+          example: 100.0
+        max_rate:
+          type: number
+          example: 200.0
+        fixed_price:
+          type: number
+          example: 1500.0
+        duration:
+          type: string
+          enum: [less_than_1_month, 1_to_3_months, 3_to_6_months]
+          example: "1_to_3_months"
+        status:
+          type: string
+          enum: [open, in_progress, completed]
+          example: "open"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    ProjectCreate:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "Название проекта"
+        description:
+          type: string
+          example: "Описание проекта..."
+        category_id:
+          type: integer
+          example: 2
+        specialization_id:
+          type: integer
+          example: 5
+        complexity:
+          type: string
+          enum: [easy, medium, hard]
+          example: "easy"
+        payment_type:
+          type: string
+          enum: [hourly, fixed]
+          example: "fixed"
+        min_rate:
+          type: number
+          example: 100.0
+        max_rate:
+          type: number
+          example: 200.0
+        fixed_price:
+          type: number
+          example: 1500.0
+        duration:
+          type: string
+          enum: [less_than_1_month, 1_to_3_months, 3_to_6_months]
+          example: "1_to_3_months"
+        skills:
+          type: array
+          description: Список идентификаторов навыков (из таблицы skills), которые требуются для проекта
+          items:
+            type: integer
+          example: [1, 3, 5]
+      required:
+        - title
+        - description
+        - complexity
+        - payment_type
+        - duration
+    ProjectUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "Обновлённое название проекта"
+        description:
+          type: string
+          example: "Обновлённое описание проекта..."
+        category_id:
+          type: integer
+          example: 2
+        specialization_id:
+          type: integer
+          example: 5
+        complexity:
+          type: string
+          enum: [easy, medium, hard]
+          example: "medium"
+        payment_type:
+          type: string
+          enum: [hourly, fixed]
+          example: "hourly"
+        min_rate:
+          type: number
+          example: 150.0
+        max_rate:
+          type: number
+          example: 250.0
+        fixed_price:
+          type: number
+          example: 2000.0
+        duration:
+          type: string
+          enum: [less_than_1_month, 1_to_3_months, 3_to_6_months]
+          example: "1_to_3_months"
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Web Development"
+    Specialization:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        category_id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Frontend Development"
+    Skill:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "JavaScript"
