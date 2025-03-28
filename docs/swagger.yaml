@@ -745,40 +745,6 @@ paths:
                 $ref: '#/components/schemas/Project'
         '404':
           description: Проект не найден
-          
-    put:
-      tags:
-        - admin
-      summary: Изменить проект
-      description: Администратор может изменить данные проекта по его ID
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          description: ID проекта
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        description: Новые данные проекта для обновления
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ProjectUpdate'
-      responses:
-        '200':
-          description: Проект успешно обновлён
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Project'
-        '400':
-          description: Ошибка обновления проекта
-        '404':
-          description: Проект не найден
-          
     delete:
       tags:
         - admin
@@ -858,44 +824,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FreelancerPortfolio'
-        '404':
-          description: Элемент портфолио не найден
-    put:
-      tags:
-        - admin
-      summary: Обновить элемент портфолио фрилансера
-      description: Обновляет данные конкретного элемента портфолио фрилансера
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          description: ID фрилансера
-          required: true
-          schema:
-            type: integer
-        - name: portfolioId
-          in: path
-          description: ID элемента портфолио
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        description: Данные для обновления элемента портфолио
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FreelancerPortfolioUpdate'
-      responses:
-        '200':
-          description: Элемент портфолио успешно обновлён
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FreelancerPortfolio'
-        '400':
-          description: Ошибка обновления элемента портфолио
         '404':
           description: Элемент портфолио не найден
     delete:
