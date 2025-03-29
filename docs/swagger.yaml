@@ -56,7 +56,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RegisterResponse'
+                $ref: '#/components/schemas/RegistrationRequest'
         '400':
           description: Неверные данные запроса
           
@@ -1014,8 +1014,9 @@ components:
         - password
         - first_name
         - last_name
+        - date_birth
         - role
-    RegisterResponse:
+    RegistrationRequest:
       type: object
       properties:
         user_id:
