@@ -79,7 +79,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginResponse'
+                $ref: '#/components/schemas/AuthenticationResponse'
         '401':
           description: Неверные учетные данные
           
@@ -981,6 +981,10 @@ components:
         last_name:
           type: string
           example: "Иванов"
+        date_birth:
+          type: string
+          format: date
+          example: "2000-01-01"
         role:
           type: string
           example: "client"
@@ -1025,7 +1029,7 @@ components:
         message:
           type: string
           example: "Регистрация успешна. Проверьте свою почту для подтверждения"
-    LoginRequest:
+    AuthenticationRequest:
       type: object
       properties:
         email:
@@ -1037,7 +1041,7 @@ components:
       required:
         - email
         - password
-    LoginResponse:
+    AuthenticationResponse:
       type: object
       properties:
         token:
