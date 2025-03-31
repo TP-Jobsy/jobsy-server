@@ -49,14 +49,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RegisterRequest'
+              $ref: '#/components/schemas/RegistrationRequest'
       responses:
         '201':
           description: Пользователь успешно зарегистрирован, код подтверждения отправлен на e-mail
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RegistrationRequest'
+                $ref: '#/components/schemas/RegistrationResponse'
         '400':
           description: Неверные данные запроса
           
@@ -72,7 +72,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginRequest'
+              $ref: '#/components/schemas/AuthenticationRequest'
       responses:
         '200':
           description: Вход выполнен успешно
@@ -991,7 +991,7 @@ components:
         is_verified:
           type: boolean
           example: true
-    RegisterRequest:
+    RegistrationRequest:
       type: object
       properties:
         email:
@@ -1020,7 +1020,7 @@ components:
         - last_name
         - date_birth
         - role
-    RegistrationRequest:
+    RegistrationResponse:
       type: object
       properties:
         user_id:
@@ -1285,7 +1285,7 @@ components:
           example: 1500.0
         duration:
           type: string
-          enum: [less_than_1_month, 1_to_3_months, 3_to_6_months]
+          enum: [less_than_1_month, less_than_3_months, less_than_6_months]
           example: "1_to_3_months"
         status:
           type: string
@@ -1331,7 +1331,7 @@ components:
           example: 1500.0
         duration:
           type: string
-          enum: [less_than_1_month, 1_to_3_months, 3_to_6_months]
+          enum: [less_than_1_month, less_than_3_months, less_than_6_months]
           example: "1_to_3_months"
         skills:
           type: array
@@ -1379,7 +1379,7 @@ components:
           example: 2000.0
         duration:
           type: string
-          enum: [less_than_1_month, 1_to_3_months, 3_to_6_months]
+          enum: [less_than_1_month, less_than_3_months, less_than_6_months]
           example: "1_to_3_months"
     Category:
       type: object
