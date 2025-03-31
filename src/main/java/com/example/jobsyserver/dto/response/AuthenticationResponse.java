@@ -1,4 +1,4 @@
-package com.example.jobsyserver.dto;
+package com.example.jobsyserver.dto.response;
 
 import com.example.jobsyserver.model.User;
 import io.swagger.v3.oas.annotations.media.Schema;
