@@ -1,6 +1,6 @@
 package com.example.jobsyserver.dto.response;
 
-import com.example.jobsyserver.model.User;
+import com.example.jobsyserver.dto.user.UserDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,5 +14,5 @@ public class AuthenticationResponse {
     private String token;
 
     @Schema(description = "Информация о пользователе")
-    private User user;
+    private UserDto user;
 }
