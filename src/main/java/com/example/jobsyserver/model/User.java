@@ -32,7 +32,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @Schema(description = "Роль пользователя", example = "client")
+    @Schema(description = "Роль пользователя", example = "CLIENT")
     private UserRole role;
 
     @Column(name = "first_name", length = 50, nullable = false)
