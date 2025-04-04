@@ -11,7 +11,7 @@ CREATE TABLE projects (
                           max_rate NUMERIC(10,2),
                           fixed_price NUMERIC(10,2),
                           duration project_duration_enum,
-                          status project_status_enum NOT NULL DEFAULT 'open',
+                          status project_status_enum NOT NULL DEFAULT 'OPEN',
                           created_at TIMESTAMP NOT NULL DEFAULT NOW(),
                           updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
                           CONSTRAINT fk_project_client FOREIGN KEY (client_id) REFERENCES users (id) ON DELETE CASCADE,
@@ -37,7 +37,7 @@ CREATE TABLE project_applications (
                                       id BIGSERIAL PRIMARY KEY,
                                       project_id BIGINT NOT NULL,
                                       freelancer_id BIGINT NOT NULL,
-                                      status project_application_status_enum NOT NULL DEFAULT 'pending',
+                                      status project_application_status_enum NOT NULL DEFAULT 'PENDING',
                                       created_at TIMESTAMP NOT NULL DEFAULT NOW(),
                                       CONSTRAINT fk_app_project FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE,
                                       CONSTRAINT fk_app_freelancer FOREIGN KEY (freelancer_id) REFERENCES freelancer_profiles (id) ON DELETE CASCADE
