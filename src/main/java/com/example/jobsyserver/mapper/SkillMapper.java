@@ -7,4 +7,5 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface SkillMapper {
     SkillDto toDto(Skill skill);
+    Skill toEntity(SkillDto skillDto);
 }
