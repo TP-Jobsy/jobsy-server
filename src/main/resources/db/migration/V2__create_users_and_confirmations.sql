@@ -5,6 +5,7 @@ CREATE TABLE users (
                        role user_role_enum NOT NULL,
                        first_name VARCHAR(50) NOT NULL,
                        last_name VARCHAR(50) NOT NULL,
+                       date_birth DATE NOT NULL,
                        phone VARCHAR(30),
                        is_verified BOOLEAN DEFAULT FALSE,
                        verification_code VARCHAR(10),
