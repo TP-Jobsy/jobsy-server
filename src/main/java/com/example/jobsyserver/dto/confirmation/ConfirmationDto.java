@@ -1,4 +1,4 @@
-package com.example.jobsyserver.dto;
+package com.example.jobsyserver.dto.confirmation;
 
 import com.example.jobsyserver.enums.ConfirmationAction;
 import io.swagger.v3.oas.annotations.media.Schema;
