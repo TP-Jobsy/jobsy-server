@@ -2,22 +2,59 @@ services:
   postgres:
     image: postgres:14
     container_name: postgres
+    restart: always
     environment:
-      POSTGRES_DB: jobsy_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: jobsy_server
+    restart: always
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/jobsy_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: pass
-      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/${POSTGRES_DB}?stringtype=unspecified"
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: "org.postgresql.Driver"
+      SPRING_FLYWAY_ENABLED: "true"
+      SPRING_FLYWAY_LOCATIONS: "classpath:db/migration"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "create"
+      SPRING_MAIL_HOST: "smtp.gmail.com"
+      SPRING_MAIL_PORT: "587"
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_TRUST: "smtp.gmail.com"
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
     ports:
       - "8080:8080"
+    env_file:
+      - .env
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  postgres-data:
+    name: postgres-data
