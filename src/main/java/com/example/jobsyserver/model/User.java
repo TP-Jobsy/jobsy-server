@@ -52,6 +52,7 @@ public class User {
     private String phone;
 
     @Column(name = "is_verified", nullable = false)
+    @Builder.Default
     @Schema(description = "Флаг подтверждения email", example = "true")
     private Boolean isVerified = false;
 
@@ -60,6 +61,7 @@ public class User {
     private String verificationCode;
 
     @Column(name = "is_active", nullable = false)
+    @Builder.Default
     @Schema(description = "Активен ли пользователь", example = "true")
     private Boolean isActive = true;
 
