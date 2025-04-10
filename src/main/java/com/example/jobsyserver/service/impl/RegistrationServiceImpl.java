@@ -3,6 +3,7 @@ package com.example.jobsyserver.service.impl;
 import com.example.jobsyserver.dto.request.RegistrationRequest;
 import com.example.jobsyserver.dto.response.RegistrationResponse;
 import com.example.jobsyserver.enums.ConfirmationAction;
+import com.example.jobsyserver.exception.BadRequestException;
 import com.example.jobsyserver.model.Confirmation;
 import com.example.jobsyserver.model.User;
 import com.example.jobsyserver.repository.ConfirmationRepository;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -32,6 +34,14 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Transactional
     public RegistrationResponse register(RegistrationRequest request) {
         log.info("Регистрация пользователя с email: {}", request.getEmail());
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new BadRequestException("Пользователь с таким email уже зарегистрирован");
+        }
+
+        if (LocalDate.now().minusYears(18).isBefore(request.getDateBirth())) {
+            throw new BadRequestException("Пользователь должен быть старше 18 лет");
+        }
 
         User user = User.builder()
                 .firstName(request.getFirstName())
