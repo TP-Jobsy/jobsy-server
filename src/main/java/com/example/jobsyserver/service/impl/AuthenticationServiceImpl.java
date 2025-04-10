@@ -2,6 +2,7 @@ package com.example.jobsyserver.service.impl;
 
 import com.example.jobsyserver.dto.request.AuthenticationRequest;
 import com.example.jobsyserver.dto.response.AuthenticationResponse;
+import com.example.jobsyserver.exception.BadRequestException;
 import com.example.jobsyserver.exception.UserNotFoundException;
 import com.example.jobsyserver.mapper.UserMapper;
 import com.example.jobsyserver.repository.UserRepository;
@@ -24,10 +25,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticationResponse login(AuthenticationRequest request) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } catch (Exception ex) {
+            throw new BadRequestException("Неверные учётные данные или пользователь не найден");
+        }
         String token = jwtService.generateToken(request.getEmail());
         var userDto = userRepository.findByEmail(request.getEmail())
                 .map(userMapper::toDto)
