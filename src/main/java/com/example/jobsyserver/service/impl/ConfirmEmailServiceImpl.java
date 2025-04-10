@@ -2,6 +2,7 @@ package com.example.jobsyserver.service.impl;
 
 import com.example.jobsyserver.enums.ConfirmationAction;
 import com.example.jobsyserver.event.UserVerifiedEvent;
+import com.example.jobsyserver.exception.BadRequestException;
 import com.example.jobsyserver.model.Confirmation;
 import com.example.jobsyserver.model.User;
 import com.example.jobsyserver.repository.ConfirmationRepository;
@@ -33,7 +34,7 @@ public class ConfirmEmailServiceImpl implements ConfirmEmailService {
                 .findByUserEmailAndActionAndUsedFalse(email, ConfirmationAction.REGISTRATION)
                 .orElseThrow(() -> {
                     log.error("Запись подтверждения не найдена или уже использована для email: {}", email);
-                    return new RuntimeException("Запись подтверждения не найдена или уже использована");
+                    return new BadRequestException("Запись подтверждения не найдена или уже использована");
                 });
 
         if (LocalDateTime.now().isAfter(confirmation.getExpiresAt())) {
@@ -41,13 +42,13 @@ public class ConfirmEmailServiceImpl implements ConfirmEmailService {
             confirmationRepository.delete(confirmation);
             userRepository.delete(user);
             log.error("Срок подтверждения истёк для пользователя с email {}. Пользователь удалён", email);
-            throw new RuntimeException("Срок подтверждения истёк. Пожалуйста, зарегистрируйтесь снова");
+            throw new BadRequestException("Срок подтверждения истёк. Пожалуйста, зарегистрируйтесь снова");
         }
 
         if (!confirmation.getConfirmationCode().equals(confirmationCode)) {
             log.error("Неверный код подтверждения для email {}. Введён: {}, ожидаемый: {}",
                     email, confirmationCode, confirmation.getConfirmationCode());
-            throw new RuntimeException("Неверный код подтверждения");
+            throw new BadRequestException("Неверный код подтверждения");
         }
 
         confirmation.setUsed(true);
