@@ -1,6 +1,4 @@
 .gradle
-gradlew
-gradlew.bat
 .gitattributes
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
