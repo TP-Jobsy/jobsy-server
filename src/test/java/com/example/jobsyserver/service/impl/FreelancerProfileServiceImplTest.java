@@ -11,6 +11,7 @@ import com.example.jobsyserver.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -150,7 +151,7 @@ class FreelancerProfileServiceImplTest {
     @Test
     void testGetCurrentUserEmailNotAuthenticated() {
         SecurityContextHolder.clearContext();
-        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+        BadCredentialsException exception = assertThrows(BadCredentialsException.class, () -> {
             freelancerProfileService.getProfile();
         });
         assertTrue(exception.getMessage().contains("Пользователь не аутентифицирован"));
