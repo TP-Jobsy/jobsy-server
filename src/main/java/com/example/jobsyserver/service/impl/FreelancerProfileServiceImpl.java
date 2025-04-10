@@ -11,6 +11,7 @@ import com.example.jobsyserver.repository.UserRepository;
 import com.example.jobsyserver.service.FreelancerProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -124,7 +125,7 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
         if (authentication == null || !authentication.isAuthenticated() ||
                 "anonymousUser".equals(authentication.getPrincipal())) {
             log.error("Пользователь не аутентифицирован");
-            throw new IllegalStateException("Пользователь не аутентифицирован");
+            throw new BadCredentialsException("Пользователь не аутентифицирован");
         }
         Object principal = authentication.getPrincipal();
         String email;
