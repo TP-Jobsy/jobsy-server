@@ -9,8 +9,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
-    env_file:
-      - .env
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -47,8 +45,6 @@ services:
       JWT_EXPIRATION: ${JWT_EXPIRATION}
     ports:
       - "8080:8080"
-    env_file:
-      - .env
     logging:
       driver: "json-file"
       options:
