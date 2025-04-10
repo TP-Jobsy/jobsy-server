@@ -64,10 +64,12 @@ public class User {
     private Boolean isActive = true;
 
     @Column(name = "created_at", nullable = false)
+    @Builder.Default
     @Schema(description = "Дата создания аккаунта", example = "2024-03-30T12:00:00")
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "updated_at", nullable = false)
+    @Builder.Default
     @Schema(description = "Дата последнего обновления аккаунта", example = "2024-03-30T12:00:00")
     private LocalDateTime updatedAt = LocalDateTime.now();
 }
