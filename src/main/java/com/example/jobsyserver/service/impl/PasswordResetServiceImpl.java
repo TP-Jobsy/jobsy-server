@@ -1,6 +1,7 @@
 package com.example.jobsyserver.service.impl;
 
 import com.example.jobsyserver.enums.ConfirmationAction;
+import com.example.jobsyserver.exception.BadRequestException;
 import com.example.jobsyserver.exception.UserNotFoundException;
 import com.example.jobsyserver.model.Confirmation;
 import com.example.jobsyserver.model.User;
@@ -55,18 +56,18 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         log.info("Подтверждение восстановления пароля для email: {} с кодом: {}", email, resetCode);
         Confirmation confirmation = confirmationRepository
                 .findByUserEmailAndActionAndUsedFalse(email, ConfirmationAction.PASSWORD_RESET)
-                .orElseThrow(() -> new RuntimeException("Запись для восстановления пароля не найдена или уже использована"));
+                .orElseThrow(() -> new BadRequestException("Запись для восстановления пароля не найдена или уже использована"));
         log.info("Найдена запись восстановления пароля для пользователя id: {}", confirmation.getUser().getId());
 
         if (LocalDateTime.now().isAfter(confirmation.getExpiresAt())) {
             log.warn("Срок действия кода истёк для пользователя id: {}", confirmation.getUser().getId());
             confirmationRepository.delete(confirmation);
-            throw new RuntimeException("Срок действия кода истёк. Пожалуйста, запросите новый");
+            throw new BadRequestException("Срок действия кода истёк. Пожалуйста, запросите новый");
         }
 
         if (!confirmation.getConfirmationCode().equals(resetCode)) {
             log.warn("Неверный код восстановления для пользователя id: {}", confirmation.getUser().getId());
-            throw new RuntimeException("Неверный код восстановления");
+            throw new BadRequestException("Неверный код восстановления");
         }
 
         User user = confirmation.getUser();
