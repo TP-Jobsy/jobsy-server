@@ -15,18 +15,25 @@ on:
       - bugfix/*
       - release/*
       - feature/*
+
 permissions:
   contents: read
   packages: write
   pull-requests: write
 
 jobs:
-  build:
-    name: Build and Run Tests
+  build_and_test:
     runs-on: ubuntu-latest
-
+    env:
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+      MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      JWT_EXPIRATION: ${{ secrets.JWT_EXPIRATION }}
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Java
@@ -36,8 +43,20 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
-      - name: Build Project
+      - name: Build project
         run: ./gradlew clean build --no-daemon
 
-      - name: Run Tests
+      - name: Run tests
         run: ./gradlew test --no-daemon
+
+      - name: Build and start Docker Compose services
+        run: docker compose up -d
+
+      - name: Wait for PostgreSQL to be healthy
+        run: sleep 10
+
+      - name: Run integration tests
+        run: ./gradlew test --no-daemon
+
+      - name: Stop Docker Compose services
+        run: docker compose down
