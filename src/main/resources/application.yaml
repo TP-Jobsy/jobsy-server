@@ -1,13 +1,13 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/${POSTGRES_DB}?stringtype=unspecified
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/${POSTGRES_DB:jobsy_db}?stringtype=unspecified
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES_PASSWORD:pass}
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -16,7 +16,7 @@ spring:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
-    validate-on-migrate: true
+    validate-on-migrate: false
 
   logging:
     level:
@@ -25,8 +25,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
+    username: ${MAIL_USERNAME:MAIL_USERNAME}
+    password: ${MAIL_PASSWORD:MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -36,5 +36,5 @@ spring:
             trust: smtp.gmail.com
 
 jwt:
-  secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION}
+  secret: ${JWT_SECRET:TEST_SECRET}
+  expiration: ${JWT_EXPIRATION:3600}
