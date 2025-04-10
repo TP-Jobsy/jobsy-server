@@ -5,6 +5,8 @@ CREATE TABLE freelancer_profiles (
                                      experience_level experience_enum,
                                      category_id BIGINT,
                                      specialization_id BIGINT,
+                                     country VARCHAR(100),
+                                     city VARCHAR(100),
                                      about_me TEXT,
                                      contact_link VARCHAR(255),
                                      created_at TIMESTAMP NOT NULL DEFAULT NOW(),

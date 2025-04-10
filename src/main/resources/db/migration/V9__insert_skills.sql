@@ -1,0 +1,16 @@
+INSERT INTO skills (name) VALUES
+                              ('Java'),
+                              ('Spring Boot'),
+                              ('Hibernate'),
+                              ('SQL'),
+                              ('Git'),
+                              ('Linux'),
+                              ('Docker'),
+                              ('Kubernetes'),
+                              ('REST API'),
+                              ('Microservices'),
+                              ('Agile'),
+                              ('Scrum'),
+                              ('AWS'),
+                              ('Node.js'),
+                              ('Python');
