@@ -2,6 +2,10 @@ package com.example.jobsyserver.dto.user;
 
 import com.example.jobsyserver.enums.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,12 +16,16 @@ import java.time.LocalDate;
 @Schema(description = "Базовый класс для передачи информации о пользователе")
 public abstract class UserBaseDto {
 
+    @NotBlank(message = "Email не может быть пустым")
+    @Email(message = "Некорректный формат email")
     @Schema(description = "E-mail пользователя", example = "user@example.com")
     protected String email;
 
+    @NotBlank(message = "Имя не может быть пустым")
     @Schema(description = "Имя пользователя", example = "Иван")
     protected String firstName;
 
+    @NotBlank(message = "Фамилия не может быть пустой")
     @Schema(description = "Фамилия пользователя", example = "Иванов")
     protected String lastName;
 
@@ -27,6 +35,8 @@ public abstract class UserBaseDto {
     @Schema(description = "Роль пользователя", example = "client")
     protected UserRole role;
 
+    @NotNull(message = "Дата рождения обязательна")
+    @Past(message = "Дата рождения должна быть в прошлом")
     @Schema(description = "Дата рождения", example = "2000-01-01")
     protected LocalDate dateBirth;
 }
