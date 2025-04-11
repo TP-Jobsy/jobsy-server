@@ -21,6 +21,7 @@ CREATE TABLE client_profiles (
                                  country VARCHAR(100),
                                  contact_link VARCHAR(255),
                                  city VARCHAR(100),
+                                 position VARCHAR(100),
                                  field_description TEXT,
                                  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
                                  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
