@@ -6,17 +6,20 @@ spring:
     driver-class-name: org.h2.Driver
 
   jpa:
+    show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+        globally_quoted_identifiers: true
 
   flyway:
     enabled: false
-  #     locations: classpath:db/migration
-  #     baseline-on-migrate: true
-  #     validate-on-migrate: false
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    validate-on-migrate: false
 
   logging:
     level:
