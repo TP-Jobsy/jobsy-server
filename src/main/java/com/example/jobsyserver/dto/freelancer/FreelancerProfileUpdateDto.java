@@ -1,5 +1,6 @@
 package com.example.jobsyserver.dto.freelancer;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -20,4 +21,8 @@ public class FreelancerProfileUpdateDto extends FreelancerProfileBaseDto {
 
     @Schema(description = "Номер телефона фрилансера", example = "+79991234567")
     private String phone;
+
+    @Schema(description = "Email заказчика (только для отображения)", example = "ivan.ivanov@example.com")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private String email;
 }

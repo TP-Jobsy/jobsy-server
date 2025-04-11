@@ -22,7 +22,7 @@ public class Confirmation {
     private User user;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "action", nullable = false)
+    @Column(name = "action", nullable = false, columnDefinition = "confirmation_action_enum")
     private ConfirmationAction action;
 
     @Column(name = "confirmation_code", nullable = false, length = 10)
