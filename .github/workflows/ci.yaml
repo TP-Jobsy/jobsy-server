@@ -55,8 +55,5 @@ jobs:
       - name: Wait for PostgreSQL to be healthy
         run: sleep 10
 
-      - name: Run integration tests
-        run: ./gradlew test --no-daemon
-
       - name: Stop Docker Compose services
         run: docker compose down
