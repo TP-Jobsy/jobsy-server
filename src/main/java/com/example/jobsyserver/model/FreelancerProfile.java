@@ -23,7 +23,7 @@ public class FreelancerProfile {
     private User user;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "experience_level")
+    @Column(name = "experience_level", columnDefinition = "experience_enum")
     private Experience experienceLevel;
 
     @Column(name = "category_id")
@@ -32,7 +32,7 @@ public class FreelancerProfile {
     @Column(name = "specialization_id")
     private Long specializationId;
 
-    @Column(name = "about_me", columnDefinition = "TEXT")
+    @Column(name = "about_me")
     private String aboutMe;
 
     @Column(name = "contact_link", length = 255)
