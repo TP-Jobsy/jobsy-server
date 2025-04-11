@@ -31,7 +31,7 @@ public class User {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "user_role_enum")
     @Schema(description = "Роль пользователя", example = "CLIENT")
     private UserRole role;
 
