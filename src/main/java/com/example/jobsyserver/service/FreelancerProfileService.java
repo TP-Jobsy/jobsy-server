@@ -1,13 +1,15 @@
 package com.example.jobsyserver.service;
 
-import com.example.jobsyserver.dto.freelancer.FreelancerProfileDto;
-import com.example.jobsyserver.dto.freelancer.FreelancerProfileUpdateDto;
+import com.example.jobsyserver.dto.freelancer.*;
 
 import java.util.List;
 
 public interface FreelancerProfileService {
     FreelancerProfileDto getProfile();
-    FreelancerProfileDto updateProfile(FreelancerProfileUpdateDto updateDto);
+    FreelancerProfileDto updateBasic(FreelancerProfileBasicDto basicDto);
+    FreelancerProfileDto updateContact(FreelancerProfileContactDto contactDto);
+    FreelancerProfileDto updateAbout(FreelancerProfileAboutDto aboutDto);
+    FreelancerProfileDto updateUser(FreelancerProfileUserDto userDto);
     void deleteAccount();
     List<FreelancerProfileDto> getAllFreelancers();
     FreelancerProfileDto getFreelancerProfileById(Long id);
