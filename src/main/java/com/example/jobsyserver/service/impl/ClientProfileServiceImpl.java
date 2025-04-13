@@ -31,11 +31,12 @@ public class ClientProfileServiceImpl implements ClientProfileService {
     private final ClientProfileRepository clientProfileRepository;
     private final UserRepository userRepository;
     private final ClientProfileMapper clientProfileMapper;
+    private final SecurityServiceImpl securityService;
 
     @Override
     @Transactional(readOnly = true)
-    public ClientProfileDto getProfile() {
-        String email = getCurrentUserEmail();
+    public ClientProfileDto getProfile() { // todo: вынести в вспомогательные методы
+        String email = securityService.getCurrentUserEmail();
         log.info("Получение профиля заказчика для пользователя с email: {}", email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с email: " + email));
@@ -47,7 +48,7 @@ public class ClientProfileServiceImpl implements ClientProfileService {
     @Override
     @Transactional
     public ClientProfileDto updateBasic(ClientProfileBasicDto basicDto) {
-        String email = getCurrentUserEmail();
+        String email = securityService.getCurrentUserEmail();
         log.info("Обновление базовых данных профиля для пользователя с email: {}", email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с email: " + email));
@@ -77,7 +78,7 @@ public class ClientProfileServiceImpl implements ClientProfileService {
     @Override
     @Transactional
     public ClientProfileDto updateContact(ClientProfileContactDto contactDto) {
-        String email = getCurrentUserEmail();
+        String email = securityService.getCurrentUserEmail();
         log.info("Обновление контактных данных профиля для пользователя с email: {}", email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с email: " + email));
@@ -94,7 +95,7 @@ public class ClientProfileServiceImpl implements ClientProfileService {
     @Override
     @Transactional
     public ClientProfileDto updateField(ClientProfileFieldDto fieldDto) {
-        String email = getCurrentUserEmail();
+        String email = securityService.getCurrentUserEmail();
         log.info("Обновление информации о сфере деятельности профиля для пользователя с email: {}", email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с email: " + email));
@@ -111,7 +112,7 @@ public class ClientProfileServiceImpl implements ClientProfileService {
     @Override
     @Transactional
     public ClientProfileDto updateUser(ClientProfileUserDto userDto) {
-        String email = getCurrentUserEmail();
+        String email = securityService.getCurrentUserEmail();
         log.info("Обновление данных пользователя для профиля заказчика с email: {}", email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с email: " + email));
@@ -138,7 +139,7 @@ public class ClientProfileServiceImpl implements ClientProfileService {
     @Override
     @Transactional
     public void deleteAccount() {
-        String email = getCurrentUserEmail();
+        String email = securityService.getCurrentUserEmail();
         log.info("Удаление аккаунта заказчика для пользователя с email: {}", email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с email: " + email));
@@ -163,18 +164,5 @@ public class ClientProfileServiceImpl implements ClientProfileService {
         ClientProfile profile = clientProfileRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Профиль заказчика не найден с id: " + id));
         return clientProfileMapper.toDto(profile);
-    }
-
-    private String getCurrentUserEmail() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
-            log.error("Пользователь не аутентифицирован");
-            throw new BadCredentialsException("Пользователь не аутентифицирован");
-        }
-        Object principal = auth.getPrincipal();
-        if (principal instanceof UserDetails) {
-            return ((UserDetails) principal).getUsername();
-        }
-        return principal.toString();
     }
 }
