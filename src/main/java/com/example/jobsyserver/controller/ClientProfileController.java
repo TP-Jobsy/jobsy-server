@@ -3,7 +3,6 @@ package com.example.jobsyserver.controller;
 import com.example.jobsyserver.dto.client.ClientProfileBasicDto;
 import com.example.jobsyserver.dto.client.ClientProfileContactDto;
 import com.example.jobsyserver.dto.client.ClientProfileFieldDto;
-import com.example.jobsyserver.dto.client.ClientProfileUserDto;
 import com.example.jobsyserver.dto.client.ClientProfileDto;
 import com.example.jobsyserver.dto.response.DefaultResponse;
 import com.example.jobsyserver.service.ClientProfileService;
@@ -37,7 +36,7 @@ public class ClientProfileController {
         return ResponseEntity.ok(dto);
     }
 
-    @Operation(summary = "Обновить основные данные профиля заказчика", description = "Обновляет основные данные (название компании)")
+    @Operation(summary = "Обновить основные данные профиля заказчика", description = "Обновляет основные данные")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Основные данные обновлены успешно"),
             @ApiResponse(responseCode = "400", description = "Ошибка обновления основных данных"),
@@ -77,22 +76,9 @@ public class ClientProfileController {
         return ResponseEntity.ok(dto);
     }
 
-    @Operation(summary = "Обновить данные пользователя", description = "Обновляет данные пользователя (имя, фамилия, телефон)")
+    @Operation(summary = "Удалить аккаунт заказчика", description = "Удаляет аккаунт заказчика текущего пользователя")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Данные пользователя обновлены успешно"),
-            @ApiResponse(responseCode = "400", description = "Ошибка обновления данных пользователя"),
-            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
-    })
-    @PutMapping("/user")
-    @PreAuthorize("hasRole('CLIENT')")
-    public ResponseEntity<ClientProfileDto> updateUser(@RequestBody ClientProfileUserDto userDto) {
-        ClientProfileDto dto = clientProfileService.updateUser(userDto);
-        return ResponseEntity.ok(dto);
-    }
-
-    @Operation(summary = "Удалить аккаунт заказчика", description = "Деактивирует аккаунт заказчика текущего пользователя")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Аккаунт успешно деактивирован"),
+            @ApiResponse(responseCode = "200", description = "Аккаунт успешно удален"),
             @ApiResponse(responseCode = "404", description = "Профиль не найден"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
@@ -100,6 +86,6 @@ public class ClientProfileController {
     @PreAuthorize("hasRole('CLIENT')")
     public ResponseEntity<DefaultResponse> deleteAccount() {
         clientProfileService.deleteAccount();
-        return ResponseEntity.ok(new DefaultResponse("Аккаунт успешно деактивирован"));
+        return ResponseEntity.ok(new DefaultResponse("Аккаунт успешно удален"));
     }
 }

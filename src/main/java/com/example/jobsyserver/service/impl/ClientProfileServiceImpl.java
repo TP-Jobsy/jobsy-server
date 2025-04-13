@@ -4,7 +4,6 @@ import com.example.jobsyserver.dto.client.ClientProfileBasicDto;
 import com.example.jobsyserver.dto.client.ClientProfileContactDto;
 import com.example.jobsyserver.dto.client.ClientProfileDto;
 import com.example.jobsyserver.dto.client.ClientProfileFieldDto;
-import com.example.jobsyserver.dto.client.ClientProfileUserDto;
 import com.example.jobsyserver.exception.UserNotFoundException;
 import com.example.jobsyserver.mapper.ClientProfileMapper;
 import com.example.jobsyserver.model.ClientProfile;
@@ -14,10 +13,6 @@ import com.example.jobsyserver.repository.UserRepository;
 import com.example.jobsyserver.service.ClientProfileService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,25 +30,19 @@ public class ClientProfileServiceImpl implements ClientProfileService {
 
     @Override
     @Transactional(readOnly = true)
-    public ClientProfileDto getProfile() { // todo: вынести в вспомогательные методы
-        String email = securityService.getCurrentUserEmail();
-        log.info("Получение профиля заказчика для пользователя с email: {}", email);
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с email: " + email));
-        ClientProfile profile = clientProfileRepository.findByUser(user)
-                .orElseThrow(() -> new UserNotFoundException("Профиль заказчика не найден для пользователя с email: " + email));
+    public ClientProfileDto getProfile() {
+        ClientProfile profile = getCurrentClientProfile();
+        log.info("Получение профиля заказчика для пользователя с email: {}", securityService.getCurrentUserEmail());
         return clientProfileMapper.toDto(profile);
     }
 
     @Override
     @Transactional
     public ClientProfileDto updateBasic(ClientProfileBasicDto basicDto) {
+        User user = getCurrentUser();
+        ClientProfile profile = getCurrentClientProfile();
         String email = securityService.getCurrentUserEmail();
         log.info("Обновление базовых данных профиля для пользователя с email: {}", email);
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с email: " + email));
-        ClientProfile profile = clientProfileRepository.findByUser(user)
-                .orElseThrow(() -> new UserNotFoundException("Профиль заказчика не найден для пользователя с email: " + email));
 
         if (basicDto.getCompanyName() != null) {
             profile.setCompanyName(basicDto.getCompanyName());
@@ -71,6 +60,19 @@ public class ClientProfileServiceImpl implements ClientProfileService {
             profile.setCity(basicDto.getCity());
             log.info("Обновлен город: {}", basicDto.getCity());
         }
+        if (basicDto.getFirstName() != null) {
+            user.setFirstName(basicDto.getFirstName());
+            log.info("Обновлено имя пользователя на: {}", basicDto.getFirstName());
+        }
+        if (basicDto.getLastName() != null) {
+            user.setLastName(basicDto.getLastName());
+            log.info("Обновлена фамилия пользователя на: {}", basicDto.getLastName());
+        }
+        if (basicDto.getPhone() != null) {
+            user.setPhone(basicDto.getPhone());
+            log.info("Обновлен номер телефона пользователя на: {}", basicDto.getPhone());
+        }
+        userRepository.save(user);
         ClientProfile updatedProfile = clientProfileRepository.save(profile);
         return clientProfileMapper.toDto(updatedProfile);
     }
@@ -80,10 +82,7 @@ public class ClientProfileServiceImpl implements ClientProfileService {
     public ClientProfileDto updateContact(ClientProfileContactDto contactDto) {
         String email = securityService.getCurrentUserEmail();
         log.info("Обновление контактных данных профиля для пользователя с email: {}", email);
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с email: " + email));
-        ClientProfile profile = clientProfileRepository.findByUser(user)
-                .orElseThrow(() -> new UserNotFoundException("Профиль заказчика не найден для пользователя с email: " + email));
+        ClientProfile profile = getCurrentClientProfile();
         if (contactDto.getContactLink() != null) {
             profile.setContactLink(contactDto.getContactLink());
             log.info("Обновлена ссылка для связи: {}", contactDto.getContactLink());
@@ -96,11 +95,8 @@ public class ClientProfileServiceImpl implements ClientProfileService {
     @Transactional
     public ClientProfileDto updateField(ClientProfileFieldDto fieldDto) {
         String email = securityService.getCurrentUserEmail();
-        log.info("Обновление информации о сфере деятельности профиля для пользователя с email: {}", email);
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с email: " + email));
-        ClientProfile profile = clientProfileRepository.findByUser(user)
-                .orElseThrow(() -> new UserNotFoundException("Профиль заказчика не найден для пользователя с email: " + email));
+        log.info("Обновление информации о сфере деятельности для пользователя с email: {}", email);
+        ClientProfile profile = getCurrentClientProfile();
         if (fieldDto.getFieldDescription() != null) {
             profile.setFieldDescription(fieldDto.getFieldDescription());
             log.info("Обновлено описание сферы деятельности: {}", fieldDto.getFieldDescription());
@@ -111,40 +107,11 @@ public class ClientProfileServiceImpl implements ClientProfileService {
 
     @Override
     @Transactional
-    public ClientProfileDto updateUser(ClientProfileUserDto userDto) {
-        String email = securityService.getCurrentUserEmail();
-        log.info("Обновление данных пользователя для профиля заказчика с email: {}", email);
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с email: " + email));
-        ClientProfile profile = clientProfileRepository.findByUser(user)
-                .orElseThrow(() -> new UserNotFoundException("Профиль заказчика не найден для пользователя с email: " + email));
-
-        if (userDto.getFirstName() != null) {
-            user.setFirstName(userDto.getFirstName());
-            log.info("Обновлено имя пользователя на: {}", userDto.getFirstName());
-        }
-        if (userDto.getLastName() != null) {
-            user.setLastName(userDto.getLastName());
-            log.info("Обновлена фамилия пользователя на: {}", userDto.getLastName());
-        }
-        if (userDto.getPhone() != null) {
-            user.setPhone(userDto.getPhone());
-            log.info("Обновлён номер телефона пользователя на: {}", userDto.getPhone());
-        }
-        userRepository.save(user);
-        log.info("Данные пользователя обновлены для email: {}", email);
-        return clientProfileMapper.toDto(profile);
-    }
-
-    @Override
-    @Transactional
     public void deleteAccount() {
         String email = securityService.getCurrentUserEmail();
         log.info("Удаление аккаунта заказчика для пользователя с email: {}", email);
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с email: " + email));
-        user.setIsActive(false);
-        userRepository.save(user);
+        User user = getCurrentUser();
+        userRepository.delete(user);
         log.info("Аккаунт заказчика с email {} успешно деактивирован", email);
     }
 
@@ -164,5 +131,16 @@ public class ClientProfileServiceImpl implements ClientProfileService {
         ClientProfile profile = clientProfileRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Профиль заказчика не найден с id: " + id));
         return clientProfileMapper.toDto(profile);
+    }
+
+    private User getCurrentUser() {
+        String email = securityService.getCurrentUserEmail();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с email: " + email));
+    }
+
+    private ClientProfile getCurrentClientProfile() {
+        return clientProfileRepository.findByUser(getCurrentUser())
+                .orElseThrow(() -> new UserNotFoundException("Профиль заказчика не найден для пользователя с email: " + securityService.getCurrentUserEmail()));
     }
 }
