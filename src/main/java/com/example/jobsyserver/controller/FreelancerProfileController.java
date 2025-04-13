@@ -72,19 +72,6 @@ public class FreelancerProfileController {
         return ResponseEntity.ok(freelancerProfileService.updateAbout(aboutDto));
     }
 
-    @Operation(summary = "Обновить данные пользователя", description = "Обновляет общие данные пользователя (имя, фамилия, телефон), email обновлять нельзя")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Данные пользователя обновлены успешно"),
-            @ApiResponse(responseCode = "400", description = "Неверные данные"),
-            @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован"),
-            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
-    })
-    @PutMapping("/user") // todo: ?
-    @PreAuthorize("hasRole('FREELANCER')")
-    public ResponseEntity<FreelancerProfileDto> updateUser(@RequestBody FreelancerProfileUserDto userDto) {
-        return ResponseEntity.ok(freelancerProfileService.updateUser(userDto));
-    }
-
     @Operation(summary = "Удалить аккаунт фрилансера", description = "Удаляет аккаунт фрилансера. После удаления вход в систему невозможен")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Аккаунт удалён успешно"),
