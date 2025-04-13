@@ -1,7 +1,6 @@
 CREATE TABLE freelancer_profiles (
                                      id BIGSERIAL PRIMARY KEY,
                                      user_id BIGINT NOT NULL UNIQUE,
-                                     hourly_rate NUMERIC(10,2),
                                      experience_level experience_enum,
                                      category_id BIGINT,
                                      specialization_id BIGINT,
