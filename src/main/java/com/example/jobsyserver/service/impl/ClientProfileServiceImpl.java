@@ -73,8 +73,7 @@ public class ClientProfileServiceImpl implements ClientProfileService {
             log.info("Обновлен номер телефона пользователя на: {}", basicDto.getPhone());
         }
         userRepository.save(user);
-        ClientProfile updatedProfile = clientProfileRepository.save(profile);
-        return clientProfileMapper.toDto(updatedProfile);
+        return saveAndReturnDto(profile);
     }
 
     @Override
@@ -87,8 +86,7 @@ public class ClientProfileServiceImpl implements ClientProfileService {
             profile.setContactLink(contactDto.getContactLink());
             log.info("Обновлена ссылка для связи: {}", contactDto.getContactLink());
         }
-        ClientProfile updatedProfile = clientProfileRepository.save(profile);
-        return clientProfileMapper.toDto(updatedProfile);
+        return saveAndReturnDto(profile);
     }
 
     @Override
@@ -101,8 +99,7 @@ public class ClientProfileServiceImpl implements ClientProfileService {
             profile.setFieldDescription(fieldDto.getFieldDescription());
             log.info("Обновлено описание сферы деятельности: {}", fieldDto.getFieldDescription());
         }
-        ClientProfile updatedProfile = clientProfileRepository.save(profile);
-        return clientProfileMapper.toDto(updatedProfile);
+        return saveAndReturnDto(profile);
     }
 
     @Override
@@ -142,5 +139,10 @@ public class ClientProfileServiceImpl implements ClientProfileService {
     private ClientProfile getCurrentClientProfile() {
         return clientProfileRepository.findByUser(getCurrentUser())
                 .orElseThrow(() -> new UserNotFoundException("Профиль заказчика не найден для пользователя с email: " + securityService.getCurrentUserEmail()));
+    }
+
+    private ClientProfileDto saveAndReturnDto(ClientProfile profile) {
+        ClientProfile updatedProfile = clientProfileRepository.save(profile);
+        return clientProfileMapper.toDto(updatedProfile);
     }
 }

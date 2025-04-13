@@ -38,6 +38,7 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
     @Transactional
     public FreelancerProfileDto updateBasic(FreelancerProfileBasicDto basicDto) {
         FreelancerProfile profile = getCurrentFreelancerProfile();
+        User user = getCurrentUser();
         log.info("Обновление базовой информации профиля для пользователя с email: {}", securityService.getCurrentUserEmail());
 
         if (basicDto.getCountry() != null) {
@@ -48,6 +49,19 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
             profile.setCity(basicDto.getCity());
             log.info("Обновлен город: {}", basicDto.getCity());
         }
+        if (basicDto.getFirstName() != null) {
+            user.setFirstName(basicDto.getFirstName());
+            log.info("Обновлено имя пользователя на: {}", basicDto.getFirstName());
+        }
+        if (basicDto.getLastName() != null) {
+            user.setLastName(basicDto.getLastName());
+            log.info("Обновлена фамилия пользователя на: {}", basicDto.getLastName());
+        }
+        if (basicDto.getPhone() != null) {
+            user.setPhone(basicDto.getPhone());
+            log.info("Обновлен номер телефона пользователя на: {}", basicDto.getPhone());
+        }
+        userRepository.save(user);
         return saveAndReturnDto(profile);
     }
 
@@ -87,31 +101,6 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
             log.info("Обновлено описание 'о себе'");
         }
         return saveAndReturnDto(profile);
-    }
-
-    @Override
-    @Transactional
-    public FreelancerProfileDto updateUser(FreelancerProfileUserDto userDto) {
-        User user = getCurrentUser();
-        log.info("Обновление данных пользователя для профиля фрилансера с email: {}", securityService.getCurrentUserEmail());
-
-        if (userDto.getFirstName() != null) {
-            user.setFirstName(userDto.getFirstName());
-            log.info("Обновлено имя пользователя на: {}", userDto.getFirstName());
-        }
-        if (userDto.getLastName() != null) {
-            user.setLastName(userDto.getLastName());
-            log.info("Обновлена фамилия пользователя на: {}", userDto.getLastName());
-        }
-        if (userDto.getPhone() != null) {
-            user.setPhone(userDto.getPhone());
-            log.info("Обновлен номер телефона пользователя на: {}", userDto.getPhone());
-        }
-        userRepository.save(user);
-        log.info("Данные пользователя обновлены для email: {}", securityService.getCurrentUserEmail());
-        FreelancerProfile profile = freelancerProfileRepository.findByUser(user)
-                .orElseThrow(() -> new UserNotFoundException("Профиль фрилансера не найден для пользователя с email: " + securityService.getCurrentUserEmail()));
-        return freelancerProfileMapper.toDto(profile);
     }
 
     @Override

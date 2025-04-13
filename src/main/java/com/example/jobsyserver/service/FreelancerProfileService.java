@@ -9,7 +9,6 @@ public interface FreelancerProfileService {
     FreelancerProfileDto updateBasic(FreelancerProfileBasicDto basicDto);
     FreelancerProfileDto updateContact(FreelancerProfileContactDto contactDto);
     FreelancerProfileDto updateAbout(FreelancerProfileAboutDto aboutDto);
-    FreelancerProfileDto updateUser(FreelancerProfileUserDto userDto);
     void deleteAccount();
     List<FreelancerProfileDto> getAllFreelancers();
     FreelancerProfileDto getFreelancerProfileById(Long id);

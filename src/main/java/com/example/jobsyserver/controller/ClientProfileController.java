@@ -49,7 +49,7 @@ public class ClientProfileController {
         return ResponseEntity.ok(dto);
     }
 
-    @Operation(summary = "Обновить контактные данные профиля заказчика", description = "Обновляет контактные данные (страна, город, контактная ссылка)")
+    @Operation(summary = "Обновить контактные данные профиля заказчика", description = "Обновляет контактные данные")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Контактные данные обновлены успешно"),
             @ApiResponse(responseCode = "400", description = "Ошибка обновления контактных данных"),
@@ -62,7 +62,7 @@ public class ClientProfileController {
         return ResponseEntity.ok(dto);
     }
 
-    @Operation(summary = "Обновить данные о сфере деятельности", description = "Обновляет информацию о сфере деятельности (описание)")
+    @Operation(summary = "Обновить данные о сфере деятельности", description = "Обновляет информацию о сфере деятельности")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Данные о сфере деятельности обновлены успешно"),
             @ApiResponse(responseCode = "400", description = "Ошибка обновления данных о сфере деятельности"),
