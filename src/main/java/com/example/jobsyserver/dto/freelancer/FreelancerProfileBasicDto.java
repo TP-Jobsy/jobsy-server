@@ -3,7 +3,9 @@ package com.example.jobsyserver.dto.freelancer;
 import com.example.jobsyserver.dto.user.PublicUserDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Schema(description = "Основные данные профиля фрилансера")
 public class FreelancerProfileBasicDto extends PublicUserDto {
