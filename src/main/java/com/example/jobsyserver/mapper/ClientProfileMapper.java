@@ -21,6 +21,10 @@ public interface ClientProfileMapper {
             @Mapping(source = "position", target = "basic.position"),
             @Mapping(source = "country", target = "basic.country"),
             @Mapping(source = "city", target = "basic.city"),
+            @Mapping(source = "user.firstName", target = "basic.firstName"),
+            @Mapping(source = "user.lastName", target = "basic.lastName"),
+            @Mapping(source = "user.email", target = "basic.email"),
+            @Mapping(source = "user.phone", target = "basic.phone"),
             @Mapping(source = "contactLink", target = "contact.contactLink"),
             @Mapping(source = "fieldDescription", target = "field.fieldDescription"),
             @Mapping(source = "user", target = "user")
