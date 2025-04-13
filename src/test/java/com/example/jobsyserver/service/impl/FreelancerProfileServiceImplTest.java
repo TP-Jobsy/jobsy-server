@@ -1,6 +1,9 @@
 package com.example.jobsyserver.service.impl;
 
-import com.example.jobsyserver.dto.freelancer.*;
+import com.example.jobsyserver.dto.freelancer.FreelancerProfileAboutDto;
+import com.example.jobsyserver.dto.freelancer.FreelancerProfileBasicDto;
+import com.example.jobsyserver.dto.freelancer.FreelancerProfileContactDto;
+import com.example.jobsyserver.dto.freelancer.FreelancerProfileDto;
 import com.example.jobsyserver.enums.Experience;
 import com.example.jobsyserver.exception.UserNotFoundException;
 import com.example.jobsyserver.mapper.FreelancerProfileMapper;
@@ -103,7 +106,7 @@ class FreelancerProfileServiceImplTest {
         Mockito.when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
         Mockito.when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(expectedDto);
         FreelancerProfileDto result = freelancerProfileService.getProfile();
-        assertNotNull(result, "Полученный дто не должен быть null");
+        assertNotNull(result, "Полученный dto не должен быть null");
         assertEquals(expectedDto.getId(), result.getId(), "Неверный идентификатор профиля");
         assertEquals(expectedDto.getCreatedAt(), result.getCreatedAt(), "Неверная дата создания");
         assertEquals(expectedDto.getUpdatedAt(), result.getUpdatedAt(), "Неверная дата обновления");
@@ -122,20 +125,40 @@ class FreelancerProfileServiceImplTest {
         FreelancerProfileBasicDto basicDto = new FreelancerProfileBasicDto();
         basicDto.setCountry("Canada");
         basicDto.setCity("Toronto");
+        basicDto.setFirstName("Алексей");
+        basicDto.setLastName("Сергеев");
+        basicDto.setPhone("+1234567890");
         Mockito.when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(sampleUser));
         Mockito.when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
         sampleProfile.setCountry(basicDto.getCountry());
         sampleProfile.setCity(basicDto.getCity());
+        sampleUser.setFirstName(basicDto.getFirstName());
+        sampleUser.setLastName(basicDto.getLastName());
+        sampleUser.setPhone(basicDto.getPhone());
+        Mockito.when(userRepository.save(sampleUser)).thenReturn(sampleUser);
         Mockito.when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
         FreelancerProfileDto expectedDto = new FreelancerProfileDto();
         expectedDto.setId(sampleProfile.getId());
         expectedDto.setCreatedAt(sampleProfile.getCreatedAt());
         expectedDto.setUpdatedAt(sampleProfile.getUpdatedAt());
+        FreelancerProfileBasicDto expectedBasic = new FreelancerProfileBasicDto();
+        expectedBasic.setCountry("Canada");
+        expectedBasic.setCity("Toronto");
+        expectedBasic.setFirstName("Алексей");
+        expectedBasic.setLastName("Сергеев");
+        expectedBasic.setPhone("+1234567890");
+        expectedDto.setBasic(expectedBasic);
         Mockito.when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(expectedDto);
         FreelancerProfileDto result = freelancerProfileService.updateBasic(basicDto);
-        assertNotNull(result, "Результирующий dto не должен быть null");
-        assertEquals("Canada", sampleProfile.getCountry(), "Страна не обновлена");
-        assertEquals("Toronto", sampleProfile.getCity(), "Город не обновлен");
+        assertNotNull(result, "Результирующий DTO не должен быть null");
+        FreelancerProfileBasicDto resultBasic = result.getBasic();
+        assertNotNull(resultBasic, "Базовые данные не должны быть null");
+        assertEquals("Canada", resultBasic.getCountry(), "Страна не обновлена");
+        assertEquals("Toronto", resultBasic.getCity(), "Город не обновлен");
+        assertEquals("Алексей", resultBasic.getFirstName(), "Имя пользователя не обновлено");
+        assertEquals("Сергеев", resultBasic.getLastName(), "Фамилия пользователя не обновлена");
+        assertEquals("+1234567890", resultBasic.getPhone(), "Номер телефона не обновлен");
+        Mockito.verify(userRepository, Mockito.times(1)).save(sampleUser);
         Mockito.verify(freelancerProfileRepository, Mockito.times(1)).save(sampleProfile);
     }
 
@@ -184,31 +207,6 @@ class FreelancerProfileServiceImplTest {
         assertEquals(aboutDto.getExperienceLevel(), sampleProfile.getExperienceLevel(), "Уровень опыта не обновлен");
         assertEquals("Обновить информацию о себе", sampleProfile.getAboutMe(), "Описание 'о себе' не обновлено");
         Mockito.verify(freelancerProfileRepository, Mockito.times(1)).save(sampleProfile);
-    }
-
-    @Test
-    void testUpdateUser() {
-        FreelancerProfileUserDto userDto = new FreelancerProfileUserDto();
-        userDto.setFirstName("Анастасия");
-        userDto.setLastName("Смирнова");
-        userDto.setPhone("+799999999999");
-        Mockito.when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(sampleUser));
-        Mockito.when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
-        sampleUser.setFirstName(userDto.getFirstName());
-        sampleUser.setLastName(userDto.getLastName());
-        sampleUser.setPhone(userDto.getPhone());
-        Mockito.when(userRepository.save(sampleUser)).thenReturn(sampleUser);
-        FreelancerProfileDto expectedDto = new FreelancerProfileDto();
-        expectedDto.setId(sampleProfile.getId());
-        expectedDto.setCreatedAt(sampleProfile.getCreatedAt());
-        expectedDto.setUpdatedAt(sampleProfile.getUpdatedAt());
-        Mockito.when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(expectedDto);
-        FreelancerProfileDto result = freelancerProfileService.updateUser(userDto);
-        assertNotNull(result, "Результирующий dto не должен быть null");
-        assertEquals("Анастасия", sampleUser.getFirstName(), "Имя пользователя не обновлено");
-        assertEquals("Смирнова", sampleUser.getLastName(), "Фамилия пользователя не обновлена");
-        assertEquals("+799999999999", sampleUser.getPhone(), "Телефон пользователя не обновлен");
-        Mockito.verify(userRepository, Mockito.times(1)).save(sampleUser);
     }
 
     @Test
