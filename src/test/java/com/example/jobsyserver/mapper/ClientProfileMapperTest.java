@@ -51,14 +51,20 @@ class ClientProfileMapperTest {
         ClientProfileDto dto = mapper.toDto(profile);
 
         assertNotNull(dto, "Полученный DTO не должен быть null");
-        assertEquals(1L, dto.getId(), "Неверный идентификатор");
+        assertEquals(1L, dto.getId(), "Неверный идентификатор профиля");
         assertEquals(createdAt, dto.getCreatedAt(), "Неверная дата создания");
         assertEquals(updatedAt, dto.getUpdatedAt(), "Неверная дата обновления");
 
         ClientProfileBasicDto basicDto = dto.getBasic();
         assertNotNull(basicDto, "Базовые данные не должны быть null");
         assertEquals("Acme Corp", basicDto.getCompanyName(), "Неверное название компании");
-         assertNull(basicDto.getPosition(), "Поле должности должно быть null, если оно не установлено");
+        assertNull(basicDto.getPosition(), "Поле должности должно быть null, если оно не установлено");
+        assertEquals("Россия", basicDto.getCountry(), "Неверная страна");
+        assertEquals("Москва", basicDto.getCity(), "Неверный город");
+        assertEquals("Ivan", basicDto.getFirstName(), "Неверное имя пользователя");
+        assertEquals("Ivanov", basicDto.getLastName(), "Неверная фамилия пользователя");
+        assertEquals("user@example.com", basicDto.getEmail(), "Неверный email пользователя");
+        assertEquals("+79991234567", basicDto.getPhone(), "Неверный номер телефона пользователя");
 
         ClientProfileContactDto contactDto = dto.getContact();
         assertNotNull(contactDto, "Контактные данные не должны быть null");
@@ -72,6 +78,7 @@ class ClientProfileMapperTest {
         assertNotNull(userDto, "Данные пользователя не должны быть null");
         assertEquals("Ivan", userDto.getFirstName(), "Неверное имя пользователя");
         assertEquals("Ivanov", userDto.getLastName(), "Неверная фамилия пользователя");
-        assertEquals("+79991234567", userDto.getPhone(), "Неверный номер телефона");
+        assertEquals("+79991234567", userDto.getPhone(), "Неверный номер телефона пользователя");
+        assertEquals("user@example.com", userDto.getEmail(), "Неверный email пользователя");
     }
 }
