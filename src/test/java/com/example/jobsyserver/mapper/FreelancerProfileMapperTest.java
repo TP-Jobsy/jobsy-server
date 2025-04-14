@@ -1,5 +1,6 @@
 package com.example.jobsyserver.mapper;
 
+import com.example.jobsyserver.dto.common.SkillDto;
 import com.example.jobsyserver.dto.freelancer.FreelancerProfileAboutDto;
 import com.example.jobsyserver.dto.freelancer.FreelancerProfileBasicDto;
 import com.example.jobsyserver.dto.freelancer.FreelancerProfileContactDto;
@@ -7,14 +8,17 @@ import com.example.jobsyserver.dto.freelancer.FreelancerProfileDto;
 import com.example.jobsyserver.dto.user.UserDto;
 import com.example.jobsyserver.enums.Experience;
 import com.example.jobsyserver.model.FreelancerProfile;
+import com.example.jobsyserver.model.FreelancerSkill;
+import com.example.jobsyserver.model.FreelancerSkillId;
+import com.example.jobsyserver.model.Skill;
 import com.example.jobsyserver.model.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
+import java.util.List;
+import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -78,5 +82,30 @@ class FreelancerProfileMapperTest {
         assertEquals("Иванов", userDto.getLastName(), "Неверная фамилия пользователя");
         assertEquals("+7999999999", userDto.getPhone(), "Неверный номер телефона");
         assertEquals("freelancer@example.com", userDto.getEmail(), "Неверный email пользователя");
+        Skill skill1 = Skill.builder().id(10L).name("Java").build();
+        Skill skill2 = Skill.builder().id(11L).name("Spring").build();
+        FreelancerSkill fs1 = FreelancerSkill.builder()
+                .id(new FreelancerSkillId(profile.getId(), skill1.getId()))
+                .freelancerProfile(profile)
+                .skill(skill1)
+                .build();
+        FreelancerSkill fs2 = FreelancerSkill.builder()
+                .id(new FreelancerSkillId(profile.getId(), skill2.getId()))
+                .freelancerProfile(profile)
+                .skill(skill2)
+                .build();
+
+        profile.getFreelancerSkills().add(fs1);
+        profile.getFreelancerSkills().add(fs2);
+        dto = mapper.toDto(profile);
+        aboutDto = dto.getAbout();
+        List<SkillDto> skillsList = aboutDto.getSkills();
+        assertNotNull(skillsList, "Список навыков не должен быть null");
+        assertEquals(2, skillsList.size(), "Количество навыков не совпадает");
+        List<String> skillNames = skillsList.stream()
+                .map(SkillDto::getName)
+                .collect(Collectors.toList());
+        assertTrue(skillNames.contains("Java"), "Навык 'Java' должен присутствовать");
+        assertTrue(skillNames.contains("Spring"), "Навык 'Spring' должен присутствовать");
     }
 }
