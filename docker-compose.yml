@@ -33,7 +33,7 @@ services:
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: "org.postgresql.Driver"
       SPRING_FLYWAY_ENABLED: "true"
       SPRING_FLYWAY_LOCATIONS: "classpath:db/migration"
-      SPRING_JPA_HIBERNATE_DDL_AUTO: "create"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "validate"
       SPRING_MAIL_HOST: "smtp.gmail.com"
       SPRING_MAIL_PORT: "587"
       SPRING_MAIL_USERNAME: ${MAIL_USERNAME}
