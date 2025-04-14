@@ -3,9 +3,9 @@ package com.example.jobsyserver.service.impl;
 import com.example.jobsyserver.dto.freelancer.*;
 import com.example.jobsyserver.exception.UserNotFoundException;
 import com.example.jobsyserver.mapper.FreelancerProfileMapper;
-import com.example.jobsyserver.model.FreelancerProfile;
-import com.example.jobsyserver.model.User;
+import com.example.jobsyserver.model.*;
 import com.example.jobsyserver.repository.FreelancerProfileRepository;
+import com.example.jobsyserver.repository.SkillRepository;
 import com.example.jobsyserver.repository.UserRepository;
 import com.example.jobsyserver.service.FreelancerProfileService;
 import com.example.jobsyserver.service.SecurityService;
@@ -24,6 +24,7 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
     private final FreelancerProfileRepository freelancerProfileRepository;
     private final UserRepository userRepository;
     private final FreelancerProfileMapper freelancerProfileMapper;
+    private final SkillRepository skillRepository;
     private final SecurityService securityService;
 
     @Override
@@ -122,6 +123,40 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
             log.warn("Фрилансеры не найдены");
         }
         return freelancerProfileMapper.toDtoList(profiles);
+    }
+
+    @Override
+    @Transactional
+    public FreelancerProfileDto addSkill(Long skillId) {
+        FreelancerProfile profile = getCurrentFreelancerProfile();
+        boolean exists = profile.getFreelancerSkills().stream()
+                .anyMatch(fs -> fs.getSkill().getId().equals(skillId));
+        if (exists) {
+            log.info("Навык с id {} уже присутствует в профиле", skillId);
+            return saveAndReturnDto(profile);
+        }
+        Skill skill = skillRepository.findById(skillId)
+                .orElseThrow(() -> new UserNotFoundException("Навык не найден с id: " + skillId));
+        FreelancerSkill fs = FreelancerSkill.builder()
+                .id(new FreelancerSkillId(profile.getId(), skill.getId()))
+                .freelancerProfile(profile)
+                .skill(skill)
+                .build();
+        profile.getFreelancerSkills().add(fs);
+        log.info("Навык с id {} успешно добавлен", skillId);
+        return saveAndReturnDto(profile);
+    }
+
+    @Override
+    @Transactional
+    public FreelancerProfileDto removeSkill(Long skillId) {
+        FreelancerProfile profile = getCurrentFreelancerProfile();
+        boolean removed = profile.getFreelancerSkills().removeIf(fs -> fs.getSkill().getId().equals(skillId));
+        if (!removed) {
+            throw new UserNotFoundException("Навык с id " + skillId + " не найден в профиле");
+        }
+        log.info("Навык с id {} успешно удалён", skillId);
+        return saveAndReturnDto(profile);
     }
 
     @Override
