@@ -12,4 +12,6 @@ public interface FreelancerProfileService {
     void deleteAccount();
     List<FreelancerProfileDto> getAllFreelancers();
     FreelancerProfileDto getFreelancerProfileById(Long id);
+    FreelancerProfileDto addSkill(Long skillId);
+    FreelancerProfileDto removeSkill(Long skillId);
 }

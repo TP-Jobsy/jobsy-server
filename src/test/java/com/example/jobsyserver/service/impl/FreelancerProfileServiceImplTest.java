@@ -1,5 +1,6 @@
 package com.example.jobsyserver.service.impl;
 
+import com.example.jobsyserver.dto.common.SkillDto;
 import com.example.jobsyserver.dto.freelancer.FreelancerProfileAboutDto;
 import com.example.jobsyserver.dto.freelancer.FreelancerProfileBasicDto;
 import com.example.jobsyserver.dto.freelancer.FreelancerProfileContactDto;
@@ -7,9 +8,9 @@ import com.example.jobsyserver.dto.freelancer.FreelancerProfileDto;
 import com.example.jobsyserver.enums.Experience;
 import com.example.jobsyserver.exception.UserNotFoundException;
 import com.example.jobsyserver.mapper.FreelancerProfileMapper;
-import com.example.jobsyserver.model.FreelancerProfile;
-import com.example.jobsyserver.model.User;
+import com.example.jobsyserver.model.*;
 import com.example.jobsyserver.repository.FreelancerProfileRepository;
+import com.example.jobsyserver.repository.SkillRepository;
 import com.example.jobsyserver.repository.UserRepository;
 import com.example.jobsyserver.service.SecurityService;
 import org.junit.jupiter.api.AfterEach;
@@ -26,9 +27,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -43,6 +46,9 @@ class FreelancerProfileServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private SkillRepository skillRepository;
 
     @Mock
     private SecurityService securityService;
@@ -86,6 +92,7 @@ class FreelancerProfileServiceImplTest {
                 .city("Москва")
                 .aboutMe("Фрилансер с опытом в разработке ПО")
                 .contactLink("http://portfolio.example.com")
+                .freelancerSkills(new ArrayList<>())
                 .createdAt(sampleCreatedAt)
                 .updatedAt(sampleUpdatedAt)
                 .build();
@@ -182,18 +189,14 @@ class FreelancerProfileServiceImplTest {
     }
 
     @Test
-    void testUpdateAbout() {
+    void testUpdateAboutWithoutSkills() {
         FreelancerProfileAboutDto aboutDto = new FreelancerProfileAboutDto();
-        aboutDto.setCategoryId(10L);
-        aboutDto.setSpecializationId(20L);
+        aboutDto.setCategoryId(20L);
+        aboutDto.setSpecializationId(30L);
         aboutDto.setExperienceLevel(Experience.MIDDLE);
-        aboutDto.setAboutMe("Обновить информацию о себе");
+        aboutDto.setAboutMe("Новый опыт работы");
         Mockito.when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(sampleUser));
         Mockito.when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
-        sampleProfile.setCategoryId(aboutDto.getCategoryId());
-        sampleProfile.setSpecializationId(aboutDto.getSpecializationId());
-        sampleProfile.setExperienceLevel(aboutDto.getExperienceLevel());
-        sampleProfile.setAboutMe(aboutDto.getAboutMe());
         Mockito.when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
         FreelancerProfileDto expectedDto = new FreelancerProfileDto();
         expectedDto.setId(sampleProfile.getId());
@@ -201,12 +204,85 @@ class FreelancerProfileServiceImplTest {
         expectedDto.setUpdatedAt(sampleProfile.getUpdatedAt());
         Mockito.when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(expectedDto);
         FreelancerProfileDto result = freelancerProfileService.updateAbout(aboutDto);
-        assertNotNull(result, "Результирующий dto не должен быть null");
-        assertEquals(10L, sampleProfile.getCategoryId(), "CategoryId не обновлен");
-        assertEquals(20L, sampleProfile.getSpecializationId(), "SpecializationId не обновлен");
-        assertEquals(aboutDto.getExperienceLevel(), sampleProfile.getExperienceLevel(), "Уровень опыта не обновлен");
-        assertEquals("Обновить информацию о себе", sampleProfile.getAboutMe(), "Описание 'о себе' не обновлено");
-        Mockito.verify(freelancerProfileRepository, Mockito.times(1)).save(sampleProfile);
+        assertTrue(sampleProfile.getFreelancerSkills().isEmpty(), "Список навыков должен остаться пустым, если не передан");
+    }
+
+    @Test
+    void testAddSkillIncrementally() {
+        Skill existingSkill = Skill.builder().id(10L).name("Java").build();
+        FreelancerSkill fsExisting = FreelancerSkill.builder()
+                .id(new FreelancerSkillId(sampleProfile.getId(), 10L))
+                .freelancerProfile(sampleProfile)
+                .skill(existingSkill)
+                .build();
+        sampleProfile.setFreelancerSkills(new ArrayList<>(List.of(fsExisting)));
+        List<Long> initialSkillIds = sampleProfile.getFreelancerSkills().stream()
+                .map(fs -> fs.getSkill().getId())
+                .collect(Collectors.toList());
+        assertEquals(1, initialSkillIds.size(), "В профиле должен быть 1 навык");
+        assertTrue(initialSkillIds.contains(10L), "Навык с id 10 должен присутствовать");
+        Skill newSkill = Skill.builder().id(11L).name("Spring Boot").build();
+        Mockito.when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(sampleUser));
+        Mockito.when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
+        Mockito.when(skillRepository.findById(11L)).thenReturn(Optional.of(newSkill));
+        Mockito.when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
+        FreelancerProfileDto expectedDto = new FreelancerProfileDto();
+        expectedDto.setId(sampleProfile.getId());
+        expectedDto.setCreatedAt(sampleProfile.getCreatedAt());
+        expectedDto.setUpdatedAt(sampleProfile.getUpdatedAt());
+        Mockito.when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(expectedDto);
+        FreelancerProfileDto resultDto = freelancerProfileService.addSkill(11L);
+        List<Long> resultSkillIds = sampleProfile.getFreelancerSkills().stream()
+                .map(fs -> fs.getSkill().getId())
+                .collect(Collectors.toList());
+        assertEquals(2, resultSkillIds.size(), "В профиле должно быть 2 навыка");
+        assertTrue(resultSkillIds.contains(10L), "Навык с id 10 должен присутствовать");
+        assertTrue(resultSkillIds.contains(11L), "Навык с id 11 должен быть добавлен");
+    }
+
+    @Test
+    void testAddSkill() {
+        Mockito.when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(sampleUser));
+        Mockito.when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
+        sampleProfile.setFreelancerSkills(new ArrayList<>());
+        Skill newSkill = Skill.builder().id(12L).name("Hibernate").build();
+        Mockito.when(skillRepository.findById(12L)).thenReturn(Optional.of(newSkill));
+        Mockito.when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
+        FreelancerProfileDto expectedDto = new FreelancerProfileDto();
+        expectedDto.setId(sampleProfile.getId());
+        expectedDto.setCreatedAt(sampleProfile.getCreatedAt());
+        expectedDto.setUpdatedAt(sampleProfile.getUpdatedAt());
+        Mockito.when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(expectedDto);
+        FreelancerProfileDto result = freelancerProfileService.addSkill(12L);
+        List<Long> resultSkillIds = sampleProfile.getFreelancerSkills().stream()
+                .map(fs -> fs.getSkill().getId())
+                .collect(Collectors.toList());
+        assertEquals(1, resultSkillIds.size(), "Должен быть добавлен один навык");
+        assertTrue(resultSkillIds.contains(12L), "Навык с id 12 должен присутствовать");
+    }
+
+    @Test
+    void testRemoveSkill() {
+        Skill existingSkill = Skill.builder().id(10L).name("Java").build();
+        FreelancerSkill existingFreelancerSkill = FreelancerSkill.builder()
+                .id(new FreelancerSkillId(sampleProfile.getId(), 10L))
+                .freelancerProfile(sampleProfile)
+                .skill(existingSkill)
+                .build();
+        sampleProfile.setFreelancerSkills(new ArrayList<>(List.of(existingFreelancerSkill)));
+        Mockito.when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(sampleUser));
+        Mockito.when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
+        Mockito.when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
+        FreelancerProfileDto expectedDto = new FreelancerProfileDto();
+        expectedDto.setId(sampleProfile.getId());
+        expectedDto.setCreatedAt(sampleProfile.getCreatedAt());
+        expectedDto.setUpdatedAt(sampleProfile.getUpdatedAt());
+        Mockito.when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(expectedDto);
+        FreelancerProfileDto result = freelancerProfileService.removeSkill(10L);
+        List<Long> resultSkillIds = sampleProfile.getFreelancerSkills().stream()
+                .map(fs -> fs.getSkill().getId())
+                .collect(Collectors.toList());
+        assertEquals(0, resultSkillIds.size(), "Навык должен быть удалён, и в профиле не должно быть навыков");
     }
 
     @Test
