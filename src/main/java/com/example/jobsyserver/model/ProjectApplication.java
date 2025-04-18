@@ -30,7 +30,7 @@ public class ProjectApplication {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "freelancer_id", nullable = false)
     @Schema(description = "Уникальный ID фрилансера", example = "1")
-    private User freelancer;
+    private FreelancerProfile freelancer;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
