@@ -6,15 +6,13 @@ CREATE TABLE projects (
                           category_id BIGINT,
                           specialization_id BIGINT,
                           complexity complexity_enum NOT NULL,
-                          payment_type payment_type_enum NOT NULL,
-                          min_rate NUMERIC(10,2),
-                          max_rate NUMERIC(10,2),
+                          payment_type payment_type_enum NOT NULL DEFAULT 'FIXED',
                           fixed_price NUMERIC(10,2),
                           duration project_duration_enum,
                           status project_status_enum NOT NULL DEFAULT 'OPEN',
                           created_at TIMESTAMP NOT NULL DEFAULT NOW(),
                           updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-                          CONSTRAINT fk_project_client FOREIGN KEY (client_id) REFERENCES users (id) ON DELETE CASCADE,
+                          CONSTRAINT fk_project_client FOREIGN KEY (client_id) REFERENCES client_profiles (id) ON DELETE CASCADE,
                           CONSTRAINT fk_project_category FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE SET NULL,
                           CONSTRAINT fk_project_specialization FOREIGN KEY (specialization_id) REFERENCES specializations (id) ON DELETE SET NULL
 );

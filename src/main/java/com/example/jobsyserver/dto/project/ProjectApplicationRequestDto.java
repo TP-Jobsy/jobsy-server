@@ -1,24 +1,11 @@
 package com.example.jobsyserver.dto.project;
 
-import com.example.jobsyserver.enums.ProjectApplicationStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@Schema(description = "DTO для отправки заявки на работу над проектом")
-public class ProjectApplicationRequestDto {
-    @NotNull
-    private Long projectId;
-
-    @NotNull
-    private Long freelancerId;
-
-    private ProjectApplicationStatus status;
+@EqualsAndHashCode(callSuper = true)
+@Schema(description = "DTO для отправки заявки на участие в проекте")
+public class ProjectApplicationRequestDto extends ProjectApplicationBasicDto {
 }

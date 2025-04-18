@@ -3,13 +3,16 @@ package com.example.jobsyserver.service.impl;
 import com.example.jobsyserver.dto.project.ProjectApplicationDto;
 import com.example.jobsyserver.dto.project.ProjectApplicationRequestDto;
 import com.example.jobsyserver.enums.ProjectApplicationStatus;
+import com.example.jobsyserver.exception.ProjectApplicationNotFoundException;
+import com.example.jobsyserver.exception.ProjectNotFoundException;
+import com.example.jobsyserver.exception.UserNotFoundException;
 import com.example.jobsyserver.mapper.ProjectApplicationMapper;
+import com.example.jobsyserver.model.FreelancerProfile;
 import com.example.jobsyserver.model.Project;
 import com.example.jobsyserver.model.ProjectApplication;
-import com.example.jobsyserver.model.User;
+import com.example.jobsyserver.repository.FreelancerProfileRepository;
 import com.example.jobsyserver.repository.ProjectApplicationRepository;
 import com.example.jobsyserver.repository.ProjectRepository;
-import com.example.jobsyserver.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,130 +29,118 @@ import static org.mockito.Mockito.*;
 class ProjectApplicationServiceImplTest {
 
     @Mock
-    private ProjectApplicationRepository applicationRepository;
-
+    private ProjectApplicationRepository repository;
     @Mock
     private ProjectRepository projectRepository;
-
     @Mock
-    private UserRepository userRepository;
-
+    private FreelancerProfileRepository freelancerProfileRepository;
     @Mock
-    private ProjectApplicationMapper applicationMapper;
+    private ProjectApplicationMapper mapper;
 
     @InjectMocks
-    private ProjectApplicationServiceImpl applicationService;
+    private ProjectApplicationServiceImpl service;
 
-    private final LocalDateTime testTime = LocalDateTime.now();
+    private final LocalDateTime now = LocalDateTime.now();
 
     @Test
-    void createApplication_ValidData_ReturnsCreatedApplication() {
-        ProjectApplicationRequestDto requestDto = new ProjectApplicationRequestDto();
-        requestDto.setProjectId(1L);
-        requestDto.setFreelancerId(1L);
+    void createApplication_Success() {
+        ProjectApplicationRequestDto dto = new ProjectApplicationRequestDto();
+        dto.setProjectId(1L);
+        dto.setFreelancerId(2L);
+        dto.setStatus(ProjectApplicationStatus.PENDING);
         Project project = new Project();
         project.setId(1L);
-        User freelancer = new User();
-        freelancer.setId(1L);
-        ProjectApplication application = createTestApplication(1L, ProjectApplicationStatus.PENDING);
-        ProjectApplicationDto responseDto = mapToResponseDto(application);
+        FreelancerProfile freelancer = new FreelancerProfile();
+        freelancer.setId(2L);
+
+        ProjectApplication entity = ProjectApplication.builder().status(dto.getStatus()).build();
+        ProjectApplication saved = ProjectApplication.builder()
+                .id(10L).project(project).freelancer(freelancer)
+                .status(dto.getStatus()).createdAt(now).build();
+        ProjectApplicationDto responseDto = new ProjectApplicationDto();
+        responseDto.setId(10L);
+
         when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
-        when(userRepository.findById(1L)).thenReturn(Optional.of(freelancer));
-        when(applicationMapper.toEntity(requestDto)).thenReturn(application);
-        when(applicationRepository.save(application)).thenReturn(application);
-        when(applicationMapper.toDto(application)).thenReturn(responseDto);
-        ProjectApplicationDto result = applicationService.createApplication(requestDto);
+        when(freelancerProfileRepository.findById(2L)).thenReturn(Optional.of(freelancer));
+        when(mapper.toEntity(dto)).thenReturn(entity);
+        when(repository.save(entity)).thenReturn(saved);
+        when(mapper.toDto(saved)).thenReturn(responseDto);
+        ProjectApplicationDto result = service.createApplication(dto);
+        assertNotNull(result);
+        assertEquals(10L, result.getId());
+    }
+
+    @Test
+    void createApplication_ProjectNotFound() {
+        ProjectApplicationRequestDto dto = new ProjectApplicationRequestDto();
+        dto.setProjectId(1L);
+        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(ProjectNotFoundException.class, () -> service.createApplication(dto));
+    }
+
+    @Test
+    void createApplication_FreelancerNotFound() {
+        ProjectApplicationRequestDto dto = new ProjectApplicationRequestDto();
+        dto.setProjectId(1L);
+        dto.setFreelancerId(2L);
+        Project project = new Project();
+        when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
+        when(freelancerProfileRepository.findById(2L)).thenReturn(Optional.empty());
+        when(mapper.toEntity(dto)).thenReturn(new ProjectApplication());
+        assertThrows(UserNotFoundException.class, () -> service.createApplication(dto));
+    }
+
+    @Test
+    void getById_Success() {
+        ProjectApplication application = ProjectApplication.builder().id(1L).build();
+        ProjectApplicationDto dto = new ProjectApplicationDto();
+        dto.setId(1L);
+        when(repository.findById(1L)).thenReturn(Optional.of(application));
+        when(mapper.toDto(application)).thenReturn(dto);
+        ProjectApplicationDto result = service.getById(1L);
         assertNotNull(result);
         assertEquals(1L, result.getId());
-        assertEquals(ProjectApplicationStatus.PENDING, result.getStatus());
-        verify(applicationRepository, times(1)).save(application);
     }
 
     @Test
-    void createApplication_ProjectNotFound_ThrowsException() {
-        ProjectApplicationRequestDto requestDto = new ProjectApplicationRequestDto();
-        requestDto.setProjectId(1L);
-        requestDto.setFreelancerId(1L);
-        when(projectRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(RuntimeException.class, () ->
-                        applicationService.createApplication(requestDto),
-                "Проект не найден");
+    void getById_NotFound() {
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(ProjectApplicationNotFoundException.class, () -> service.getById(1L));
     }
 
     @Test
-    void getById_ExistingId_ReturnsApplication() {
-        Long applicationId = 1L;
-        ProjectApplication application = createTestApplication(applicationId, ProjectApplicationStatus.PENDING);
-        ProjectApplicationDto responseDto = mapToResponseDto(application);
-        when(applicationRepository.findById(applicationId)).thenReturn(Optional.of(application));
-        when(applicationMapper.toDto(application)).thenReturn(responseDto);
-        ProjectApplicationDto result = applicationService.getById(applicationId);
+    void updateStatus_Success() {
+        ProjectApplication application = ProjectApplication.builder().id(1L).status(ProjectApplicationStatus.PENDING).build();
+        ProjectApplication saved = ProjectApplication.builder().id(1L).status(ProjectApplicationStatus.APPROVED).build();
+        ProjectApplicationDto dto = new ProjectApplicationDto();
+        dto.setId(1L);
+        dto.setStatus(ProjectApplicationStatus.APPROVED);
+        when(repository.findById(1L)).thenReturn(Optional.of(application));
+        when(repository.save(application)).thenReturn(saved);
+        when(mapper.toDto(saved)).thenReturn(dto);
+        ProjectApplicationDto result = service.updateStatus(1L, ProjectApplicationStatus.APPROVED);
         assertNotNull(result);
-        assertEquals(applicationId, result.getId());
-        verify(applicationRepository, times(1)).findById(applicationId);
+        assertEquals(ProjectApplicationStatus.APPROVED, result.getStatus());
     }
 
     @Test
-    void getById_NonExistingId_ThrowsException() {
-        Long applicationId = 999L;
-        when(applicationRepository.findById(applicationId)).thenReturn(Optional.empty());
-        assertThrows(RuntimeException.class, () ->
-                        applicationService.getById(applicationId),
-                "Заявка не найдена");
+    void updateStatus_NotFound() {
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(ProjectApplicationNotFoundException.class, () -> service.updateStatus(1L, ProjectApplicationStatus.APPROVED));
     }
 
     @Test
-    void updateStatus_ValidStatus_UpdatesApplication() {
-        Long applicationId = 1L;
-        ProjectApplicationStatus newStatus = ProjectApplicationStatus.APPROVED;
-        ProjectApplication application = createTestApplication(applicationId, ProjectApplicationStatus.PENDING);
-        ProjectApplication updatedApplication = createTestApplication(applicationId, newStatus);
-        ProjectApplicationDto responseDto = mapToResponseDto(updatedApplication);
-        when(applicationRepository.findById(applicationId)).thenReturn(Optional.of(application));
-        when(applicationRepository.save(application)).thenReturn(updatedApplication);
-        when(applicationMapper.toDto(updatedApplication)).thenReturn(responseDto);
-        ProjectApplicationDto result = applicationService.updateStatus(applicationId, newStatus);
-        assertNotNull(result);
-        assertEquals(newStatus, result.getStatus());
-        verify(applicationRepository, times(1)).save(application);
+    void deleteApplication_Success() {
+        ProjectApplication application = ProjectApplication.builder().id(1L).build();
+        when(repository.findById(1L)).thenReturn(Optional.of(application));
+        doNothing().when(repository).delete(application);
+        service.deleteApplication(1L);
+        verify(repository, times(1)).delete(application);
     }
 
     @Test
-    void deleteApplication_ExistingId_DeletesApplication() {
-        Long applicationId = 1L;
-        ProjectApplication application = createTestApplication(applicationId, ProjectApplicationStatus.PENDING);
-        when(applicationRepository.findById(applicationId)).thenReturn(Optional.of(application));
-        doNothing().when(applicationRepository).delete(application);
-        applicationService.deleteApplication(applicationId);
-        verify(applicationRepository, times(1)).delete(application);
-    }
-
-    @Test
-    void deleteApplication_NonExistingId_ThrowsException() {
-        Long applicationId = 999L;
-        when(applicationRepository.findById(applicationId)).thenReturn(Optional.empty());
-        assertThrows(RuntimeException.class, () ->
-                        applicationService.deleteApplication(applicationId),
-                "Заявка не найдена");
-    }
-
-    private ProjectApplication createTestApplication(Long id, ProjectApplicationStatus status) {
-        return ProjectApplication.builder()
-                .id(id)
-                .project(new Project())
-                .freelancer(new User())
-                .status(status)
-                .createdAt(testTime)
-                .build();
-    }
-
-    private ProjectApplicationDto mapToResponseDto(ProjectApplication application) {
-        return ProjectApplicationDto.builder()
-                .id(application.getId())
-                .projectId(application.getProject().getId())
-                .freelancerId(application.getFreelancer().getId())
-                .status(application.getStatus())
-                .createdAt(application.getCreatedAt())
-                .build();
+    void deleteApplication_NotFound() {
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(ProjectApplicationNotFoundException.class, () -> service.deleteApplication(1L));
     }
 }

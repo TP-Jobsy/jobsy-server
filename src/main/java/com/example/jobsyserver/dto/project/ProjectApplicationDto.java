@@ -1,23 +1,18 @@
 package com.example.jobsyserver.dto.project;
 
-import com.example.jobsyserver.enums.ProjectApplicationStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-@Schema(description = "Базовый класс с информацией о заявке на выполнение проекта")
-public class ProjectApplicationDto {
+@EqualsAndHashCode(callSuper = true)
+@Schema(description = "DTO с информацией о поданной заявке")
+public class ProjectApplicationDto extends ProjectApplicationBasicDto {
+
+    @Schema(description = "ID заявки", example = "100")
     private Long id;
-    private Long projectId;
-    private Long freelancerId;
-    private ProjectApplicationStatus status;
+
+    @Schema(description = "Дата создания заявки", example = "2024-04-18T14:00:00")
     private LocalDateTime createdAt;
 }

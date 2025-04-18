@@ -218,7 +218,7 @@ class FreelancerProfileServiceImplTest {
         sampleProfile.setFreelancerSkills(new ArrayList<>(List.of(fsExisting)));
         List<Long> initialSkillIds = sampleProfile.getFreelancerSkills().stream()
                 .map(fs -> fs.getSkill().getId())
-                .collect(Collectors.toList());
+                .toList();
         assertEquals(1, initialSkillIds.size(), "В профиле должен быть 1 навык");
         assertTrue(initialSkillIds.contains(10L), "Навык с id 10 должен присутствовать");
         Skill newSkill = Skill.builder().id(11L).name("Spring Boot").build();
@@ -234,7 +234,7 @@ class FreelancerProfileServiceImplTest {
         FreelancerProfileDto resultDto = freelancerProfileService.addSkill(11L);
         List<Long> resultSkillIds = sampleProfile.getFreelancerSkills().stream()
                 .map(fs -> fs.getSkill().getId())
-                .collect(Collectors.toList());
+                .toList();
         assertEquals(2, resultSkillIds.size(), "В профиле должно быть 2 навыка");
         assertTrue(resultSkillIds.contains(10L), "Навык с id 10 должен присутствовать");
         assertTrue(resultSkillIds.contains(11L), "Навык с id 11 должен быть добавлен");
@@ -256,7 +256,7 @@ class FreelancerProfileServiceImplTest {
         FreelancerProfileDto result = freelancerProfileService.addSkill(12L);
         List<Long> resultSkillIds = sampleProfile.getFreelancerSkills().stream()
                 .map(fs -> fs.getSkill().getId())
-                .collect(Collectors.toList());
+                .toList();
         assertEquals(1, resultSkillIds.size(), "Должен быть добавлен один навык");
         assertTrue(resultSkillIds.contains(12L), "Навык с id 12 должен присутствовать");
     }
@@ -281,7 +281,7 @@ class FreelancerProfileServiceImplTest {
         FreelancerProfileDto result = freelancerProfileService.removeSkill(10L);
         List<Long> resultSkillIds = sampleProfile.getFreelancerSkills().stream()
                 .map(fs -> fs.getSkill().getId())
-                .collect(Collectors.toList());
+                .toList();
         assertEquals(0, resultSkillIds.size(), "Навык должен быть удалён, и в профиле не должно быть навыков");
     }
 
