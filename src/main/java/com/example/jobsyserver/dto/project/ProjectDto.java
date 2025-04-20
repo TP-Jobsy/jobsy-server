@@ -39,12 +39,6 @@ public class ProjectDto {
     @Schema(description = "Тип оплаты")
     private PaymentType paymentType;
 
-    @Schema(description = "Минимальная ставка фрилансеров", example = "500.00")
-    private BigDecimal minRate;
-
-    @Schema(description = "Максимальная ставка фрилансеров", example = "1500.00")
-    private BigDecimal maxRate;
-
     @Schema(description = "Фиксированная цена", example = "1200.00")
     private BigDecimal fixedPrice;
 
