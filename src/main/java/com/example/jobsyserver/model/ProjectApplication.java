@@ -1,5 +1,6 @@
 package com.example.jobsyserver.model;
 
+import com.example.jobsyserver.enums.ApplicationType;
 import com.example.jobsyserver.enums.ProjectApplicationStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,6 +33,10 @@ public class ProjectApplication {
     @Column(nullable = false)
     @Builder.Default
     private ProjectApplicationStatus status = ProjectApplicationStatus.PENDING;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private ApplicationType applicationType;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

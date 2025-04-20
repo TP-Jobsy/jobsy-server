@@ -36,6 +36,7 @@ CREATE TABLE project_applications (
                                       project_id BIGINT NOT NULL,
                                       freelancer_id BIGINT NOT NULL,
                                       status project_application_status_enum NOT NULL DEFAULT 'PENDING',
+                                      application_type application_type_enum NOT NULL,
                                       created_at TIMESTAMP NOT NULL DEFAULT NOW(),
                                       CONSTRAINT fk_app_project FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE,
                                       CONSTRAINT fk_app_freelancer FOREIGN KEY (freelancer_id) REFERENCES freelancer_profiles (id) ON DELETE CASCADE
