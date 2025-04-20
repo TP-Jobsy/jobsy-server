@@ -63,7 +63,6 @@ public class FreelancerResponseServiceImpl implements FreelancerResponseService 
             project.setStatus(ProjectStatus.IN_PROGRESS);
             projectRepository.save(project);
         }
-
         return mapper.toDto(applicationRepository.save(application));
     }
 }
