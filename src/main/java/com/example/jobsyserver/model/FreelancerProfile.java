@@ -58,4 +58,6 @@ public class FreelancerProfile {
     @Builder.Default
     private List<FreelancerSkill> freelancerSkills = new ArrayList<>();
 
+    @Column(name="avatar_url")
+    private String avatarUrl;
 }
