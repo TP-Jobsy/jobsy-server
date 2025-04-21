@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(properties = "spring.profiles.active=test")
 class ClientProfileMapperTest {
 
     @Autowired
@@ -80,5 +80,10 @@ class ClientProfileMapperTest {
         assertEquals("Ivanov", userDto.getLastName(), "Неверная фамилия пользователя");
         assertEquals("+79991234567", userDto.getPhone(), "Неверный номер телефона пользователя");
         assertEquals("user@example.com", userDto.getEmail(), "Неверный email пользователя");
+        assertNull(dto.getAvatarUrl(), "avatarUrl должен быть null, если не установлен");
+        String avatar = "http://example.com/avatar-client.png";
+        profile.setAvatarUrl(avatar);
+        dto = mapper.toDto(profile);
+        assertEquals(avatar, dto.getAvatarUrl(), "avatarUrl должен попадать в DTO");
     }
 }

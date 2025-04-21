@@ -27,7 +27,8 @@ public interface ClientProfileMapper {
             @Mapping(source = "user.phone", target = "basic.phone"),
             @Mapping(source = "contactLink", target = "contact.contactLink"),
             @Mapping(source = "fieldDescription", target = "field.fieldDescription"),
-            @Mapping(source = "user", target = "user")
+            @Mapping(source = "user", target = "user"),
+            @Mapping(source = "avatarUrl", target = "avatarUrl")
     })
     ClientProfileDto toDto(ClientProfile profile);
 

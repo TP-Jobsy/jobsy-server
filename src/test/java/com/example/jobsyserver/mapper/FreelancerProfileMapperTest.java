@@ -15,13 +15,13 @@ import com.example.jobsyserver.model.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(properties = "spring.profiles.active=test")
 class FreelancerProfileMapperTest {
 
     @Autowired
@@ -104,8 +104,13 @@ class FreelancerProfileMapperTest {
         assertEquals(2, skillsList.size(), "Количество навыков не совпадает");
         List<String> skillNames = skillsList.stream()
                 .map(SkillDto::getName)
-                .collect(Collectors.toList());
+                .toList();
         assertTrue(skillNames.contains("Java"), "Навык 'Java' должен присутствовать");
         assertTrue(skillNames.contains("Spring"), "Навык 'Spring' должен присутствовать");
+        assertNull(dto.getAvatarUrl(), "avatarUrl должен быть null, если не установлен");
+        String avatar = "http://example.com/avatar-freelancer.png";
+        profile.setAvatarUrl(avatar);
+        dto = mapper.toDto(profile);
+        assertEquals(avatar, dto.getAvatarUrl(), "avatarUrl должен проброситься из сущности в DTO");
     }
 }

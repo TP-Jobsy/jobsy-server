@@ -1,6 +1,5 @@
 package com.example.jobsyserver.service.impl;
 
-import com.example.jobsyserver.dto.common.SkillDto;
 import com.example.jobsyserver.dto.freelancer.FreelancerProfileAboutDto;
 import com.example.jobsyserver.dto.freelancer.FreelancerProfileBasicDto;
 import com.example.jobsyserver.dto.freelancer.FreelancerProfileContactDto;
@@ -31,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 

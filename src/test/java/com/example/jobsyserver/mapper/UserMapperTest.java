@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(properties = "spring.profiles.active=test")
 public class UserMapperTest {
 
     @Autowired
