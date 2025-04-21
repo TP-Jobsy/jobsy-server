@@ -30,4 +30,7 @@ public class FreelancerProfileDto {
 
     @Schema(description = "Дата последнего обновления профиля", example = "2024-03-30T12:00:00")
     private LocalDateTime updatedAt;
+
+    @Schema(description = "url аватарки фрилансера")
+    private String avatarUrl;
 }

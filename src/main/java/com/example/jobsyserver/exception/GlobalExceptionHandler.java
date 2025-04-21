@@ -23,6 +23,13 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(HttpStatus.BAD_REQUEST.value(), errorMessage);
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(AvatarStorageException.class)
+    public ResponseEntity<ErrorResponse> handleAvatarStorage(AvatarStorageException ex) {
+        return new ResponseEntity<>(
+                new ErrorResponse(ex.getStatusCode(), ex.getMessage()),
+                HttpStatus.valueOf(ex.getStatusCode())
+        );
+    }
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException ex) {

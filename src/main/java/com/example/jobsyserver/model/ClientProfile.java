@@ -46,4 +46,7 @@ public class ClientProfile {
     @Builder.Default
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @Column(name="avatar_url")
+    private String avatarUrl;
 }
