@@ -41,3 +41,17 @@ spring:
 jwt:
   secret: ${JWT_SECRET:TEST_SECRET}
   expiration: ${JWT_EXPIRATION:3600}
+
+s3:
+  enabled: true
+  client:
+    endpoint: http://minio:9000
+    region: us‑east‑1
+    access‑key: ${S3_CLIENT_ACCESS_KEY:S3_CLIENT_ACCESS_KEY}
+    secret‑key: ${S3_CLIENT_SECRET_KEY:S3_CLIENT_SECRET_KEY}
+    bucket: avatars
+    maxSize: 2097152
+    allowed-ext:
+      - png
+      - jpg
+      - jpeg
