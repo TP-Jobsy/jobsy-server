@@ -1,6 +1,7 @@
 package com.example.jobsyserver.service.impl;
 
 import com.example.jobsyserver.dto.freelancer.*;
+import com.example.jobsyserver.exception.BadRequestException;
 import com.example.jobsyserver.exception.UserNotFoundException;
 import com.example.jobsyserver.mapper.FreelancerProfileMapper;
 import com.example.jobsyserver.model.*;
@@ -127,12 +128,19 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
 
     @Override
     @Transactional
-    public FreelancerProfileDto addSkill(Long skillId) {
+    public FreelancerProfileDto addSkill(Long skillId) { // todo: вынести в отдельный сервис
         FreelancerProfile profile = getCurrentFreelancerProfile();
+        int MAX_SKILLS = 5;
+        int current = profile.getFreelancerSkills().size();
+        if (current >= MAX_SKILLS) {
+            log.warn("Попытка добавить {}‑й навык, но лимит {} достигнут для профиля id={}",
+                    current + 1, MAX_SKILLS, profile.getId());
+            throw new BadRequestException("Нельзя добавить более " + MAX_SKILLS + " навыков");
+        }
         boolean exists = profile.getFreelancerSkills().stream()
                 .anyMatch(fs -> fs.getSkill().getId().equals(skillId));
         if (exists) {
-            log.info("Навык с id {} уже присутствует в профиле", skillId);
+            log.info("Навык с id={} уже есть в профиле id={}", skillId, profile.getId());
             return saveAndReturnDto(profile);
         }
         Skill skill = skillRepository.findById(skillId)
@@ -143,7 +151,7 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
                 .skill(skill)
                 .build();
         profile.getFreelancerSkills().add(fs);
-        log.info("Навык с id {} успешно добавлен", skillId);
+        log.info("Навык с id={} добавлен в профиль id={}", skillId, profile.getId());
         return saveAndReturnDto(profile);
     }
 
