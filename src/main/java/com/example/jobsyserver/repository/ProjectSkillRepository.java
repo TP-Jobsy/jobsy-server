@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface ProjectSkillRepository extends JpaRepository<ProjectSkill, ProjectSkillId> {
     List<ProjectSkill> findAllByProjectId(Long projectId);
+    long countByProjectId(Long projectId);
 }

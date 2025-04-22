@@ -1,7 +1,9 @@
 package com.example.jobsyserver.service.impl;
 
 import com.example.jobsyserver.dto.common.SkillDto;
+import com.example.jobsyserver.exception.BadRequestException;
 import com.example.jobsyserver.exception.ProjectNotFoundException;
+import com.example.jobsyserver.exception.SkillNotFoundException;
 import com.example.jobsyserver.mapper.SkillMapper;
 import com.example.jobsyserver.model.Project;
 import com.example.jobsyserver.model.ProjectSkill;
@@ -24,23 +26,26 @@ public class ProjectSkillServiceImpl implements ProjectSkillService {
     private final SkillRepository skillRepository;
     private final SkillMapper skillMapper;
     private final ProjectSkillRepository projectSkillRepository;
+    private static final int MAX_SKILLS = 5;
 
     @Override
     @Transactional
     public void addSkill(Long projectId, Long skillId) {
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ProjectNotFoundException("Проект не найден"));
+                .orElseThrow(() -> new ProjectNotFoundException("Проект не найден с id: " + projectId));
+        long count = projectSkillRepository.countByProjectId(projectId);
+        if (count >= MAX_SKILLS) {
+            throw new BadRequestException("Нельзя добавить более " + MAX_SKILLS + " навыков в проект");
+        }
         Skill skill = skillRepository.findById(skillId)
-                .orElseThrow(() -> new RuntimeException("Навык не найден"));
-
+                .orElseThrow(() -> new SkillNotFoundException("Навык не найден с id: " + skillId));
         ProjectSkillId id = new ProjectSkillId(projectId, skillId);
         if (projectSkillRepository.existsById(id)) {
-            throw new RuntimeException("Навык уже добавлен");
+            throw new BadRequestException("Навык уже добавлен в проект");
         }
-        projectSkillRepository.save(
-                ProjectSkill.builder().id(id).project(project).skill(skill).build()
-        );
+        projectSkillRepository.save(new ProjectSkill(id, project, skill));
     }
+
 
     @Override
     @Transactional

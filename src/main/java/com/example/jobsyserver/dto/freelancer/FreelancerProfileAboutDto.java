@@ -26,5 +26,6 @@ public class FreelancerProfileAboutDto {
     private String aboutMe;
 
     @Schema(description = "Список навыков фрилансера")
+    @Size(max = 5, message = "Нельзя указывать более 5 навыков")
     private List<SkillDto> skills;
 }
