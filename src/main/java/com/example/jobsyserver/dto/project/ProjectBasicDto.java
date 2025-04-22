@@ -47,5 +47,6 @@ public class ProjectBasicDto {
     private SpecializationDto specialization;
 
     @Schema(description = "Навыки, необходимые для проекта")
+    @Size(max = 5, message = "Нельзя указывать более 5 навыков на проект")
     private List<SkillDto> skills;
 }
