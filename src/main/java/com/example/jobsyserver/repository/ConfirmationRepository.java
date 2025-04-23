@@ -3,9 +3,11 @@ package com.example.jobsyserver.repository;
 import com.example.jobsyserver.enums.ConfirmationAction;
 import com.example.jobsyserver.model.Confirmation;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+@Repository
 public interface ConfirmationRepository extends JpaRepository<Confirmation, Long> {
     Optional<Confirmation> findByUserEmailAndActionAndUsedFalse(String email, ConfirmationAction action);
 }
