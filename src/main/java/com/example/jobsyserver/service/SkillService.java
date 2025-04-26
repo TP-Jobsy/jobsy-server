@@ -10,4 +10,5 @@ public interface SkillService {
     SkillDto createSkill(SkillDto skillDto);
     SkillDto updateSkill(Long id, SkillDto skillDto);
     void deleteSkillById(Long id);
+    List<SkillDto> autocompleteSkills(String term);
 }

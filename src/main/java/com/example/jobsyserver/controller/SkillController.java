@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -79,5 +80,20 @@ public class SkillController {
     public ResponseEntity<Void> deleteSkill(@PathVariable Long id) {
         skillService.deleteSkillById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Автодополнение навыков по части названия")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Список совпавших навыков"),
+            @ApiResponse(responseCode = "400", description = "Запрос слишком короткий (min 2 символа)")
+    })
+    @GetMapping("/autocomplete")
+    public ResponseEntity<List<SkillDto>> autocomplete(
+            @RequestParam("query")
+            @Size(min = 2, message = "Введите минимум 2 символа")
+            String query
+    ) {
+        List<SkillDto> dtos = skillService.autocompleteSkills(query);
+        return ResponseEntity.ok(dtos);
     }
 }
