@@ -1,0 +1,6 @@
+45.142.44.227 {
+    handle /api/* {
+        uri strip_prefix /api
+        reverse_proxy app:8080
+    }
+}
