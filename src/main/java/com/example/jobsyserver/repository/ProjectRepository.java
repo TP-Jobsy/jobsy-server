@@ -11,4 +11,6 @@ import java.util.List;
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpecificationExecutor<Project> {
     List<Project> findByStatus(ProjectStatus status);
+    List<Project> findByClientId(Long clientId);
+    List<Project> findByClientIdAndStatus(Long clientId, ProjectStatus status);
 }

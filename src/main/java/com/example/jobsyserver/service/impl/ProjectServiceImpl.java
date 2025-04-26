@@ -138,6 +138,20 @@ public class ProjectServiceImpl implements ProjectService {
         projectRepository.delete(project);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProjectDto> getProjectsByClient(Long clientId, ProjectStatus status) {
+        List<Project> projects;
+        if (status != null) {
+            projects = projectRepository.findByClientIdAndStatus(clientId, status);
+        } else {
+            projects = projectRepository.findByClientId(clientId);
+        }
+        return projects.stream()
+                .map(projectMapper::toDto)
+                .toList();
+    }
+
     private User getCurrentUser() {
         String email = securityService.getCurrentUserEmail();
         return userRepository.findByEmail(email)
