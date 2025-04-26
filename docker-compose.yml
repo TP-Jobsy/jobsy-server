@@ -16,11 +16,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network
 
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: jonshilin/jobsy:latest
     container_name: jobsy_server
     restart: always
     depends_on:
@@ -58,6 +58,8 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    networks:
+      - app-network
   minio:
     image: minio/minio:latest
     container_name: minio
@@ -70,9 +72,31 @@ services:
     volumes:
       - data:/data
     command: server /data --console-address ":9001"
+    networks:
+      - app-network
+  caddy:
+    image: caddy:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: always
+    networks:
+      - app-network
 
 volumes:
   data:
     name: minio-data
   postgres-data:
     name: postgres-data
+  caddy_data:
+    name: caddy-data
+  caddy_config:
+    name: caddy-config
+
+networks:
+    app-network:
+        driver: bridge
