@@ -60,4 +60,12 @@ public class SkillServiceImpl implements SkillService {
         }
         skillRepository.deleteById(id);
     }
+
+    @Override
+    public List<SkillDto> autocompleteSkills(String term) {
+        List<Skill> skills = skillRepository.findByNameContainingIgnoreCase(term);
+        return skills.stream()
+                .map(skillMapper::toDto)
+                .toList();
+    }
 }
