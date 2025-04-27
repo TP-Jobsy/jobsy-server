@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,9 +20,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AbstractException.class)
     public ResponseEntity<ErrorResponse> handleAbstractException(AbstractException ex) {
-        return ResponseEntity
-                .status(ex.getStatusCode())
-                .body(new ErrorResponse(ex.getStatusCode(), ex.getMessage()));
+        return buildResponse(ex.getStatusCode(), ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -30,9 +29,7 @@ public class GlobalExceptionHandler {
                 .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
                 .collect(Collectors.toList());
         String message = String.join("; ", errors);
-        return ResponseEntity
-                .badRequest()
-                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message));
+        return buildResponse(HttpStatus.BAD_REQUEST.value(), message);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -40,47 +37,47 @@ public class GlobalExceptionHandler {
         String message = ex.getConstraintViolations().stream()
                 .map(ConstraintViolation::getMessage)
                 .collect(Collectors.joining("; "));
-        return ResponseEntity
-                .badRequest()
-                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message));
+        return buildResponse(HttpStatus.BAD_REQUEST.value(), message);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ErrorResponse> handleMissingParams(MissingServletRequestParameterException ex) {
         String message = "Отсутствует обязательный параметр: " + ex.getParameterName();
-        return ResponseEntity
-                .badRequest()
-                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message));
+        return buildResponse(HttpStatus.BAD_REQUEST.value(), message);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         String message = String.format("Неверный формат параметра '%s': ожидается %s",
                 ex.getName(), ex.getRequiredType().getSimpleName());
-        return ResponseEntity
-                .badRequest()
-                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), message));
+        return buildResponse(HttpStatus.BAD_REQUEST.value(), message);
     }
 
     @ExceptionHandler(AvatarStorageException.class)
     public ResponseEntity<ErrorResponse> handleAvatarStorage(AvatarStorageException ex) {
-        return ResponseEntity
-                .status(ex.getStatusCode())
-                .body(new ErrorResponse(ex.getStatusCode(), ex.getMessage()));
+        return buildResponse(ex.getStatusCode(), ex.getMessage());
     }
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException ex) {
-        return ResponseEntity
-                .badRequest()
-                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
+        return buildResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN.value(), "Доступ запрещён: недостаточно прав");
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
         ex.printStackTrace();
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Ошибка на стороне сервера");
+    }
+
+    private ResponseEntity<ErrorResponse> buildResponse(int status, String message) {
+        ErrorResponse body = new ErrorResponse(status, message);
         return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error"));
+                .status(status)
+                .body(body);
     }
 }

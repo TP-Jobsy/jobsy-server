@@ -1,8 +1,7 @@
 package com.example.jobsyserver.service.impl;
 
 import com.example.jobsyserver.dto.common.SpecializationDto;
-import com.example.jobsyserver.exception.CategoryNotFoundException;
-import com.example.jobsyserver.exception.SpecializationNotFoundException;
+import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.mapper.SpecializationMapper;
 import com.example.jobsyserver.model.Category;
 import com.example.jobsyserver.model.Specialization;
@@ -44,7 +43,7 @@ public class SpecializationServiceImpl implements SpecializationService {
     @Override
     public SpecializationDto getSpecializationById(Long id) {
         Specialization specialization = specializationRepository.findById(id)
-                .orElseThrow(() -> new SpecializationNotFoundException("Специализация не найдена с id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Специализация", id));
         return specializationMapper.toDto(specialization);
     }
 
@@ -63,7 +62,7 @@ public class SpecializationServiceImpl implements SpecializationService {
     @Override
     public SpecializationDto updateSpecialization(Long id, SpecializationDto specializationDto) {
         Specialization existingSpecialization = specializationRepository.findById(id)
-                .orElseThrow(() -> new SpecializationNotFoundException("Специализация не найдена с id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Специализация", id));
 
         existingSpecialization.setName(specializationDto.getName());
 
@@ -80,7 +79,7 @@ public class SpecializationServiceImpl implements SpecializationService {
     @Override
     public void deleteSpecializationById(Long id) {
         if (!specializationRepository.existsById(id)) {
-            throw new SpecializationNotFoundException("Специализация не найдена с id " + id);
+            throw new ResourceNotFoundException("Специализация" + id);
         }
         specializationRepository.deleteById(id);
     }

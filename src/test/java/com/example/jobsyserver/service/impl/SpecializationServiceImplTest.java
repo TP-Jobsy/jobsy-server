@@ -1,7 +1,7 @@
 package com.example.jobsyserver.service.impl;
 
 import com.example.jobsyserver.dto.common.SpecializationDto;
-import com.example.jobsyserver.exception.SpecializationNotFoundException;
+import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.mapper.SpecializationMapper;
 import com.example.jobsyserver.model.Category;
 import com.example.jobsyserver.model.Specialization;
@@ -69,7 +69,7 @@ class SpecializationServiceImplTest {
     @Test
     void testGetSpecializationById_notFound() {
         when(specializationRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(SpecializationNotFoundException.class, () -> specializationService.getSpecializationById(1L));
+        assertThrows(ResourceNotFoundException.class, () -> specializationService.getSpecializationById(1L));
         verify(specializationRepository, times(1)).findById(1L);
     }
 
@@ -134,7 +134,7 @@ class SpecializationServiceImplTest {
     @Test
     void testDeleteSpecializationById_notFound() {
         when(specializationRepository.existsById(1L)).thenReturn(false);
-        assertThrows(SpecializationNotFoundException.class, () -> specializationService.deleteSpecializationById(1L));
+        assertThrows(ResourceNotFoundException.class, () -> specializationService.deleteSpecializationById(1L));
         verify(specializationRepository, times(1)).existsById(1L);
     }
 }

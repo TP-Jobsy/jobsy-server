@@ -2,8 +2,7 @@ package com.example.jobsyserver.service.impl;
 
 import com.example.jobsyserver.dto.common.SkillDto;
 import com.example.jobsyserver.exception.BadRequestException;
-import com.example.jobsyserver.exception.ProjectNotFoundException;
-import com.example.jobsyserver.exception.SkillNotFoundException;
+import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.mapper.SkillMapper;
 import com.example.jobsyserver.model.Project;
 import com.example.jobsyserver.model.ProjectSkill;
@@ -32,13 +31,13 @@ public class ProjectSkillServiceImpl implements ProjectSkillService {
     @Transactional
     public void addSkill(Long projectId, Long skillId) {
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ProjectNotFoundException("Проект не найден с id: " + projectId));
+                .orElseThrow(() -> new ResourceNotFoundException("Проект", projectId));
         long count = projectSkillRepository.countByProjectId(projectId);
         if (count >= MAX_SKILLS) {
             throw new BadRequestException("Нельзя добавить более " + MAX_SKILLS + " навыков в проект");
         }
         Skill skill = skillRepository.findById(skillId)
-                .orElseThrow(() -> new SkillNotFoundException("Навык не найден с id: " + skillId));
+                .orElseThrow(() -> new ResourceNotFoundException("Навык", skillId));
         ProjectSkillId id = new ProjectSkillId(projectId, skillId);
         if (projectSkillRepository.existsById(id)) {
             throw new BadRequestException("Навык уже добавлен в проект");

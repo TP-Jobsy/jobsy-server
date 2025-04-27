@@ -4,7 +4,7 @@ import com.example.jobsyserver.dto.client.ClientProfileBasicDto;
 import com.example.jobsyserver.dto.client.ClientProfileContactDto;
 import com.example.jobsyserver.dto.client.ClientProfileDto;
 import com.example.jobsyserver.dto.client.ClientProfileFieldDto;
-import com.example.jobsyserver.exception.UserNotFoundException;
+import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.mapper.ClientProfileMapper;
 import com.example.jobsyserver.model.ClientProfile;
 import com.example.jobsyserver.model.User;
@@ -126,19 +126,19 @@ public class ClientProfileServiceImpl implements ClientProfileService {
     @Transactional(readOnly = true)
     public ClientProfileDto getClientProfileById(Long id) {
         ClientProfile profile = clientProfileRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Профиль заказчика не найден с id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Профиль заказчика" + id));
         return clientProfileMapper.toDto(profile);
     }
 
     private User getCurrentUser() {
         String email = securityService.getCurrentUserEmail();
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с email: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь" + email));
     }
 
     private ClientProfile getCurrentClientProfile() {
         return clientProfileRepository.findByUser(getCurrentUser())
-                .orElseThrow(() -> new UserNotFoundException("Профиль заказчика не найден для пользователя с email: " + securityService.getCurrentUserEmail()));
+                .orElseThrow(() -> new ResourceNotFoundException("Профиль заказчика" + securityService.getCurrentUserEmail()));
     }
 
     private ClientProfileDto saveAndReturnDto(ClientProfile profile) {

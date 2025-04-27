@@ -5,7 +5,7 @@ import com.example.jobsyserver.dto.freelancer.FreelancerProfileBasicDto;
 import com.example.jobsyserver.dto.freelancer.FreelancerProfileContactDto;
 import com.example.jobsyserver.dto.freelancer.FreelancerProfileDto;
 import com.example.jobsyserver.enums.Experience;
-import com.example.jobsyserver.exception.UserNotFoundException;
+import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.mapper.FreelancerProfileMapper;
 import com.example.jobsyserver.model.*;
 import com.example.jobsyserver.repository.FreelancerProfileRepository;
@@ -120,7 +120,7 @@ class FreelancerProfileServiceImplTest {
     @Test
     void testGetProfileUserNotFound() {
         Mockito.when(userRepository.findByEmail(testEmail)).thenReturn(Optional.empty());
-        UserNotFoundException exception = assertThrows(UserNotFoundException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> freelancerProfileService.getProfile());
         assertTrue(exception.getMessage().contains(testEmail), "Сообщение исключения должно содержать email");
     }
