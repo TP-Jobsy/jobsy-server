@@ -36,9 +36,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new BadRequestException("Пользователь с таким email уже зарегистрирован");
         }
-        if (LocalDate.now().minusYears(18).isBefore(request.getDateBirth())) {
-            throw new BadRequestException("Пользователь должен быть старше 18 лет");
-        }
+
         User user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
