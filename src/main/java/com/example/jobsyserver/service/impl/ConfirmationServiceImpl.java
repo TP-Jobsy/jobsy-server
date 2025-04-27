@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -57,6 +58,12 @@ class ConfirmationServiceImpl implements ConfirmationService {
         var expired = repo.findAllByActionAndUsedFalseAndExpiresAtBefore(action, now);
         repo.deleteAll(expired);
         return expired;
+    }
+
+    @Override
+    public Optional<Confirmation> findActiveByEmail(String email, ConfirmationAction action) {
+        return repo.findByUserEmailAndActionAndUsedFalse(email, action)
+                .filter(c -> c.getExpiresAt().isAfter(LocalDateTime.now()));
     }
 }
 
