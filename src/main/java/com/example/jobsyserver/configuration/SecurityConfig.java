@@ -31,6 +31,7 @@ public class SecurityConfig {
             "/auth/register",
             "/auth/confirm-email",
             "/auth/login",
+            "/auth/resend-confirmation",
             "/auth/password-reset/**",
             "/freelancers"
     };

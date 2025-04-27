@@ -15,6 +15,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -44,6 +47,13 @@ public class ConfirmEmailServiceImpl implements ConfirmEmailService {
         if (Boolean.TRUE.equals(user.getIsVerified())) {
             throw new BadRequestException("Email уже подтверждён");
         }
+        confirmationService.findActiveByEmail(email, ConfirmationAction.REGISTRATION)
+                .ifPresent(conf -> {
+                    long minutesLeft = Duration.between(LocalDateTime.now(), conf.getExpiresAt()).toMinutes();
+                    throw new BadRequestException(
+                            "Текущий код ещё действителен ("+ minutesLeft +" мин) " + "Попробуйте позже или используйте старый код"
+                    );
+                });
         Confirmation newConfirmation = confirmationService.createConfirmationFor(user, ConfirmationAction.REGISTRATION);
         log.info("Сгенерирован новый код {}, публикуем событие", newConfirmation.getConfirmationCode());
         eventPublisher.publishEvent(
