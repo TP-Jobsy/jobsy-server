@@ -21,7 +21,7 @@ public class ConfirmationDto {
     @Schema(description = "Тип действия подтверждения", example = "REGISTRATION")
     private ConfirmationAction action;
 
-    @Schema(description = "Код подтверждения", example = "ABC123")
+    @Schema(description = "Код подтверждения", example = "1234")
     private String confirmationCode;
 
     @Schema(description = "Дата и время истечения срока действия", example = "2025-04-01T12:00:00")
