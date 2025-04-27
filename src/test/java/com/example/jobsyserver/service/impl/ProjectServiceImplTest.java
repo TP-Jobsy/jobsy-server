@@ -4,8 +4,7 @@ import com.example.jobsyserver.dto.project.ProjectCreateDto;
 import com.example.jobsyserver.dto.project.ProjectDto;
 import com.example.jobsyserver.dto.project.ProjectUpdateDto;
 import com.example.jobsyserver.enums.ProjectStatus;
-import com.example.jobsyserver.exception.ProjectNotFoundException;
-import com.example.jobsyserver.exception.UserNotFoundException;
+import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.mapper.ProjectMapper;
 import com.example.jobsyserver.model.*;
 import com.example.jobsyserver.repository.*;
@@ -72,7 +71,7 @@ class ProjectServiceImplTest {
     void createProject_userNotFound() {
         when(securityService.getCurrentUserEmail()).thenReturn("no@mail.com");
         when(userRepository.findByEmail("no@mail.com")).thenReturn(Optional.empty());
-        assertThrows(UserNotFoundException.class, () -> service.createProject(createDto));
+        assertThrows(ResourceNotFoundException.class, () -> service.createProject(createDto));
     }
 
     @Test
@@ -81,7 +80,7 @@ class ProjectServiceImplTest {
         when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(user));
         when(clientProfileRepository.findByUser(user)).thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class, () -> service.createProject(createDto));
+        assertThrows(ResourceNotFoundException.class, () -> service.createProject(createDto));
     }
 
     @Test
@@ -111,7 +110,7 @@ class ProjectServiceImplTest {
         when(securityService.getCurrentUserEmail()).thenReturn("test@mail.com");
         when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(user));
         when(projectRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(ProjectNotFoundException.class, () -> service.updateProject(1L, updateDto));
+        assertThrows(ResourceNotFoundException.class, () -> service.updateProject(1L, updateDto));
     }
 
     @Test

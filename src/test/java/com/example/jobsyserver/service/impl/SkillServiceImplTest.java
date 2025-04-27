@@ -1,7 +1,7 @@
 package com.example.jobsyserver.service.impl;
 
 import com.example.jobsyserver.dto.common.SkillDto;
-import com.example.jobsyserver.exception.SkillNotFoundException;
+import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.mapper.SkillMapper;
 import com.example.jobsyserver.model.Skill;
 import com.example.jobsyserver.repository.SkillRepository;
@@ -67,7 +67,7 @@ class SkillServiceImplTest {
     @Test
     void testGetSkillById_notFound() {
         when(skillRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(SkillNotFoundException.class, () -> skillService.getSkillById(1L));
+        assertThrows(ResourceNotFoundException.class, () -> skillService.getSkillById(1L));
         verify(skillRepository, times(1)).findById(1L);
     }
 
@@ -121,7 +121,7 @@ class SkillServiceImplTest {
     @Test
     void testDeleteSkillById_notFound() {
         when(skillRepository.existsById(1L)).thenReturn(false);
-        assertThrows(SkillNotFoundException.class, () -> skillService.deleteSkillById(1L));
+        assertThrows(ResourceNotFoundException.class, () -> skillService.deleteSkillById(1L));
         verify(skillRepository, times(1)).existsById(1L);
     }
 }

@@ -1,7 +1,7 @@
 package com.example.jobsyserver.service.impl;
 
 import com.example.jobsyserver.dto.common.CategoryDto;
-import com.example.jobsyserver.exception.CategoryNotFoundException;
+import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.mapper.CategoryMapper;
 import com.example.jobsyserver.model.Category;
 import com.example.jobsyserver.repository.CategoryRepository;
@@ -67,7 +67,7 @@ class CategoryServiceImplTest {
     @Test
     void testGetCategoryById_notFound() {
         when(categoryRepository.findById(1L)).thenReturn(Optional.empty());
-        assertThrows(CategoryNotFoundException.class, () -> categoryService.getCategoryById(1L));
+        assertThrows(ResourceNotFoundException.class, () -> categoryService.getCategoryById(1L));
         verify(categoryRepository, times(1)).findById(1L);
     }
 
