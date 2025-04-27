@@ -2,7 +2,7 @@ package com.example.jobsyserver.service.impl;
 
 import com.example.jobsyserver.enums.ConfirmationAction;
 import com.example.jobsyserver.exception.BadRequestException;
-import com.example.jobsyserver.exception.UserNotFoundException;
+import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.model.Confirmation;
 import com.example.jobsyserver.model.User;
 import com.example.jobsyserver.repository.ConfirmationRepository;
@@ -32,7 +32,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     public void initiatePasswordReset(String email) {
         log.info("Запрос на восстановление пароля для email: {}", email);
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с email " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь", "email", email));
         log.info("Пользователь найден: id={}, email={}", user.getId(), user.getEmail());
 
         String resetCode = String.format("%04d", (int)(Math.random() * 10000));

@@ -3,7 +3,7 @@ package com.example.jobsyserver.service.impl;
 import com.example.jobsyserver.dto.request.AuthenticationRequest;
 import com.example.jobsyserver.dto.response.AuthenticationResponse;
 import com.example.jobsyserver.exception.BadRequestException;
-import com.example.jobsyserver.exception.UserNotFoundException;
+import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.mapper.UserMapper;
 import com.example.jobsyserver.repository.UserRepository;
 import com.example.jobsyserver.service.AuthenticationService;
@@ -35,7 +35,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String token = jwtService.generateToken(request.getEmail());
         var userDto = userRepository.findByEmail(request.getEmail())
                 .map(userMapper::toDto)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь"));
         return new AuthenticationResponse(token, userDto);
     }
 }

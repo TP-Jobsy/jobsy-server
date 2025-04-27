@@ -1,7 +1,7 @@
 package com.example.jobsyserver.service.impl;
 
 import com.example.jobsyserver.event.UserVerifiedEvent;
-import com.example.jobsyserver.exception.UserNotFoundException;
+import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.model.FreelancerProfile;
 import com.example.jobsyserver.model.User;
 import com.example.jobsyserver.repository.FreelancerProfileRepository;
@@ -26,7 +26,7 @@ public class FreelancerProfileCreationServiceImpl implements FreelancerProfileCr
     @Transactional
     public void handleUserVerified(UserVerifiedEvent event) {
         User user = userRepository.findById(event.user().getId())
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с id: " + event.user().getId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь" + event.user().getId()));
         if (!user.getRole().name().equalsIgnoreCase("FREELANCER")) {
             log.info("Пользователь с email {} не является фрилансером – профиль не создаётся", user.getEmail());
             return;

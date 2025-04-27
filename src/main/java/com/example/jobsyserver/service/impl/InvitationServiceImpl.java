@@ -4,9 +4,7 @@ import com.example.jobsyserver.dto.project.ProjectApplicationDto;
 import com.example.jobsyserver.enums.ApplicationType;
 import com.example.jobsyserver.enums.ProjectApplicationStatus;
 import com.example.jobsyserver.enums.ProjectStatus;
-import com.example.jobsyserver.exception.ProjectApplicationNotFoundException;
-import com.example.jobsyserver.exception.ProjectNotFoundException;
-import com.example.jobsyserver.exception.UserNotFoundException;
+import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.mapper.ProjectApplicationMapper;
 import com.example.jobsyserver.model.FreelancerProfile;
 import com.example.jobsyserver.model.Project;
@@ -32,9 +30,9 @@ public class InvitationServiceImpl implements InvitationService {
     @Transactional
     public ProjectApplicationDto invite(Long projectId, Long freelancerId) {
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ProjectNotFoundException("Проект не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Проект"));
         FreelancerProfile freelancer = freelancerProfileRepository.findById(freelancerId)
-                .orElseThrow(() -> new UserNotFoundException("Фрилансер не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Фрилансер"));
 
         ProjectApplication application = ProjectApplication.builder()
                 .project(project)
@@ -50,7 +48,7 @@ public class InvitationServiceImpl implements InvitationService {
     @Transactional
     public ProjectApplicationDto handleInvitationStatus(Long applicationId, ProjectApplicationStatus status) {
         ProjectApplication application = applicationRepository.findById(applicationId)
-                .orElseThrow(() -> new ProjectApplicationNotFoundException("Заявка не найдена"));
+                .orElseThrow(() -> new ResourceNotFoundException("Заявка"));
 
         if (application.getApplicationType() != ApplicationType.INVITATION) {
             throw new IllegalArgumentException("Это не приглашение клиента");

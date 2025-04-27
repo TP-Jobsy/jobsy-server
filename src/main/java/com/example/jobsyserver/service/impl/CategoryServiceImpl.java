@@ -1,7 +1,7 @@
 package com.example.jobsyserver.service.impl;
 
 import com.example.jobsyserver.dto.common.CategoryDto;
-import com.example.jobsyserver.exception.CategoryNotFoundException;
+import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.mapper.CategoryMapper;
 import com.example.jobsyserver.model.Category;
 import com.example.jobsyserver.repository.CategoryRepository;
@@ -33,7 +33,7 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto getCategoryById(Long id) {
         return categoryRepository.findById(id)
                 .map(categoryMapper::toDto)
-                .orElseThrow(() -> new CategoryNotFoundException("Категория не найдена с id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Категория" + id));
     }
 
     @Override
@@ -46,7 +46,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto updateCategory(Long id, CategoryDto categoryDto) {
         Category existingCategory = categoryRepository.findById(id)
-                .orElseThrow(() -> new CategoryNotFoundException("Категория не найдена с id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Категория" + id));
         existingCategory.setName(categoryDto.getName());
         Category updatedCategory = categoryRepository.save(existingCategory);
         return categoryMapper.toDto(updatedCategory);
@@ -55,7 +55,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public void deleteCategoryById(Long id) {
         if (!categoryRepository.existsById(id)) {
-            throw new CategoryNotFoundException("Категория не найдена с id " + id);
+            throw new ResourceNotFoundException("Категория" + id);
         }
         categoryRepository.deleteById(id);
     }
@@ -63,6 +63,6 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Category findCategoryById(Long id) {
         return categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Категория не найдена с id " + id));
+                .orElseThrow(() -> new RuntimeException("Категория" + id));
     }
 }

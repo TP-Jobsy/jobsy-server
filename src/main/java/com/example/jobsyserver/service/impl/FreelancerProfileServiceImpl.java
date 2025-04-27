@@ -2,7 +2,7 @@ package com.example.jobsyserver.service.impl;
 
 import com.example.jobsyserver.dto.freelancer.*;
 import com.example.jobsyserver.exception.BadRequestException;
-import com.example.jobsyserver.exception.UserNotFoundException;
+import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.mapper.FreelancerProfileMapper;
 import com.example.jobsyserver.model.*;
 import com.example.jobsyserver.repository.FreelancerProfileRepository;
@@ -111,7 +111,7 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
         String currentEmail = securityService.getCurrentUserEmail();
         log.info("Удаление аккаунта для пользователя с email: {}", currentEmail);
         User user = userRepository.findByEmail(currentEmail)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с email: " + currentEmail));
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь", "email", currentEmail));
         userRepository.delete(user);
         log.info("Аккаунт пользователя с email {} успешно удалён", currentEmail);
     }
@@ -144,7 +144,7 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
             return saveAndReturnDto(profile);
         }
         Skill skill = skillRepository.findById(skillId)
-                .orElseThrow(() -> new UserNotFoundException("Навык не найден с id: " + skillId));
+                .orElseThrow(() -> new ResourceNotFoundException("Навык" + skillId));
         FreelancerSkill fs = FreelancerSkill.builder()
                 .id(new FreelancerSkillId(profile.getId(), skill.getId()))
                 .freelancerProfile(profile)
@@ -161,7 +161,7 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
         FreelancerProfile profile = getCurrentFreelancerProfile();
         boolean removed = profile.getFreelancerSkills().removeIf(fs -> fs.getSkill().getId().equals(skillId));
         if (!removed) {
-            throw new UserNotFoundException("Навык с id " + skillId + " не найден в профиле");
+            throw new ResourceNotFoundException("Навык" + skillId);
         }
         log.info("Навык с id {} успешно удалён", skillId);
         return saveAndReturnDto(profile);
@@ -171,20 +171,20 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
     @Transactional(readOnly = true)
     public FreelancerProfileDto getFreelancerProfileById(Long id) {
         FreelancerProfile profile = freelancerProfileRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Фрилансер не найден с id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Фрилансер" + id));
         return freelancerProfileMapper.toDto(profile);
     }
 
     private User getCurrentUser() {
         String currentEmail = securityService.getCurrentUserEmail();
         return userRepository.findByEmail(currentEmail)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с email: " + currentEmail));
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь", "email", currentEmail));
     }
 
     private FreelancerProfile getCurrentFreelancerProfile() {
         User user = getCurrentUser();
         return freelancerProfileRepository.findByUser(user)
-                .orElseThrow(() -> new UserNotFoundException("Профиль фрилансера не найден для пользователя с email: " + user.getEmail()));
+                .orElseThrow(() -> new ResourceNotFoundException("Профиль фрилансера" , "email", user.getEmail()));
     }
 
     private FreelancerProfileDto saveAndReturnDto(FreelancerProfile profile) {

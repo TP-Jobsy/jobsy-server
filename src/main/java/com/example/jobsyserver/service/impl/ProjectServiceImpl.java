@@ -4,10 +4,7 @@ import com.example.jobsyserver.dto.project.ProjectCreateDto;
 import com.example.jobsyserver.dto.project.ProjectDto;
 import com.example.jobsyserver.dto.project.ProjectUpdateDto;
 import com.example.jobsyserver.enums.ProjectStatus;
-import com.example.jobsyserver.exception.CategoryNotFoundException;
-import com.example.jobsyserver.exception.ProjectNotFoundException;
-import com.example.jobsyserver.exception.SpecializationNotFoundException;
-import com.example.jobsyserver.exception.UserNotFoundException;
+import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.mapper.ProjectMapper;
 import com.example.jobsyserver.model.ClientProfile;
 import com.example.jobsyserver.model.Project;
@@ -52,7 +49,7 @@ public class ProjectServiceImpl implements ProjectService {
         User currentUser = getCurrentUser();
 
         ClientProfile client = clientProfileRepository.findByUser(currentUser)
-                .orElseThrow(() -> new UserNotFoundException("Профиль клиента не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Профиль"));
 
         Project project = projectMapper.toEntity(dto);
         project.setClient(client);
@@ -60,12 +57,12 @@ public class ProjectServiceImpl implements ProjectService {
 
         if (dto.getCategory() != null) {
             project.setCategory(categoryRepository.findById(dto.getCategory().getId())
-                    .orElseThrow(() -> new CategoryNotFoundException("Категория не найдена")));
+                    .orElseThrow(() -> new ResourceNotFoundException("Категория")));
         }
 
         if (dto.getSpecialization() != null) {
             project.setSpecialization(specializationRepository.findById(dto.getSpecialization().getId())
-                    .orElseThrow(() -> new SpecializationNotFoundException("Специализация не найдена")));
+                    .orElseThrow(() -> new ResourceNotFoundException("Специализация")));
         }
 
         Project savedProject = projectRepository.save(project);
@@ -85,7 +82,7 @@ public class ProjectServiceImpl implements ProjectService {
         User currentUser = getCurrentUser();
 
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ProjectNotFoundException("Проект не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Проект"));
 
         if (!project.getClient().getUser().getId().equals(currentUser.getId())) {
             throw new RuntimeException("Вы не являетесь владельцем проекта");
@@ -99,12 +96,12 @@ public class ProjectServiceImpl implements ProjectService {
 
         if (dto.getCategory() != null) {
             project.setCategory(categoryRepository.findById(dto.getCategory().getId())
-                    .orElseThrow(() -> new CategoryNotFoundException("Категория не найдена")));
+                    .orElseThrow(() -> new ResourceNotFoundException("Категория")));
         }
 
         if (dto.getSpecialization() != null) {
             project.setSpecialization(specializationRepository.findById(dto.getSpecialization().getId())
-                    .orElseThrow(() -> new SpecializationNotFoundException("Специализация не найдена")));
+                    .orElseThrow(() -> new ResourceNotFoundException("Специализация")));
         }
 
         Project updatedProject = projectRepository.save(project);
@@ -125,7 +122,7 @@ public class ProjectServiceImpl implements ProjectService {
     public void deleteProject(Long id) {
         User currentUser = getCurrentUser();
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new ProjectNotFoundException("Проект не найден"));
+                .orElseThrow(() -> new ResourceNotFoundException("Проект"));
 
         if (!project.getClient().getUser().getId().equals(currentUser.getId())) {
             throw new RuntimeException("Вы не являетесь владельцем проекта");
@@ -155,6 +152,6 @@ public class ProjectServiceImpl implements ProjectService {
     private User getCurrentUser() {
         String email = securityService.getCurrentUserEmail();
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден с email: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь", "email", email));
     }
 }

@@ -1,7 +1,7 @@
 package com.example.jobsyserver.service.impl;
 
 import com.example.jobsyserver.dto.common.SkillDto;
-import com.example.jobsyserver.exception.SkillNotFoundException;
+import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.mapper.SkillMapper;
 import com.example.jobsyserver.model.Skill;
 import com.example.jobsyserver.repository.SkillRepository;
@@ -33,7 +33,7 @@ public class SkillServiceImpl implements SkillService {
     @Override
     public SkillDto getSkillById(Long id) {
         Skill skill = skillRepository.findById(id)
-                .orElseThrow(() -> new SkillNotFoundException("Скилл не найден с id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Навык", id));
         return skillMapper.toDto(skill);
     }
 
@@ -47,7 +47,7 @@ public class SkillServiceImpl implements SkillService {
     @Override
     public SkillDto updateSkill(Long id, SkillDto skillDto) {
         Skill existingSkill = skillRepository.findById(id)
-                .orElseThrow(() -> new SkillNotFoundException("Скилл не найден с id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Навык", id));
         existingSkill.setName(skillDto.getName());
         Skill updatedSkill = skillRepository.save(existingSkill);
         return skillMapper.toDto(updatedSkill);
@@ -56,7 +56,7 @@ public class SkillServiceImpl implements SkillService {
     @Override
     public void deleteSkillById(Long id) {
         if (!skillRepository.existsById(id)) {
-            throw new SkillNotFoundException("Скилл не найден с id " + id);
+            throw new ResourceNotFoundException("Навык", id);
         }
         skillRepository.deleteById(id);
     }
