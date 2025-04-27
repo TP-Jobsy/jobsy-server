@@ -63,4 +63,5 @@ confirmation:
   expirationMinutes: 5
   codeLength: 4
   cleanup:
-    interval: 3600000
+#    interval: 600000
+    interval: 60000
