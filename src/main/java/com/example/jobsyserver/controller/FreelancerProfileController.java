@@ -7,14 +7,17 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/profile/freelancer")
+@Validated
 @Tag(name = "Freelancer Profile", description = "Операции по управлению профилем фрилансера")
 public class FreelancerProfileController {
 
@@ -42,7 +45,7 @@ public class FreelancerProfileController {
     })
     @PutMapping("/basic")
     @PreAuthorize("hasRole('FREELANCER')")
-    public ResponseEntity<FreelancerProfileDto> updateBasic(@RequestBody FreelancerProfileBasicDto basicDto) {
+    public ResponseEntity<FreelancerProfileDto> updateBasic(@Valid @RequestBody FreelancerProfileBasicDto basicDto) {
         return ResponseEntity.ok(freelancerProfileService.updateBasic(basicDto));
     }
 
@@ -55,7 +58,7 @@ public class FreelancerProfileController {
     })
     @PutMapping("/contact")
     @PreAuthorize("hasRole('FREELANCER')")
-    public ResponseEntity<FreelancerProfileDto> updateContact(@RequestBody FreelancerProfileContactDto contactDto) {
+    public ResponseEntity<FreelancerProfileDto> updateContact(@Valid @RequestBody FreelancerProfileContactDto contactDto) {
         return ResponseEntity.ok(freelancerProfileService.updateContact(contactDto));
     }
 
@@ -68,7 +71,7 @@ public class FreelancerProfileController {
     })
     @PutMapping("/about")
     @PreAuthorize("hasRole('FREELANCER')")
-    public ResponseEntity<FreelancerProfileDto> updateAbout(@RequestBody FreelancerProfileAboutDto aboutDto) {
+    public ResponseEntity<FreelancerProfileDto> updateAbout(@Valid @RequestBody FreelancerProfileAboutDto aboutDto) {
         return ResponseEntity.ok(freelancerProfileService.updateAbout(aboutDto));
     }
 

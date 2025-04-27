@@ -10,7 +10,7 @@ import org.hibernate.validator.constraints.URL;
 public class FreelancerProfileContactDto {
 
     @NotBlank(message = "Ссылка не может быть пустой")
-    @URL(message = "Некорректный URL")
+    @URL(protocol = "http", regexp = "^(http|https)://.*$", message = "Должен быть корректный HTTP/HTTPS URL")
     @Schema(description = "Ссылка для связи или портфолио", example = "https://linkedin.com/in/username")
     private String contactLink;
 }

@@ -10,14 +10,17 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/profile/client")
 @RequiredArgsConstructor
+@Validated
 @Tag(name = "client", description = "Операции управления профилем заказчика")
 public class ClientProfileController {
 
@@ -44,7 +47,7 @@ public class ClientProfileController {
     })
     @PutMapping("/basic")
     @PreAuthorize("hasRole('CLIENT')")
-    public ResponseEntity<ClientProfileDto> updateBasic(@RequestBody ClientProfileBasicDto basicDto) {
+    public ResponseEntity<ClientProfileDto> updateBasic(@Valid @RequestBody ClientProfileBasicDto basicDto) {
         ClientProfileDto dto = clientProfileService.updateBasic(basicDto);
         return ResponseEntity.ok(dto);
     }
@@ -57,7 +60,7 @@ public class ClientProfileController {
     })
     @PutMapping("/contact")
     @PreAuthorize("hasRole('CLIENT')")
-    public ResponseEntity<ClientProfileDto> updateContact(@RequestBody ClientProfileContactDto contactDto) {
+    public ResponseEntity<ClientProfileDto> updateContact(@Valid @RequestBody ClientProfileContactDto contactDto) {
         ClientProfileDto dto = clientProfileService.updateContact(contactDto);
         return ResponseEntity.ok(dto);
     }
@@ -71,7 +74,7 @@ public class ClientProfileController {
     })
     @PutMapping("/field")
     @PreAuthorize("hasRole('CLIENT')")
-    public ResponseEntity<ClientProfileDto> updateField(@RequestBody ClientProfileFieldDto fieldDto) {
+    public ResponseEntity<ClientProfileDto> updateField(@Valid @RequestBody ClientProfileFieldDto fieldDto) {
         ClientProfileDto dto = clientProfileService.updateField(fieldDto);
         return ResponseEntity.ok(dto);
     }
