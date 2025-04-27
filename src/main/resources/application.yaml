@@ -58,3 +58,8 @@ s3:
       -
 search:
   max-skills: 10
+
+confirmation:
+  expirationMinutes: 5
+  cleanup:
+    interval: 3600000
