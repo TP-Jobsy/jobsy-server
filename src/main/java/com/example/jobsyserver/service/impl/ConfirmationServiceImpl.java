@@ -25,7 +25,7 @@ class ConfirmationServiceImpl implements ConfirmationService {
     public Confirmation createConfirmationFor(User user, ConfirmationAction action) {
         repo.findByUserEmailAndActionAndUsedFalse(user.getEmail(), action)
                 .ifPresent(repo::delete);
-        var code = ConfirmationCodeGenerator.generateNumericCode(props.expirationMinutes());
+        var code = ConfirmationCodeGenerator.generateNumericCode(props.codeLength());
         var conf = Confirmation.builder()
                 .user(user)
                 .action(action)
