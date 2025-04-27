@@ -6,15 +6,18 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Freelancer Skills", description = "Операции управления навыками фрилансера")
 @RestController
 @RequestMapping("/profile/freelancer/skills")
 @RequiredArgsConstructor
+@Validated
 public class FreelancerSkillsController {
 
     private final FreelancerProfileService freelancerProfileService;
@@ -28,7 +31,7 @@ public class FreelancerSkillsController {
     })
     @PostMapping("/{skillId}")
     @PreAuthorize("hasRole('FREELANCER')")
-    public ResponseEntity<FreelancerProfileDto> addSkill(@PathVariable Long skillId) {
+    public ResponseEntity<FreelancerProfileDto> addSkill(@Valid @PathVariable Long skillId) {
         FreelancerProfileDto dto = freelancerProfileService.addSkill(skillId);
         return ResponseEntity.ok(dto);
     }
