@@ -1,7 +1,7 @@
 package com.example.jobsyserver.controller;
 
 import com.example.jobsyserver.exception.AvatarStorageException;
-import com.example.jobsyserver.exception.ProfileNotFoundException;
+import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.model.ClientProfile;
 import com.example.jobsyserver.model.FreelancerProfile;
 import com.example.jobsyserver.repository.ClientProfileRepository;
@@ -45,7 +45,7 @@ public class AvatarController {
         ClientProfile profile = clients.findByUserEmail(email)
                 .orElseThrow(() -> {
                     log.error("Профиль клиента не найден для email={}", email);
-                    return new ProfileNotFoundException("Client", email);
+                    return new ResourceNotFoundException("Клиент", "email", email);
                 });
         log.debug("Найден профиль клиента, id={}", profile.getId());
 
@@ -80,7 +80,7 @@ public class AvatarController {
         FreelancerProfile profile = freelancers.findByUserEmail(email)
                 .orElseThrow(() -> {
                     log.error("Профиль фрилансера не найден для email={}", email);
-                    return new ProfileNotFoundException("Freelancer", email);
+                    return new ResourceNotFoundException("Фрилансер", "email", email);
                 });
         log.debug("Найден профиль фрилансера, id={}", profile.getId());
         try {
