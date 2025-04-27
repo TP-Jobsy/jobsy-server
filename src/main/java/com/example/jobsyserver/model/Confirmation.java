@@ -2,8 +2,7 @@ package com.example.jobsyserver.model;
 
 import com.example.jobsyserver.enums.ConfirmationAction;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -11,6 +10,9 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "confirmations")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Confirmation {
 
     @Id
