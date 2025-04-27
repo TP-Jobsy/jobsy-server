@@ -10,7 +10,7 @@ import org.hibernate.validator.constraints.URL;
 public class ClientProfileContactDto {
 
     @NotBlank(message = "Ссылка не может быть пустой")
-    @URL(message = "Некорректный URL")
+    @URL(protocol = "http", regexp = "^(http|https)://.*$", message = "Должен быть корректный HTTP/HTTPS URL")
     @Schema(description = "Ссылка для связи или на сайт компании", example = "http://acme-corp.example.com")
     private String contactLink;
 }
