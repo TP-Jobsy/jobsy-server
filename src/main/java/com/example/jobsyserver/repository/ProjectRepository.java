@@ -13,4 +13,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
     List<Project> findByStatus(ProjectStatus status);
     List<Project> findByClientId(Long clientId);
     List<Project> findByClientIdAndStatus(Long clientId, ProjectStatus status);
+    List<Project> findByAssignedFreelancerIdAndStatus(Long freelancerProfileId, ProjectStatus status);
+    List<Project> findByAssignedFreelancerId(Long freelancerProfileId);
 }
