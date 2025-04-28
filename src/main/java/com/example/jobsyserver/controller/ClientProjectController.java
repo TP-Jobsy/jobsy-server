@@ -23,15 +23,15 @@ import java.util.List;
 @RequestMapping("/projects")
 @RequiredArgsConstructor
 @Validated
-public class ProjectController {
+public class ClientProjectController {
 
     private final ProjectService projectService;
     private final SecurityService securityService;
 
-    @Operation(summary = "Получить список всех проектов", description = "Возвращает список всех проектов по статусу (если указан)")
+    @Operation(summary = "Получить список всех проектов", description = "Доступно всем аутентифицированным")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Проекты успешно получены"),
-            @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован"),
+            @ApiResponse(responseCode = "401", description = "Не аутентифицирован"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
     @GetMapping
@@ -40,28 +40,42 @@ public class ProjectController {
         return ResponseEntity.ok(projectService.getAllProjects(status));
     }
 
-    @Operation(summary = "Создать проект", description = "Создание нового проекта. Доступно только пользователям с ролью CLIENT")
+    @Operation(summary = "Получить проект по ID", description = "Возвращает данные одного проекта")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Проект найден"),
+            @ApiResponse(responseCode = "404", description = "Проект не найден"),
+            @ApiResponse(responseCode = "401", description = "Не аутентифицирован"),
+            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
+    })
+    @GetMapping("/{projectId}")
+    public ResponseEntity<ProjectDto> getProjectById(@PathVariable Long projectId) {
+        return ResponseEntity.ok(projectService.getProjectById(projectId));
+    }
+
+    @Operation(summary = "Создать проект", description = "Доступно только CLIENT")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Проект успешно создан"),
-            @ApiResponse(responseCode = "400", description = "Неверные данные для создания проекта"),
-            @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован или не имеет прав"),
+            @ApiResponse(responseCode = "400", description = "Неверные данные"),
+            @ApiResponse(responseCode = "401", description = "Не аутентифицирован"),
+            @ApiResponse(responseCode = "403", description = "Недостаточно прав"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
     @PreAuthorize("hasRole('CLIENT')")
     @PostMapping
     public ResponseEntity<ProjectDto> createProject(
-            @Valid @RequestBody ProjectCreateDto dto
-    ) {
+            @Valid @RequestBody ProjectCreateDto dto) {
         ProjectDto created = projectService.createProject(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(created);
     }
 
-    @Operation(summary = "Обновить проект", description = "Обновление существующего проекта. Доступно только владельцу проекта с ролью CLIENT")
+    @Operation(summary = "Обновить проект", description = "Доступно только владельцу (CLIENT)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Проект успешно обновлён"),
-            @ApiResponse(responseCode = "400", description = "Неверные данные для обновления проекта"),
-            @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован или не имеет прав"),
-            @ApiResponse(responseCode = "403", description = "Доступ запрещён: не владелец проекта"),
+            @ApiResponse(responseCode = "400", description = "Неверные данные"),
+            @ApiResponse(responseCode = "401", description = "Не аутентифицирован"),
+            @ApiResponse(responseCode = "403", description = "Доступ запрещён"),
             @ApiResponse(responseCode = "404", description = "Проект не найден"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
@@ -69,16 +83,16 @@ public class ProjectController {
     @PutMapping("/{projectId}")
     public ResponseEntity<ProjectDto> updateProject(
             @PathVariable Long projectId,
-            @Valid @RequestBody ProjectUpdateDto dto
-    ) {
-        return ResponseEntity.ok(projectService.updateProject(projectId, dto));
+            @Valid @RequestBody ProjectUpdateDto dto) {
+        return ResponseEntity.ok(
+                projectService.updateProject(projectId, dto));
     }
 
-    @Operation(summary = "Удалить проект", description = "Удаление проекта. Доступно только владельцу проекта с ролью CLIENT")
+    @Operation(summary = "Удалить проект", description = "Доступно только владельцу (CLIENT)")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Проект успешно удалён"),
-            @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован или не имеет прав"),
-            @ApiResponse(responseCode = "403", description = "Доступ запрещён: не владелец проекта"),
+            @ApiResponse(responseCode = "401", description = "Не аутентифицирован"),
+            @ApiResponse(responseCode = "403", description = "Доступ запрещён"),
             @ApiResponse(responseCode = "404", description = "Проект не найден"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
@@ -89,23 +103,24 @@ public class ProjectController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Получить проекты конкретного клиента")
+    @Operation(summary = "Получить проекты конкретного клиента", description = "Поиск по clientId")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Проекты успешно получены"),
             @ApiResponse(responseCode = "404", description = "Клиент не найден"),
+            @ApiResponse(responseCode = "401", description = "Не аутентифицирован"),
+            @ApiResponse(responseCode = "403", description = "Нет прав"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
     @PreAuthorize("hasRole('CLIENT') or hasRole('ADMIN')")
     @GetMapping("/client/{clientId}")
     public ResponseEntity<List<ProjectDto>> getProjectsByClient(
             @PathVariable Long clientId,
-            @RequestParam(required = false) ProjectStatus status
-    ) {
-        List<ProjectDto> dtos = projectService.getProjectsByClient(clientId, status);
-        return ResponseEntity.ok(dtos);
+            @RequestParam(required = false) ProjectStatus status) {
+        return ResponseEntity.ok(
+                projectService.getProjectsByClient(clientId, status));
     }
 
-    @Operation(summary = "Получить свои проекты (текущий клиент)")
+    @Operation(summary = "Получить свои проекты", description = "CLIENT → только свои")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Проекты успешно получены"),
             @ApiResponse(responseCode = "401", description = "Не аутентифицирован"),
@@ -114,10 +129,9 @@ public class ProjectController {
     @PreAuthorize("hasRole('CLIENT')")
     @GetMapping("/me")
     public ResponseEntity<List<ProjectDto>> getMyProjects(
-            @RequestParam(required = false) ProjectStatus status
-    ) {
-        Long clientId = securityService.getCurrentClientProfileId();
-        List<ProjectDto> dtos = projectService.getProjectsByClient(clientId, status);
-        return ResponseEntity.ok(dtos);
+            @RequestParam(required = false) ProjectStatus status) {
+        Long myClientId = securityService.getCurrentClientProfileId();
+        return ResponseEntity.ok(
+                projectService.getProjectsByClient(myClientId, status));
     }
 }
