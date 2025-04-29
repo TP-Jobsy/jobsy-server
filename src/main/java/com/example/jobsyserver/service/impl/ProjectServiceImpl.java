@@ -6,14 +6,17 @@ import com.example.jobsyserver.dto.project.ProjectUpdateDto;
 import com.example.jobsyserver.enums.ProjectStatus;
 import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.mapper.ProjectMapper;
-import com.example.jobsyserver.model.ClientProfile;
-import com.example.jobsyserver.model.Project;
 import com.example.jobsyserver.model.User;
-import com.example.jobsyserver.repository.*;
+import com.example.jobsyserver.repository.CategoryRepository;
+import com.example.jobsyserver.repository.ClientProfileRepository;
+import com.example.jobsyserver.repository.ProjectRepository;
+import com.example.jobsyserver.repository.SpecializationRepository;
+import com.example.jobsyserver.repository.UserRepository;
 import com.example.jobsyserver.service.ProjectService;
 import com.example.jobsyserver.service.ProjectSkillService;
 import com.example.jobsyserver.service.SecurityService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +24,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepository projectRepository;
@@ -34,10 +38,44 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectDto> getAllProjects(ProjectStatus status) {
-        List<Project> projects = (status != null)
+        var projects = status != null
                 ? projectRepository.findByStatus(status)
                 : projectRepository.findAll();
+        return projects.stream()
+                .map(projectMapper::toDto)
+                .toList();
+    }
 
+    @Override
+    public ProjectDto getProjectById(Long projectId) {
+        var project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Проект", projectId));
+        return projectMapper.toDto(project);
+    }
+
+    @Override
+    public ProjectDto getProjectByIdAndClient(Long projectId, Long clientId) {
+        var project = projectRepository.findById(projectId)
+                .filter(p -> p.getClient().getId().equals(clientId))
+                .orElseThrow(() -> new ResourceNotFoundException("Проект", projectId));
+        return projectMapper.toDto(project);
+    }
+
+    @Override
+    public List<ProjectDto> getProjectsByClient(Long clientId, ProjectStatus status) {
+        var projects = status != null
+                ? projectRepository.findByClientIdAndStatus(clientId, status)
+                : projectRepository.findByClientId(clientId);
+        return projects.stream()
+                .map(projectMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public List<ProjectDto> getProjectsForFreelancer(Long freelancerProfileId, ProjectStatus status) {
+        var projects = status != null
+                ? projectRepository.findByAssignedFreelancerIdAndStatus(freelancerProfileId, status)
+                : projectRepository.findByAssignedFreelancerId(freelancerProfileId);
         return projects.stream()
                 .map(projectMapper::toDto)
                 .toList();
@@ -46,111 +84,87 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public ProjectDto createProject(ProjectCreateDto dto) {
-        User currentUser = getCurrentUser();
-
-        ClientProfile client = clientProfileRepository.findByUser(currentUser)
-                .orElseThrow(() -> new ResourceNotFoundException("Профиль"));
-
-        Project project = projectMapper.toEntity(dto);
+        User current = getCurrentUser();
+        var client = clientProfileRepository.findByUser(current)
+                .orElseThrow(() -> new ResourceNotFoundException("Профиль заказчика"));
+        var project = projectMapper.toEntity(dto);
         project.setClient(client);
         project.setStatus(ProjectStatus.OPEN);
 
         if (dto.getCategory() != null) {
-            project.setCategory(categoryRepository.findById(dto.getCategory().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Категория")));
+            var cat = categoryRepository.findById(dto.getCategory().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Категория", dto.getCategory().getId()));
+            project.setCategory(cat);
         }
 
         if (dto.getSpecialization() != null) {
-            project.setSpecialization(specializationRepository.findById(dto.getSpecialization().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Специализация")));
+            var spec = specializationRepository.findById(dto.getSpecialization().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Специализация", dto.getSpecialization().getId()));
+            project.setSpecialization(spec);
         }
 
-        Project savedProject = projectRepository.save(project);
-
+        var saved = projectRepository.save(project);
         if (dto.getSkills() != null) {
-            dto.getSkills().forEach(skillDto ->
-                    projectSkillService.addSkill(savedProject.getId(), skillDto.getId())
-            );
+            dto.getSkills().forEach(s -> projectSkillService.addSkill(saved.getId(), s.getId()));
         }
 
-        return projectMapper.toDto(savedProject);
+        return projectMapper.toDto(saved);
     }
 
     @Override
     @Transactional
     public ProjectDto updateProject(Long projectId, ProjectUpdateDto dto) {
-        User currentUser = getCurrentUser();
+        User current = getCurrentUser();
+        var project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Проект", projectId));
 
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Проект"));
-
-        if (!project.getClient().getUser().getId().equals(currentUser.getId())) {
-            throw new RuntimeException("Вы не являетесь владельцем проекта");
+        if (!project.getClient().getUser().getId().equals(current.getId())) {
+            throw new AccessDeniedException("Не ваш проект");
         }
-
         if (project.getStatus() != ProjectStatus.OPEN) {
-            throw new RuntimeException("Можно редактировать только проекты со статусом OPEN");
+            throw new IllegalStateException("Редактировать можно только проекты в статусе OPEN");
         }
-
         projectMapper.toEntity(dto, project);
 
         if (dto.getCategory() != null) {
-            project.setCategory(categoryRepository.findById(dto.getCategory().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Категория")));
+            var cat = categoryRepository.findById(dto.getCategory().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Категория", dto.getCategory().getId()));
+            project.setCategory(cat);
         }
 
         if (dto.getSpecialization() != null) {
-            project.setSpecialization(specializationRepository.findById(dto.getSpecialization().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Специализация")));
+            var spec = specializationRepository.findById(dto.getSpecialization().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Специализация", dto.getSpecialization().getId()));
+            project.setSpecialization(spec);
         }
-
-        Project updatedProject = projectRepository.save(project);
+        var updated = projectRepository.save(project);
 
         if (dto.getSkills() != null) {
-            projectSkillService.getSkillsByProject(projectId).forEach(existingSkill ->
-                    projectSkillService.removeSkill(projectId, existingSkill.getId())
-            );
-            dto.getSkills().forEach(newSkill ->
-                    projectSkillService.addSkill(projectId, newSkill.getId())
-            );
+            projectSkillService.getSkillsByProject(projectId)
+                    .forEach(s -> projectSkillService.removeSkill(projectId, s.getId()));
+            dto.getSkills().forEach(s -> projectSkillService.addSkill(projectId, s.getId()));
         }
-
-        return projectMapper.toDto(updatedProject);
+        return projectMapper.toDto(updated);
     }
 
     @Override
-    public void deleteProject(Long id) {
-        User currentUser = getCurrentUser();
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Проект"));
+    @Transactional
+    public void deleteProject(Long projectId) {
+        User current = getCurrentUser();
+        var project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Проект", projectId));
 
-        if (!project.getClient().getUser().getId().equals(currentUser.getId())) {
-            throw new RuntimeException("Вы не являетесь владельцем проекта");
+        if (!project.getClient().getUser().getId().equals(current.getId())) {
+            throw new AccessDeniedException("Не ваш проект");
         }
-
         if (project.getStatus() != ProjectStatus.OPEN) {
-            throw new RuntimeException("Удаление доступно только для проектов со статусом OPEN");
+            throw new IllegalStateException("Удалять можно только OPEN");
         }
-
         projectRepository.delete(project);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<ProjectDto> getProjectsByClient(Long clientId, ProjectStatus status) {
-        List<Project> projects;
-        if (status != null) {
-            projects = projectRepository.findByClientIdAndStatus(clientId, status);
-        } else {
-            projects = projectRepository.findByClientId(clientId);
-        }
-        return projects.stream()
-                .map(projectMapper::toDto)
-                .toList();
-    }
-
     private User getCurrentUser() {
-        String email = securityService.getCurrentUserEmail();
+        var email = securityService.getCurrentUserEmail();
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Пользователь", "email", email));
     }
