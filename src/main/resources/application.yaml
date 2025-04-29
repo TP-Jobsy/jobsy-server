@@ -64,3 +64,4 @@ confirmation:
   codeLength: 4
   cleanup:
     interval: 600000
+    passwordResetInterval: 600000

@@ -24,7 +24,7 @@ class ConfirmationServiceImpl implements ConfirmationService {
 
     @Override
     public Confirmation createConfirmationFor(User user, ConfirmationAction action) {
-        repo.findByUserEmailAndActionAndUsedFalse(user.getEmail(), action)
+        repo.findFirstByUserEmailAndActionAndUsedFalseOrderByExpiresAtDesc(user.getEmail(), action)
                 .ifPresent(repo::delete);
         var code = ConfirmationCodeGenerator.generateNumericCode(props.codeLength());
         var conf = Confirmation.builder()
@@ -39,7 +39,7 @@ class ConfirmationServiceImpl implements ConfirmationService {
 
     @Override
     public Confirmation validateAndUse(String email, String code, ConfirmationAction action) {
-        var conf = repo.findByUserEmailAndActionAndUsedFalse(email, action)
+        var conf = repo.findFirstByUserEmailAndActionAndUsedFalseOrderByExpiresAtDesc(email, action)
                 .orElseThrow(() -> new BadRequestException("Код не найден или уже использован"));
         if (conf.getExpiresAt().isBefore(LocalDateTime.now())) {
             throw new BadRequestException("Срок действия кода истёк");
@@ -62,7 +62,7 @@ class ConfirmationServiceImpl implements ConfirmationService {
 
     @Override
     public Optional<Confirmation> findActiveByEmail(String email, ConfirmationAction action) {
-        return repo.findByUserEmailAndActionAndUsedFalse(email, action)
+        return repo.findFirstByUserEmailAndActionAndUsedFalseOrderByExpiresAtDesc(email, action)
                 .filter(c -> c.getExpiresAt().isAfter(LocalDateTime.now()));
     }
 }

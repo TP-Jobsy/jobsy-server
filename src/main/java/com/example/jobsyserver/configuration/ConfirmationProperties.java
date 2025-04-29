@@ -8,5 +8,5 @@ public record ConfirmationProperties(
         CleanupProperties cleanup,
         int codeLength
 ) {
-    public record CleanupProperties(long interval) {}
+    public record CleanupProperties(long interval, long passwordResetInterval) {}
 }

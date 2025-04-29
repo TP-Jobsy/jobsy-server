@@ -11,6 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface ConfirmationRepository extends JpaRepository<Confirmation, Long> {
-    Optional<Confirmation> findByUserEmailAndActionAndUsedFalse(String email, ConfirmationAction action);
     List<Confirmation> findAllByActionAndUsedFalseAndExpiresAtBefore(ConfirmationAction action, LocalDateTime before);
+    Optional<Confirmation> findFirstByUserEmailAndActionAndUsedFalseOrderByExpiresAtDesc(
+            String email, ConfirmationAction action);
 }
