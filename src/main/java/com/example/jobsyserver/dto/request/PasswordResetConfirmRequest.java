@@ -1,5 +1,6 @@
 package com.example.jobsyserver.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
@@ -16,7 +17,7 @@ public class PasswordResetConfirmRequest {
     @Schema(description = "E-mail пользователя", example = "user@example.com")
     private String email;
 
-    @JsonProperty("confirmationCode")
+    @JsonAlias({ "resetCode", "confirmationCode" })
     @NotBlank(message = "Код восстановления не может быть пустым")
     @Size(min = 4, max = 4, message = "Код восстановления должен состоять из 4 символов")
     @Schema(description = "Код восстановления", example = "1234")
