@@ -20,11 +20,9 @@ public class ClientProfileBasicDto extends PublicUserDto {
     @Schema(description = "Должность", example = "Менеджер проектов")
     private String position;
 
-    @NotBlank(message = "Страна не может быть пустым")
     @Schema(description = "Страна", example = "Россия")
     private String country;
 
-    @NotBlank(message = "Город не может быть пустым")
     @Schema(description = "Город", example = "Москва")
     private String city;
 }
