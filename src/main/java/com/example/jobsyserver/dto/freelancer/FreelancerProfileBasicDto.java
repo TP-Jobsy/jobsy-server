@@ -11,11 +11,9 @@ import lombok.EqualsAndHashCode;
 @Schema(description = "Основные данные профиля фрилансера")
 public class FreelancerProfileBasicDto extends PublicUserDto {
 
-    @NotBlank(message = "Страна не может быть пустым")
     @Schema(description = "Страна", example = "Россия")
     private String country;
 
-    @NotBlank(message = "Город не может быть пустым")
     @Schema(description = "Город", example = "Москва")
     private String city;
 

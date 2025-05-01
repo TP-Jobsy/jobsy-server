@@ -60,7 +60,7 @@ public class ClientProfileController {
     })
     @PutMapping("/contact")
     @PreAuthorize("hasRole('CLIENT')")
-    public ResponseEntity<ClientProfileDto> updateContact(@Valid @RequestBody ClientProfileContactDto contactDto) {
+    public ResponseEntity<ClientProfileDto> updateContact(@RequestBody ClientProfileContactDto contactDto) {
         ClientProfileDto dto = clientProfileService.updateContact(contactDto);
         return ResponseEntity.ok(dto);
     }
@@ -74,7 +74,7 @@ public class ClientProfileController {
     })
     @PutMapping("/field")
     @PreAuthorize("hasRole('CLIENT')")
-    public ResponseEntity<ClientProfileDto> updateField(@Valid @RequestBody ClientProfileFieldDto fieldDto) {
+    public ResponseEntity<ClientProfileDto> updateField(@RequestBody ClientProfileFieldDto fieldDto) {
         ClientProfileDto dto = clientProfileService.updateField(fieldDto);
         return ResponseEntity.ok(dto);
     }
