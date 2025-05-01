@@ -9,7 +9,6 @@ import lombok.Data;
 @Schema(description = "Информация о сфере деятельности заказчика")
 public class ClientProfileFieldDto {
 
-    @NotBlank(message = "Сфера деятельности не может быть пустым")
     @Size(max = 800, message = "Сфера деятельности не должен превышать 800 символов")
     @Schema(description = "Описание сферы деятельности компании", example = "Информационные технологии")
     private String fieldDescription;
