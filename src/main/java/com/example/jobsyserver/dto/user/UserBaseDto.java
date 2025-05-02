@@ -27,7 +27,7 @@ public abstract class UserBaseDto {
     protected String lastName;
 
     @NotBlank(message = "Номер телефона не может быть пустым")
-    @Pattern(regexp = "7\\d{9}", message = "Телефон должен начинаться с '7' и содержать ровно 10 цифр")
+    @Pattern(regexp = "7\\d{10}", message = "Телефон должен начинаться с '7' и содержать ровно 10 цифр")
     @Schema(description = "Номер телефона, 10 цифр, начиная с 7", example = "79991234567")
     protected String phone;
 
