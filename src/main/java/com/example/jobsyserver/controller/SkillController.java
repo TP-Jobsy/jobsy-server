@@ -84,14 +84,11 @@ public class SkillController {
 
     @Operation(summary = "Автодополнение навыков по части названия")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Список совпавших навыков"),
-            @ApiResponse(responseCode = "400", description = "Запрос слишком короткий (min 2 символа)")
+            @ApiResponse(responseCode = "200", description = "Список совпавших или популярных навыков")
     })
     @GetMapping("/autocomplete")
     public ResponseEntity<List<SkillDto>> autocomplete(
-            @RequestParam("query")
-            @Size(min = 2, message = "Введите минимум 2 символа")
-            String query
+            @RequestParam(value = "query", required = false) String query
     ) {
         List<SkillDto> dtos = skillService.autocompleteSkills(query);
         return ResponseEntity.ok(dtos);
