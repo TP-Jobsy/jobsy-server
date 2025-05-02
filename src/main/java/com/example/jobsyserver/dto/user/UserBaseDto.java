@@ -2,10 +2,7 @@ package com.example.jobsyserver.dto.user;
 
 import com.example.jobsyserver.enums.UserRole;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,7 +26,9 @@ public abstract class UserBaseDto {
     @Schema(description = "Фамилия пользователя", example = "Иванов")
     protected String lastName;
 
-    @Schema(description = "Номер телефона", example = "+79991234567")
+    @NotBlank(message = "Номер телефона не может быть пустым")
+    @Pattern(regexp = "7\\d{9}", message = "Телефон должен начинаться с '7' и содержать ровно 10 цифр")
+    @Schema(description = "Номер телефона, 10 цифр, начиная с 7", example = "79991234567")
     protected String phone;
 
     @Schema(description = "Роль пользователя", example = "client")

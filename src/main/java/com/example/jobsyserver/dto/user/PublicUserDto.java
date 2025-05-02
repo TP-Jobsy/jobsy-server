@@ -18,6 +18,6 @@ public class PublicUserDto {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String email;
 
-    @Schema(description = "Номер телефона пользователя", example = "+79991234567")
+    @Schema(description = "Номер телефона, 10 цифр, начиная с 7", example = "79991234567")
     private String phone;
 }
