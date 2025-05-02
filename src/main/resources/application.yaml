@@ -65,3 +65,6 @@ confirmation:
   cleanup:
     interval: 600000
     passwordResetInterval: 600000
+    
+skill:
+  popular-limit: 10
