@@ -7,12 +7,14 @@ import com.example.jobsyserver.dto.common.SkillDto;
 import com.example.jobsyserver.model.FreelancerPortfolio;
 import com.example.jobsyserver.model.PortfolioSkill;
 import org.mapstruct.*;
+import org.springframework.context.annotation.Primary;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Primary
 @Mapper(componentModel = "spring", uses = SkillMapper.class)
 public interface FreelancerPortfolioMapper {
 
