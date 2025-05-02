@@ -8,7 +8,6 @@ public class SkillSpecifications {
 
     public static Specification<Skill> randomOrder() {
         return (Root<Skill> root, CriteriaQuery<?> query, CriteriaBuilder cb) -> {
-            query.distinct(true);
             query.orderBy(cb.asc(cb.function("random", Double.class)));
             return cb.conjunction();
         };
