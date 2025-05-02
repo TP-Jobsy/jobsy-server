@@ -70,7 +70,7 @@ public class SkillServiceImpl implements SkillService {
     public List<SkillDto> autocompleteSkills(String term) {
         Specification<Skill> spec;
         if (term == null || term.length() < 2) {
-            spec = Specification.where(SkillSpecifications.popularInProjects());
+            spec = Specification.where(SkillSpecifications.randomOrder());
         } else {
             spec = Specification.where(SkillSpecifications.nameContains(term));
         }

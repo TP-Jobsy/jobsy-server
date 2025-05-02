@@ -1,18 +1,15 @@
 package com.example.jobsyserver.specification;
 
 import com.example.jobsyserver.model.Skill;
-import com.example.jobsyserver.model.ProjectSkill;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
 public class SkillSpecifications {
 
-    public static Specification<Skill> popularInProjects() {
-        return (root, query, cb) -> {
+    public static Specification<Skill> randomOrder() {
+        return (Root<Skill> root, CriteriaQuery<?> query, CriteriaBuilder cb) -> {
             query.distinct(true);
-            Join<Skill, ProjectSkill> join = root.join("projectSkills", JoinType.LEFT);
-            query.groupBy(root.get("id"));
-            query.orderBy(cb.desc(cb.count(join)));
+            query.orderBy(cb.asc(cb.function("random", Double.class)));
             return cb.conjunction();
         };
     }
