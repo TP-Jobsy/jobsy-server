@@ -31,6 +31,7 @@ public class FavoriteServiceImpl implements FavoriteService {
         var freelancer = freelancerProfileRepo.getReferenceById(frId);
         var project    = projectRepo.getReferenceById(projectId);
         FavoriteProject fp = new FavoriteProject();
+        fp.setId(new FavoriteProjectId(frId, projectId));
         fp.setFreelancer(freelancer);
         fp.setProject(project);
         favProjRepo.save(fp);
@@ -56,7 +57,9 @@ public class FavoriteServiceImpl implements FavoriteService {
     public void addFreelancerToFavorites(Long clientId, Long freelancerId) {
         var client    = clientProfileRepo.getReferenceById(clientId);
         var freelancer = freelancerProfileRepo.getReferenceById(freelancerId);
+
         FavoriteFreelancer ff = new FavoriteFreelancer();
+        ff.setId(new FavoriteFreelancerId(clientId, freelancerId));
         ff.setClient(client);
         ff.setFreelancer(freelancer);
         favFrRepo.save(ff);
