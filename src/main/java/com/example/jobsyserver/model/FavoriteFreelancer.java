@@ -17,7 +17,7 @@ import static jakarta.persistence.FetchType.LAZY;
         uniqueConstraints = @UniqueConstraint(columnNames = {"client_id","freelancer_id"}))
 public class FavoriteFreelancer {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = LAZY, optional = false)
