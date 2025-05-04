@@ -16,14 +16,16 @@ import static jakarta.persistence.FetchType.LAZY;
 @Table(name = "favorite_projects",
         uniqueConstraints = @UniqueConstraint(columnNames = {"freelancer_id","project_id"}))
 public class FavoriteProject {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
+    @EmbeddedId
+    private FavoriteProjectId id;
+
+    @MapsId("freelancerId")
     @ManyToOne(fetch = LAZY, optional = false)
     @JoinColumn(name = "freelancer_id", nullable = false)
     private FreelancerProfile freelancer;
 
+    @MapsId("projectId")
     @ManyToOne(fetch = LAZY, optional = false)
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
