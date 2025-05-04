@@ -2,6 +2,7 @@ package com.example.jobsyserver.dto.portfolio;
 
 import com.example.jobsyserver.dto.common.SkillDto;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -33,6 +34,7 @@ public class FreelancerPortfolioDto {
 
     @Schema(description = "Список прикреплённых навыков (ID + имя)",
             implementation = SkillDto.class)
+    @Size(max = 5, message = "Нельзя указывать более 5 навыков")
     private List<SkillDto> skills;
 
     @Schema(description = "Дата создания записи", example = "2025-05-02T12:34:56")
