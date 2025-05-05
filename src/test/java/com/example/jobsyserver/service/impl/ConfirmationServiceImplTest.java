@@ -90,11 +90,13 @@ class ConfirmationServiceImplTest {
     @Test
     void deleteExpired_shouldDeleteExpiredConfirmations() {
         LocalDateTime now = LocalDateTime.now();
+
         List<Confirmation> expired = List.of(
                 Confirmation.builder().expiresAt(now.minusMinutes(1)).build(),
                 Confirmation.builder().expiresAt(now.minusHours(1)).build()
         );
-        when(repo.findAllByActionAndUsedFalseAndExpiresAtBefore(testAction, now))
+
+        when(repo.findAllByActionAndUsedFalseAndExpiresAtBefore(eq(testAction), any(LocalDateTime.class)))
                 .thenReturn(expired);
 
         List<Confirmation> result = service.deleteExpired(testAction);
@@ -102,6 +104,7 @@ class ConfirmationServiceImplTest {
         assertEquals(2, result.size());
         verify(repo).deleteAll(expired);
     }
+
 
     @Test
     void findActiveByEmail_shouldReturnActiveConfirmation() {
