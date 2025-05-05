@@ -10,4 +10,6 @@ import java.util.List;
 public interface FavoriteFreelancerRepository extends JpaRepository<FavoriteFreelancer, Long> {
     List<FavoriteFreelancer> findByClientId(Long clientId);
     void deleteByClientIdAndFreelancerId(Long clientId, Long freelancerId);
+    boolean existsByClientIdAndFreelancerId(Long clientId, Long freelancerId);
+
 }
