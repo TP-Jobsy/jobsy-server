@@ -2,6 +2,8 @@ package com.example.jobsyserver.service.impl;
 
 import com.example.jobsyserver.dto.freelancer.FreelancerProfileDto;
 import com.example.jobsyserver.dto.project.ProjectDto;
+import com.example.jobsyserver.exception.BadRequestException;
+import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.mapper.FreelancerProfileMapper;
 import com.example.jobsyserver.mapper.ProjectMapper;
 import com.example.jobsyserver.model.*;
@@ -28,8 +30,13 @@ public class FavoriteServiceImpl implements FavoriteService {
     @Override
     @Transactional
     public void addProjectToFavorites(Long frId, Long projectId) {
-        var freelancer = freelancerProfileRepo.getReferenceById(frId);
-        var project    = projectRepo.getReferenceById(projectId);
+        var freelancer = freelancerProfileRepo.findById(frId)
+                .orElseThrow(() -> new ResourceNotFoundException("Freelancer", frId));
+        var project = projectRepo.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", projectId));
+        if (favProjRepo.existsByFreelancerIdAndProjectId(frId, projectId)) {
+            throw new BadRequestException("Проект уже в избранном");
+        }
         FavoriteProject fp = new FavoriteProject();
         fp.setId(new FavoriteProjectId(frId, projectId));
         fp.setFreelancer(freelancer);
@@ -55,9 +62,13 @@ public class FavoriteServiceImpl implements FavoriteService {
     @Override
     @Transactional
     public void addFreelancerToFavorites(Long clientId, Long freelancerId) {
-        var client    = clientProfileRepo.getReferenceById(clientId);
-        var freelancer = freelancerProfileRepo.getReferenceById(freelancerId);
-
+        var client = clientProfileRepo.findById(clientId)
+                .orElseThrow(() -> new ResourceNotFoundException("Client", clientId));
+        var freelancer = freelancerProfileRepo.findById(freelancerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Freelancer", freelancerId));
+        if (favFrRepo.existsByClientIdAndFreelancerId(clientId, freelancerId)) {
+            throw new BadRequestException("Фрилансер уже в избранном");
+        }
         FavoriteFreelancer ff = new FavoriteFreelancer();
         ff.setId(new FavoriteFreelancerId(clientId, freelancerId));
         ff.setClient(client);
