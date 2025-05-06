@@ -4,6 +4,14 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
+    hikari:
+      max-lifetime: 1800000
+      idle-timeout: 600000
+      connection-timeout: 30000
+      minimum-idle: 2
+      maximum-pool-size: 10
+      connection-test-query: SELECT 1
+      validation-timeout: 5000
 
   jpa:
     show-sql: true
