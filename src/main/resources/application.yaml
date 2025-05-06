@@ -1,0 +1,75 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+    hikari:
+      max-lifetime: 1800000
+      idle-timeout: 600000
+      connection-timeout: 30000
+      minimum-idle: 2
+      maximum-pool-size: 10
+      connection-test-query: SELECT 1
+      validation-timeout: 5000
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+        globally_quoted_identifiers: true
+
+  flyway:
+    enabled: false
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    validate-on-migrate: false
+    placeholder-replacement: false
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:MAIL_USERNAME}
+    password: ${MAIL_PASSWORD:MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls.enable: true
+          ssl:
+            trust: smtp.gmail.com
+
+jwt:
+  secret: ${JWT_SECRET:TEST_SECRET}
+  expiration: ${JWT_EXPIRATION:3600}
+
+s3:
+  enabled: true
+  client:
+    endpoint: http://minio:9000
+    region: us‑east‑1
+    access‑key: ${S3_CLIENT_ACCESS_KEY:S3_CLIENT_ACCESS_KEY}
+    secret‑key: ${S3_CLIENT_SECRET_KEY:S3_CLIENT_SECRET_KEY}
+    bucket: avatars
+    maxSize: 2097152
+    allowed-ext:
+      - png
+      - jpg
+      - jpeg
+      -
+search:
+  max-skills: 10
+
+confirmation:
+  expirationMinutes: 5
+  codeLength: 4
+  cleanup:
+    interval: 600000
+    passwordResetInterval: 600000
+
+skill:
+  popular-limit: 10

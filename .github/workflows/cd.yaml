@@ -49,6 +49,9 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
+      - name: Build with Gradle
+        run: ./gradlew clean build
+
       - name: Build Docker image for backend
         run: |
           docker build -t jonshilin/jobsy:latest .

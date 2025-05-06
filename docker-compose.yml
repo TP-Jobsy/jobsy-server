@@ -1,0 +1,102 @@
+services:
+  postgres:
+    image: postgres:14
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  app:
+    image: jonshilin/jobsy:latest
+    container_name: jobsy_server
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/${POSTGRES_DB}?stringtype=unspecified"
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: "org.postgresql.Driver"
+      SPRING_FLYWAY_ENABLED: "true"
+      SPRING_FLYWAY_LOCATIONS: "classpath:db/migration"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "none"
+      SPRING_MAIL_HOST: "smtp.gmail.com"
+      SPRING_MAIL_PORT: "587"
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_SSL_TRUST: "smtp.gmail.com"
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      SPRING_S3_CLIENT_ENABLED: "true"
+      SPRING_S3_CLIENT_ENDPOINT: "http://minio:9000"
+      SPRING_S3_CLIENT_REGION: us‑east‑1
+      SPRING_S3_CLIENT_ACCESS_KEY: ${S3_CLIENT_ACCESS_KEY}
+      SPRING_S3_CLIENT_SECRET_KEY: ${S3_CLIENT_SECRET_KEY}
+      SPRING_S3_CLIENT_BUCKET: avatars
+      SPRING_S3_CLIENT_MAX-SIZE: "2097152"
+      SPRING_S3_CLIENT_ALLOWED-EXT: "png,jpg,jpeg"
+    ports:
+      - "8080:8080"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - app-network
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_CLIENT_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${S3_CLIENT_SECRET_KEY}
+    volumes:
+      - data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - app-network
+  caddy:
+    image: caddy:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: always
+    networks:
+      - app-network
+
+volumes:
+  data:
+    name: minio-data
+  postgres-data:
+    name: postgres-data
+  caddy_data:
+    name: caddy-data
+  caddy_config:
+    name: caddy-config
+
+networks:
+    app-network:
+        driver: bridge

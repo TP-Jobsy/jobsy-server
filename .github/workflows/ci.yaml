@@ -49,11 +49,5 @@ jobs:
       - name: Run tests
         run: ./gradlew test --no-daemon
 
-      - name: Build and start Docker Compose services
-        run: docker compose up -d
-
       - name: Wait for PostgreSQL to be healthy
         run: sleep 10
-
-      - name: Stop Docker Compose services
-        run: docker compose down
