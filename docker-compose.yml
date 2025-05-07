@@ -16,8 +16,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    env_file:
-      - .env
     networks:
       - app-network
 
@@ -64,8 +62,6 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-    env_file:
-      - .env
     networks:
       - app-network
   minio:
@@ -80,8 +76,6 @@ services:
     volumes:
       - data:/data
     command: server /data --console-address ":9001"
-    env_file:
-      - .env
     networks:
       - app-network
   caddy:
