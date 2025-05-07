@@ -1,9 +1,14 @@
 package com.example.jobsyserver.service.impl;
 
+import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.model.ClientProfile;
 import com.example.jobsyserver.model.FreelancerProfile;
+import com.example.jobsyserver.model.Project;
+import com.example.jobsyserver.model.User;
 import com.example.jobsyserver.repository.ClientProfileRepository;
 import com.example.jobsyserver.repository.FreelancerProfileRepository;
+import com.example.jobsyserver.repository.ProjectRepository;
+import com.example.jobsyserver.repository.UserRepository;
 import com.example.jobsyserver.service.SecurityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -18,6 +23,8 @@ public class SecurityServiceImpl implements SecurityService {
 
     private final ClientProfileRepository clientProfileRepository;
     private final FreelancerProfileRepository freelancerProfileRepository;
+    private final UserRepository userRepository;
+    private final ProjectRepository projectRepository;
 
     @Override
     public String getCurrentUserEmail() {
@@ -31,6 +38,18 @@ public class SecurityServiceImpl implements SecurityService {
         return (principal instanceof UserDetails)
                 ? ((UserDetails) principal).getUsername()
                 : principal.toString();
+    }
+    @Override
+    public User getCurrentUser() {
+        String email = getCurrentUserEmail();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+    }
+
+    @Override
+    public Project getProjectReference(Long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", projectId));
     }
 
     @Override
