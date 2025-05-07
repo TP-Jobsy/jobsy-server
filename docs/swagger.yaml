@@ -1174,7 +1174,7 @@ paths:
         '404':
           description: Элемент портфолио не найден
   
-  /ai/project-description:
+  /projects/{projectId}/ai/description:
     post:
       tags:
         - ai
