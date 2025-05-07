@@ -82,11 +82,11 @@ public class AiGenerationServiceImpl implements AiGenerationService {
                 .bodyToMono(JsonNode.class)
                 .block();
 
-        String output = response.get("choices")
-                .get(0)
-                .get("delta")
-                .get("content")
-                .asText();
+        JsonNode firstChoice = response.path("choices").path(0);
+        String output = firstChoice
+                .path("message")
+                .path("content")
+                .asText("");
 
         req.setOutput(output);
         aiRequestRepo.save(req);
