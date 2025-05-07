@@ -1,6 +1,7 @@
 package com.example.jobsyserver.service.impl;
 
 import com.example.jobsyserver.dto.common.SkillDto;
+import com.example.jobsyserver.dto.project.ProjectBasicDto;
 import com.example.jobsyserver.dto.project.ProjectCreateDto;
 import com.example.jobsyserver.dto.project.ProjectDto;
 import com.example.jobsyserver.dto.project.ProjectUpdateDto;
@@ -124,6 +125,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .orElseThrow(() -> new ResourceNotFoundException("Профиль клиента"));
         Project draft = projectMapper.toEntity(dto);
         draft.setClient(client);
+        applyCategoryAndSpec(draft, dto);
         draft.setStatus(ProjectStatus.DRAFT);
         draft = projectRepository.save(draft);
         syncSkills(draft, dto.getSkills());
@@ -144,7 +146,6 @@ public class ProjectServiceImpl implements ProjectService {
         return projectMapper.toDto(projectRepository.save(draft));
     }
 
-
     @Override
     @Transactional
     public ProjectDto publish(Long draftId, ProjectUpdateDto dto) {
@@ -155,8 +156,7 @@ public class ProjectServiceImpl implements ProjectService {
         return updated;
     }
 
-
-    private void applyCategoryAndSpec(Project project, ProjectUpdateDto dto) {
+    private void applyCategoryAndSpec(Project project, ProjectBasicDto dto) {
         if (dto.getCategory() != null) {
             var cat = categoryRepository.findById(dto.getCategory().getId())
                     .orElseThrow(() -> new ResourceNotFoundException("Категория", dto.getCategory().getId()));
