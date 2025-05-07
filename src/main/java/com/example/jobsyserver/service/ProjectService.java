@@ -13,7 +13,9 @@ public interface ProjectService {
     ProjectDto getProjectByIdAndClient(Long projectId, Long clientId);
     List<ProjectDto> getProjectsByClient(Long clientId, ProjectStatus status);
     List<ProjectDto> getProjectsForFreelancer(Long freelancerProfileId, ProjectStatus status);
-    ProjectDto createProject(ProjectCreateDto dto);
     ProjectDto updateProject(Long projectId, ProjectUpdateDto dto);
     void deleteProject(Long projectId);
+    ProjectDto createDraft(ProjectCreateDto dto);
+    ProjectDto updateDraft(Long draftId, ProjectUpdateDto dto);
+    ProjectDto publish(Long draftId, ProjectUpdateDto dto);
 }
