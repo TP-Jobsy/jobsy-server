@@ -51,6 +51,10 @@ services:
       S3_CLIENT_BUCKET: "avatars"
       S3_CLIENT_MAX-SIZE: "2097152"
       S3_CLIENT_ALLOWED-EXT: "png,jpg,jpeg"
+      NOVITA_API_URL: "${NOVITA_API_URL}"
+      NOVITA_API_KEY: "${NOVITA_API_KEY}"
+      NOVITA_API_MODEL: "${NOVITA_API_MODEL}"
+      NOVITA_API_DEFAULT_SYSTEM_PROMPT: "${NOVITA_API_DEFAULT_SYSTEM_PROMPT}"
     ports:
       - "8080:8080"
     logging:
