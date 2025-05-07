@@ -76,26 +76,30 @@ public class AiGenerationServiceImpl implements AiGenerationService {
                 .bodyValue(Map.of(
                         "model",           props.model(),
                         "messages",        messages,
+                        "stream",     false,
                         "response_format", Map.of("type","text")
                 ))
                 .retrieve()
                 .bodyToMono(JsonNode.class)
                 .block();
 
-        JsonNode firstChoice = response.path("choices").path(0);
-        String output = firstChoice
+        String raw = response
+                .path("choices")
+                .path(0)
                 .path("message")
                 .path("content")
                 .asText("");
 
-        req.setOutput(output);
+        String cleaned = raw.replaceAll("(?s)<think>.*?</think>\\s*", "").trim();
+
+        req.setOutput(cleaned);
         aiRequestRepo.save(req);
         historyRepo.save(ProjectAiHistory.builder()
                 .project(project)
                 .aiRequest(req)
                 .build());
 
-        return output;
+        return cleaned;
     }
 
     private Bucket newBucket(Long userId) {
