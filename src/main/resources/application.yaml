@@ -73,3 +73,10 @@ confirmation:
 
 skill:
   popular-limit: 10
+
+novita:
+  api:
+    url: ${NOVITA_API_URL:NOVITA_API_URL}
+    key: ${NOVITA_API_KEY_FILE:NOVITA_API_KEY}
+    model: ${NOVITA_API_MODEL:NOVITA_API_MODEL}
+    default-system-prompt: ${NOVITA_API_DEFAULT_SYSTEM_PROMPT:NOVITA_API_DEFAULT_SYSTEM_PROMPT}
