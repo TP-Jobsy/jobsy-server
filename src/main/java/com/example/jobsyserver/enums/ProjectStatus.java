@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "Статус проекта")
 public enum ProjectStatus {
+    @Schema(description = "Черновик")
+    DRAFT,
     @Schema(description = "Открыт")
     OPEN,
 
