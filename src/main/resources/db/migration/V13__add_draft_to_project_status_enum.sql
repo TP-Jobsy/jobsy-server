@@ -1,0 +1,2 @@
+ALTER TYPE project_status_enum
+    ADD VALUE IF NOT EXISTS 'DRAFT' BEFORE 'OPEN';

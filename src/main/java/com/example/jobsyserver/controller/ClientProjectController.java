@@ -6,6 +6,8 @@ import com.example.jobsyserver.dto.project.ProjectUpdateDto;
 import com.example.jobsyserver.enums.ProjectStatus;
 import com.example.jobsyserver.service.ProjectService;
 import com.example.jobsyserver.service.SecurityService;
+import com.example.jobsyserver.validation.Draft;
+import com.example.jobsyserver.validation.Publish;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -50,24 +52,6 @@ public class ClientProjectController {
     @GetMapping("/{projectId}")
     public ResponseEntity<ProjectDto> getProjectById(@PathVariable Long projectId) {
         return ResponseEntity.ok(projectService.getProjectById(projectId));
-    }
-
-    @Operation(summary = "Создать проект", description = "Доступно только CLIENT")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Проект успешно создан"),
-            @ApiResponse(responseCode = "400", description = "Неверные данные"),
-            @ApiResponse(responseCode = "401", description = "Не аутентифицирован"),
-            @ApiResponse(responseCode = "403", description = "Недостаточно прав"),
-            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
-    })
-    @PreAuthorize("hasRole('CLIENT')")
-    @PostMapping
-    public ResponseEntity<ProjectDto> createProject(
-            @Valid @RequestBody ProjectCreateDto dto) {
-        ProjectDto created = projectService.createProject(dto);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(created);
     }
 
     @Operation(summary = "Обновить проект", description = "Доступно только владельцу (CLIENT)")
@@ -133,5 +117,34 @@ public class ClientProjectController {
         Long myClientId = securityService.getCurrentClientProfileId();
         return ResponseEntity.ok(
                 projectService.getProjectsByClient(myClientId, status));
+    }
+
+    @Operation(summary = "Создать черновик проекта")
+    @PostMapping("/drafts")
+    @PreAuthorize("hasRole('CLIENT')")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Validated(Draft.class)
+    public ProjectDto createDraft(@RequestBody @Validated(Draft.class) ProjectCreateDto dto) {
+        return projectService.createDraft(dto);
+    }
+
+    @Operation(summary = "Обновить черновик проекта")
+    @PutMapping("/{draftId}/draft")
+    @PreAuthorize("hasRole('CLIENT')")
+    @Validated(Draft.class)
+    public ProjectDto updateDraft(
+            @PathVariable Long draftId,
+            @RequestBody @Validated(Draft.class) ProjectUpdateDto dto) {
+        return projectService.updateDraft(draftId, dto);
+    }
+
+    @Operation(summary = "Опубликовать черновик (финальное редактирование + статус → OPEN)")
+    @PostMapping("/{draftId}/publish")
+    @PreAuthorize("hasRole('CLIENT')")
+    @Validated(Publish.class)
+    public ProjectDto publishDraft(
+            @PathVariable Long draftId,
+            @RequestBody @Validated(Publish.class) ProjectUpdateDto dto) {
+        return projectService.publish(draftId, dto);
     }
 }
