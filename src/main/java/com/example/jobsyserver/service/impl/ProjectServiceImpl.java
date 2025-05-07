@@ -5,6 +5,9 @@ import com.example.jobsyserver.dto.project.ProjectBasicDto;
 import com.example.jobsyserver.dto.project.ProjectCreateDto;
 import com.example.jobsyserver.dto.project.ProjectDto;
 import com.example.jobsyserver.dto.project.ProjectUpdateDto;
+import com.example.jobsyserver.enums.Complexity;
+import com.example.jobsyserver.enums.PaymentType;
+import com.example.jobsyserver.enums.ProjectDuration;
 import com.example.jobsyserver.enums.ProjectStatus;
 import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.mapper.ProjectMapper;
@@ -23,6 +26,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -126,6 +130,20 @@ public class ProjectServiceImpl implements ProjectService {
         Project draft = projectMapper.toEntity(dto);
         draft.setClient(client);
         applyCategoryAndSpec(draft, dto);
+        draft.setTitle(dto.getTitle());
+        draft.setDescription(dto.getDescription() != null ? dto.getDescription() : "");
+        draft.setPaymentType(dto.getPaymentType() != null
+                ? dto.getPaymentType()
+                : PaymentType.FIXED);
+        draft.setFixedPrice(dto.getFixedPrice() != null
+                ? dto.getFixedPrice()
+                : BigDecimal.ZERO);
+        draft.setProjectComplexity(dto.getComplexity() != null
+                ? dto.getComplexity()
+                : Complexity.EASY);
+        draft.setProjectDuration(dto.getDuration() != null
+                ? dto.getDuration()
+                : ProjectDuration.LESS_THAN_1_MONTH);
         draft.setStatus(ProjectStatus.DRAFT);
         draft = projectRepository.save(draft);
         syncSkills(draft, dto.getSkills());
