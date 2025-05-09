@@ -1,10 +1,17 @@
 package com.example.jobsyserver.service.impl;
 
-import com.example.jobsyserver.dto.freelancer.*;
+import com.example.jobsyserver.dto.freelancer.FreelancerProfileBasicDto;
+import com.example.jobsyserver.dto.freelancer.FreelancerProfileContactDto;
+import com.example.jobsyserver.dto.freelancer.FreelancerProfileDto;
+import com.example.jobsyserver.dto.freelancer.FreelancerProfileAboutDto;
 import com.example.jobsyserver.exception.BadRequestException;
 import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.mapper.FreelancerProfileMapper;
-import com.example.jobsyserver.model.*;
+import com.example.jobsyserver.model.FreelancerProfile;
+import com.example.jobsyserver.model.FreelancerSkill;
+import com.example.jobsyserver.model.FreelancerSkillId;
+import com.example.jobsyserver.model.Skill;
+import com.example.jobsyserver.model.User;
 import com.example.jobsyserver.repository.FreelancerProfileRepository;
 import com.example.jobsyserver.repository.SkillRepository;
 import com.example.jobsyserver.repository.UserRepository;
@@ -36,21 +43,9 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
     @Transactional(readOnly = true)
     public FreelancerProfileDto getProfile() {
         FreelancerProfile profile = getCurrentFreelancerProfile();
-        var dto = freelancerProfileMapper.toDto(profile);
-        Long catId = profile.getCategoryId();
-        if (catId != null) {
-            dto.getAbout().setCategoryName(
-                    categoryService.getCategoryById(catId).getName()
-            );
-        }
-        Long specId = profile.getSpecializationId();
-        if (specId != null) {
-            dto.getAbout().setSpecializationName(
-                    specializationService.getSpecializationById(specId).getName()
-            );
-        }
+        FreelancerProfileDto dto = mapWithNames(profile);
         log.info("Получение профиля фрилансера для пользователя с email: {}", securityService.getCurrentUserEmail());
-        return freelancerProfileMapper.toDto(profile);
+        return dto;
     }
 
     @Override
@@ -81,7 +76,7 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
             log.info("Обновлен номер телефона пользователя на: {}", basicDto.getPhone());
         }
         userRepository.save(user);
-        return saveAndReturnDto(profile);
+        return mapWithNames(freelancerProfileRepository.save(profile));
     }
 
     @Override
@@ -94,7 +89,7 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
             profile.setContactLink(contactDto.getContactLink());
             log.info("Обновлена контактная ссылка: {}", contactDto.getContactLink());
         }
-        return saveAndReturnDto(profile);
+        return mapWithNames(freelancerProfileRepository.save(profile));
     }
 
     @Override
@@ -119,7 +114,7 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
             profile.setAboutMe(aboutDto.getAboutMe());
             log.info("Обновлено описание 'о себе'");
         }
-        return saveAndReturnDto(profile);
+        return mapWithNames(freelancerProfileRepository.save(profile));
     }
 
     @Override
@@ -140,17 +135,19 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
         if (profiles.isEmpty()) {
             log.warn("Фрилансеры не найдены");
         }
-        return freelancerProfileMapper.toDtoList(profiles);
+        return profiles.stream()
+                .map(this::mapWithNames)
+                .toList();
     }
 
     @Override
     @Transactional
-    public FreelancerProfileDto addSkill(Long skillId) { // todo: вынести в отдельный сервис
+    public FreelancerProfileDto addSkill(Long skillId) {
         FreelancerProfile profile = getCurrentFreelancerProfile();
         int MAX_SKILLS = 5;
         int current = profile.getFreelancerSkills().size();
         if (current >= MAX_SKILLS) {
-            log.warn("Попытка добавить {}‑й навык, но лимит {} достигнут для профиля id={}",
+            log.warn("Попытка добавить {}-й навык, но лимит {} достигнут для профиля id={}",
                     current + 1, MAX_SKILLS, profile.getId());
             throw new BadRequestException("Нельзя добавить более " + MAX_SKILLS + " навыков");
         }
@@ -158,7 +155,7 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
                 .anyMatch(fs -> fs.getSkill().getId().equals(skillId));
         if (exists) {
             log.info("Навык с id={} уже есть в профиле id={}", skillId, profile.getId());
-            return saveAndReturnDto(profile);
+            return mapWithNames(profile);
         }
         Skill skill = skillRepository.findById(skillId)
                 .orElseThrow(() -> new ResourceNotFoundException("Навык" + skillId));
@@ -169,7 +166,7 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
                 .build();
         profile.getFreelancerSkills().add(fs);
         log.info("Навык с id={} добавлен в профиль id={}", skillId, profile.getId());
-        return saveAndReturnDto(profile);
+        return mapWithNames(freelancerProfileRepository.save(profile));
     }
 
     @Override
@@ -181,7 +178,7 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
             throw new ResourceNotFoundException("Навык" + skillId);
         }
         log.info("Навык с id {} успешно удалён", skillId);
-        return saveAndReturnDto(profile);
+        return mapWithNames(freelancerProfileRepository.save(profile));
     }
 
     @Override
@@ -189,29 +186,28 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
     public FreelancerProfileDto getFreelancerProfileById(Long id) {
         FreelancerProfile profile = freelancerProfileRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Фрилансер" + id));
-        var dto = freelancerProfileMapper.toDto(profile);
-        if (profile.getCategoryId() != null) {
-            dto.getAbout().setCategoryName(
-                    categoryService.getCategoryById(profile.getCategoryId()).getName()
-            );
-        }
-        if (profile.getSpecializationId() != null) {
-            dto.getAbout().setSpecializationName(
-                    specializationService.getSpecializationById(profile.getSpecializationId()).getName()
-            );
-        }
-        return freelancerProfileMapper.toDto(profile);
+        return mapWithNames(profile);
     }
 
+    private FreelancerProfileDto mapWithNames(FreelancerProfile profile) {
+        FreelancerProfileDto dto = freelancerProfileMapper.toDto(profile);
+        if (dto.getAbout() == null) {
+            dto.setAbout(new FreelancerProfileAboutDto());
+        }
+        Long catId = profile.getCategoryId();
+        if (catId != null) {
+            dto.getAbout().setCategoryName(categoryService.getCategoryById(catId).getName());
+        }
+        Long specId = profile.getSpecializationId();
+        if (specId != null) {
+            dto.getAbout().setSpecializationName(specializationService.getSpecializationById(specId).getName());
+        }
+        return dto;
+    }
 
     private FreelancerProfile getCurrentFreelancerProfile() {
         User user = securityService.getCurrentUser();
         return freelancerProfileRepository.findByUser(user)
-                .orElseThrow(() -> new ResourceNotFoundException("Профиль фрилансера" , "email", user.getEmail()));
-    }
-
-    private FreelancerProfileDto saveAndReturnDto(FreelancerProfile profile) {
-        FreelancerProfile updatedProfile = freelancerProfileRepository.save(profile);
-        return freelancerProfileMapper.toDto(updatedProfile);
+                .orElseThrow(() -> new ResourceNotFoundException("Профиль фрилансера", "email", user.getEmail()));
     }
 }
