@@ -8,8 +8,10 @@ import com.example.jobsyserver.model.*;
 import com.example.jobsyserver.repository.FreelancerProfileRepository;
 import com.example.jobsyserver.repository.SkillRepository;
 import com.example.jobsyserver.repository.UserRepository;
+import com.example.jobsyserver.service.CategoryService;
 import com.example.jobsyserver.service.FreelancerProfileService;
 import com.example.jobsyserver.service.SecurityService;
+import com.example.jobsyserver.service.SpecializationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,11 +29,26 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
     private final FreelancerProfileMapper freelancerProfileMapper;
     private final SkillRepository skillRepository;
     private final SecurityService securityService;
+    private final CategoryService categoryService;
+    private final SpecializationService specializationService;
 
     @Override
     @Transactional(readOnly = true)
     public FreelancerProfileDto getProfile() {
         FreelancerProfile profile = getCurrentFreelancerProfile();
+        var dto = freelancerProfileMapper.toDto(profile);
+        Long catId = profile.getCategoryId();
+        if (catId != null) {
+            dto.getAbout().setCategoryName(
+                    categoryService.getCategoryById(catId).getName()
+            );
+        }
+        Long specId = profile.getSpecializationId();
+        if (specId != null) {
+            dto.getAbout().setSpecializationName(
+                    specializationService.getSpecializationById(specId).getName()
+            );
+        }
         log.info("Получение профиля фрилансера для пользователя с email: {}", securityService.getCurrentUserEmail());
         return freelancerProfileMapper.toDto(profile);
     }
@@ -40,7 +57,7 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
     @Transactional
     public FreelancerProfileDto updateBasic(FreelancerProfileBasicDto basicDto) {
         FreelancerProfile profile = getCurrentFreelancerProfile();
-        User user = getCurrentUser();
+        User user = securityService.getCurrentUser();
         log.info("Обновление базовой информации профиля для пользователя с email: {}", securityService.getCurrentUserEmail());
 
         if (basicDto.getCountry() != null) {
@@ -172,17 +189,23 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
     public FreelancerProfileDto getFreelancerProfileById(Long id) {
         FreelancerProfile profile = freelancerProfileRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Фрилансер" + id));
+        var dto = freelancerProfileMapper.toDto(profile);
+        if (profile.getCategoryId() != null) {
+            dto.getAbout().setCategoryName(
+                    categoryService.getCategoryById(profile.getCategoryId()).getName()
+            );
+        }
+        if (profile.getSpecializationId() != null) {
+            dto.getAbout().setSpecializationName(
+                    specializationService.getSpecializationById(profile.getSpecializationId()).getName()
+            );
+        }
         return freelancerProfileMapper.toDto(profile);
     }
 
-    private User getCurrentUser() {
-        String currentEmail = securityService.getCurrentUserEmail();
-        return userRepository.findByEmail(currentEmail)
-                .orElseThrow(() -> new ResourceNotFoundException("Пользователь", "email", currentEmail));
-    }
 
     private FreelancerProfile getCurrentFreelancerProfile() {
-        User user = getCurrentUser();
+        User user = securityService.getCurrentUser();
         return freelancerProfileRepository.findByUser(user)
                 .orElseThrow(() -> new ResourceNotFoundException("Профиль фрилансера" , "email", user.getEmail()));
     }
