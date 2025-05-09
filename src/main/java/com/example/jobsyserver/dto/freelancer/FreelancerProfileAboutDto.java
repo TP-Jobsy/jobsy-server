@@ -15,8 +15,14 @@ public class FreelancerProfileAboutDto {
     @Schema(description = "Идентификатор категории", example = "1")
     private Long categoryId;
 
+    @Schema(description = "Название категории", example = "Веб-разработка")
+    private String categoryName;
+
     @Schema(description = "Идентификатор специализации", example = "1")
     private Long specializationId;
+
+    @Schema(description = "Название специализации", example = "Front-end")
+    private String specializationName;
 
     @Schema(description = "Уровень опыта работы", example = "Senior")
     private Experience experienceLevel;
