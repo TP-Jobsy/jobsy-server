@@ -3,4 +3,8 @@ jobsyapp.ru {
                 uri strip_prefix /api
                 reverse_proxy app:8080
         }
+        handle_path /actuator/* {
+                uri strip_prefix /actuator
+                reverse_proxy app:8081
+            }
 }
