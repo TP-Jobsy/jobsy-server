@@ -55,8 +55,10 @@ services:
       NOVITA_API_KEY: "${NOVITA_API_KEY}"
       NOVITA_API_MODEL: "${NOVITA_API_MODEL}"
       NOVITA_API_DEFAULT_SYSTEM_PROMPT: "${NOVITA_API_DEFAULT_SYSTEM_PROMPT}"
+      SPRING_MANAGEMENT_SERVER_PORT: "8081"
     ports:
       - "8080:8080"
+      - "8081:8081"
     logging:
       driver: "json-file"
       options:
@@ -88,6 +90,24 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     restart: always
+    networks:
+      - app-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    networks:
+      - app-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
     networks:
       - app-network
 
