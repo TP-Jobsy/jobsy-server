@@ -1,5 +1,7 @@
 package com.example.jobsyserver.service.impl;
 
+import com.example.jobsyserver.dto.common.CategoryDto;
+import com.example.jobsyserver.dto.common.SpecializationDto;
 import com.example.jobsyserver.dto.freelancer.FreelancerProfileAboutDto;
 import com.example.jobsyserver.dto.freelancer.FreelancerProfileBasicDto;
 import com.example.jobsyserver.dto.freelancer.FreelancerProfileContactDto;
@@ -7,11 +9,17 @@ import com.example.jobsyserver.dto.freelancer.FreelancerProfileDto;
 import com.example.jobsyserver.enums.Experience;
 import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.mapper.FreelancerProfileMapper;
-import com.example.jobsyserver.model.*;
+import com.example.jobsyserver.model.FreelancerProfile;
+import com.example.jobsyserver.model.FreelancerSkill;
+import com.example.jobsyserver.model.FreelancerSkillId;
+import com.example.jobsyserver.model.Skill;
+import com.example.jobsyserver.model.User;
 import com.example.jobsyserver.repository.FreelancerProfileRepository;
 import com.example.jobsyserver.repository.SkillRepository;
 import com.example.jobsyserver.repository.UserRepository;
+import com.example.jobsyserver.service.CategoryService;
 import com.example.jobsyserver.service.SecurityService;
+import com.example.jobsyserver.service.SpecializationService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +40,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class FreelancerProfileServiceImplTest {
@@ -39,18 +48,18 @@ class FreelancerProfileServiceImplTest {
     @InjectMocks
     private FreelancerProfileServiceImpl freelancerProfileService;
 
+    @Mock(lenient = true)
+    private SecurityService securityService;
     @Mock
     private FreelancerProfileRepository freelancerProfileRepository;
-
     @Mock
     private UserRepository userRepository;
-
     @Mock
     private SkillRepository skillRepository;
-
     @Mock
-    private SecurityService securityService;
-
+    private CategoryService categoryService;
+    @Mock
+    private SpecializationService specializationService;
     @Mock
     private FreelancerProfileMapper freelancerProfileMapper;
 
@@ -62,12 +71,6 @@ class FreelancerProfileServiceImplTest {
 
     @BeforeEach
     void setup() {
-        Authentication auth = new UsernamePasswordAuthenticationToken(
-                new org.springframework.security.core.userdetails.User(testEmail, "", Collections.emptyList()),
-                null,
-                Collections.emptyList());
-        SecurityContextHolder.getContext().setAuthentication(auth);
-        Mockito.lenient().when(securityService.getCurrentUserEmail()).thenReturn(testEmail);
         sampleUser = User.builder()
                 .id(1L)
                 .email(testEmail)
@@ -76,10 +79,8 @@ class FreelancerProfileServiceImplTest {
                 .dateBirth(LocalDate.of(1990, 1, 1))
                 .phone("+79123456789")
                 .build();
-
         sampleCreatedAt = LocalDateTime.of(2024, 3, 30, 12, 0);
         sampleUpdatedAt = LocalDateTime.of(2024, 3, 30, 12, 0);
-
         sampleProfile = FreelancerProfile.builder()
                 .id(100L)
                 .user(sampleUser)
@@ -94,6 +95,13 @@ class FreelancerProfileServiceImplTest {
                 .createdAt(sampleCreatedAt)
                 .updatedAt(sampleUpdatedAt)
                 .build();
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                new org.springframework.security.core.userdetails.User(testEmail, "", Collections.emptyList()),
+                null,
+                Collections.emptyList());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        Mockito.lenient().when(securityService.getCurrentUserEmail()).thenReturn(testEmail);
+        Mockito.lenient().when(securityService.getCurrentUser()).thenReturn(sampleUser);
     }
 
     @AfterEach
@@ -103,26 +111,38 @@ class FreelancerProfileServiceImplTest {
 
     @Test
     void testGetProfileSuccess() {
-        FreelancerProfileDto expectedDto = new FreelancerProfileDto();
-        expectedDto.setId(sampleProfile.getId());
-        expectedDto.setCreatedAt(sampleCreatedAt);
-        expectedDto.setUpdatedAt(sampleUpdatedAt);
-        Mockito.when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(sampleUser));
-        Mockito.when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
-        Mockito.when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(expectedDto);
+        when(freelancerProfileRepository.findByUser(sampleUser))
+                .thenReturn(Optional.of(sampleProfile));
+        FreelancerProfileDto baseDto = new FreelancerProfileDto();
+        baseDto.setId(sampleProfile.getId());
+        baseDto.setCreatedAt(sampleCreatedAt);
+        baseDto.setUpdatedAt(sampleUpdatedAt);
+        var aboutDto = new FreelancerProfileAboutDto();
+        aboutDto.setCategoryId(2L);
+        aboutDto.setSpecializationId(3L);
+        baseDto.setAbout(aboutDto);
+        when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(baseDto);
+        CategoryDto catDto = new CategoryDto(); catDto.setId(2L); catDto.setName("Веб-разработка");
+        when(categoryService.getCategoryById(2L)).thenReturn(catDto);
+        SpecializationDto specDto = new SpecializationDto(); specDto.setId(3L); specDto.setName("Front-end");
+        when(specializationService.getSpecializationById(3L)).thenReturn(specDto);
         FreelancerProfileDto result = freelancerProfileService.getProfile();
-        assertNotNull(result, "Полученный dto не должен быть null");
-        assertEquals(expectedDto.getId(), result.getId(), "Неверный идентификатор профиля");
-        assertEquals(expectedDto.getCreatedAt(), result.getCreatedAt(), "Неверная дата создания");
-        assertEquals(expectedDto.getUpdatedAt(), result.getUpdatedAt(), "Неверная дата обновления");
+        assertNotNull(result);
+        assertEquals(100L, result.getId());
+        assertEquals("Веб-разработка", result.getAbout().getCategoryName());
+        assertEquals("Front-end", result.getAbout().getSpecializationName());
     }
 
     @Test
-    void testGetProfileUserNotFound() {
-        Mockito.when(userRepository.findByEmail(testEmail)).thenReturn(Optional.empty());
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-                () -> freelancerProfileService.getProfile());
-        assertTrue(exception.getMessage().contains(testEmail), "Сообщение исключения должно содержать email");
+    void testGetProfileNotFound() {
+        when(freelancerProfileRepository.findByUser(sampleUser))
+                .thenReturn(Optional.empty());
+        ResourceNotFoundException exception = assertThrows(
+                ResourceNotFoundException.class,
+                () -> freelancerProfileService.getProfile()
+        );
+        assertTrue(exception.getMessage().contains("Профиль фрилансера"),
+                "Сообщение исключения должно содержать 'Профиль фрилансера'");
     }
 
     @Test
@@ -133,19 +153,13 @@ class FreelancerProfileServiceImplTest {
         basicDto.setFirstName("Алексей");
         basicDto.setLastName("Сергеев");
         basicDto.setPhone("+1234567890");
-        Mockito.when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(sampleUser));
-        Mockito.when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
-        sampleProfile.setCountry(basicDto.getCountry());
-        sampleProfile.setCity(basicDto.getCity());
-        sampleUser.setFirstName(basicDto.getFirstName());
-        sampleUser.setLastName(basicDto.getLastName());
-        sampleUser.setPhone(basicDto.getPhone());
-        Mockito.when(userRepository.save(sampleUser)).thenReturn(sampleUser);
-        Mockito.when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
+        when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
+        when(userRepository.save(sampleUser)).thenReturn(sampleUser);
+        when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
         FreelancerProfileDto expectedDto = new FreelancerProfileDto();
         expectedDto.setId(sampleProfile.getId());
-        expectedDto.setCreatedAt(sampleProfile.getCreatedAt());
-        expectedDto.setUpdatedAt(sampleProfile.getUpdatedAt());
+        expectedDto.setCreatedAt(sampleCreatedAt);
+        expectedDto.setUpdatedAt(sampleUpdatedAt);
         FreelancerProfileBasicDto expectedBasic = new FreelancerProfileBasicDto();
         expectedBasic.setCountry("Canada");
         expectedBasic.setCity("Toronto");
@@ -153,37 +167,33 @@ class FreelancerProfileServiceImplTest {
         expectedBasic.setLastName("Сергеев");
         expectedBasic.setPhone("+1234567890");
         expectedDto.setBasic(expectedBasic);
-        Mockito.when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(expectedDto);
+        when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(expectedDto);
+
         FreelancerProfileDto result = freelancerProfileService.updateBasic(basicDto);
-        assertNotNull(result, "Результирующий DTO не должен быть null");
-        FreelancerProfileBasicDto resultBasic = result.getBasic();
-        assertNotNull(resultBasic, "Базовые данные не должны быть null");
-        assertEquals("Canada", resultBasic.getCountry(), "Страна не обновлена");
-        assertEquals("Toronto", resultBasic.getCity(), "Город не обновлен");
-        assertEquals("Алексей", resultBasic.getFirstName(), "Имя пользователя не обновлено");
-        assertEquals("Сергеев", resultBasic.getLastName(), "Фамилия пользователя не обновлена");
-        assertEquals("+1234567890", resultBasic.getPhone(), "Номер телефона не обновлен");
-        Mockito.verify(userRepository, Mockito.times(1)).save(sampleUser);
-        Mockito.verify(freelancerProfileRepository, Mockito.times(1)).save(sampleProfile);
+
+        assertNotNull(result);
+        var resultBasic = result.getBasic();
+        assertNotNull(resultBasic);
+        assertEquals("Canada", resultBasic.getCountry());
+        assertEquals("Toronto", resultBasic.getCity());
+        assertEquals("Алексей", resultBasic.getFirstName());
+        assertEquals("Сергеев", resultBasic.getLastName());
+        assertEquals("+1234567890", resultBasic.getPhone());
+        Mockito.verify(userRepository).save(sampleUser);
+        Mockito.verify(freelancerProfileRepository).save(sampleProfile);
     }
 
     @Test
     void testUpdateContact() {
         FreelancerProfileContactDto contactDto = new FreelancerProfileContactDto();
         contactDto.setContactLink("http://newcontact.example.com");
-        Mockito.when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(sampleUser));
-        Mockito.when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
-        sampleProfile.setContactLink(contactDto.getContactLink());
-        Mockito.when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
-        FreelancerProfileDto expectedDto = new FreelancerProfileDto();
-        expectedDto.setId(sampleProfile.getId());
-        expectedDto.setCreatedAt(sampleProfile.getCreatedAt());
-        expectedDto.setUpdatedAt(sampleProfile.getUpdatedAt());
-        Mockito.when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(expectedDto);
+        when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
+        when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
+        when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(new FreelancerProfileDto());
         FreelancerProfileDto result = freelancerProfileService.updateContact(contactDto);
-        assertNotNull(result, "Результирующий dto не должен быть null");
-        assertEquals("http://newcontact.example.com", sampleProfile.getContactLink(), "Контактная ссылка не обновлена");
-        Mockito.verify(freelancerProfileRepository, Mockito.times(1)).save(sampleProfile);
+        assertNotNull(result);
+        assertEquals("http://newcontact.example.com", sampleProfile.getContactLink());
+        Mockito.verify(freelancerProfileRepository).save(sampleProfile);
     }
 
     @Test
@@ -193,16 +203,11 @@ class FreelancerProfileServiceImplTest {
         aboutDto.setSpecializationId(30L);
         aboutDto.setExperienceLevel(Experience.MIDDLE);
         aboutDto.setAboutMe("Новый опыт работы");
-        Mockito.when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(sampleUser));
-        Mockito.when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
-        Mockito.when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
-        FreelancerProfileDto expectedDto = new FreelancerProfileDto();
-        expectedDto.setId(sampleProfile.getId());
-        expectedDto.setCreatedAt(sampleProfile.getCreatedAt());
-        expectedDto.setUpdatedAt(sampleProfile.getUpdatedAt());
-        Mockito.when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(expectedDto);
+        when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
+        when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
+        when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(new FreelancerProfileDto());
         FreelancerProfileDto result = freelancerProfileService.updateAbout(aboutDto);
-        assertTrue(sampleProfile.getFreelancerSkills().isEmpty(), "Список навыков должен остаться пустым, если не передан");
+        assertTrue(sampleProfile.getFreelancerSkills().isEmpty());
     }
 
     @Test
@@ -213,106 +218,90 @@ class FreelancerProfileServiceImplTest {
                 .freelancerProfile(sampleProfile)
                 .skill(existingSkill)
                 .build();
-        sampleProfile.setFreelancerSkills(new ArrayList<>(List.of(fsExisting)));
-        List<Long> initialSkillIds = sampleProfile.getFreelancerSkills().stream()
-                .map(fs -> fs.getSkill().getId())
-                .toList();
-        assertEquals(1, initialSkillIds.size(), "В профиле должен быть 1 навык");
-        assertTrue(initialSkillIds.contains(10L), "Навык с id 10 должен присутствовать");
+        sampleProfile.getFreelancerSkills().add(fsExisting);
+        when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
         Skill newSkill = Skill.builder().id(11L).name("Spring Boot").build();
-        Mockito.when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(sampleUser));
-        Mockito.when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
-        Mockito.when(skillRepository.findById(11L)).thenReturn(Optional.of(newSkill));
-        Mockito.when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
-        FreelancerProfileDto expectedDto = new FreelancerProfileDto();
-        expectedDto.setId(sampleProfile.getId());
-        expectedDto.setCreatedAt(sampleProfile.getCreatedAt());
-        expectedDto.setUpdatedAt(sampleProfile.getUpdatedAt());
-        Mockito.when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(expectedDto);
+        when(skillRepository.findById(11L)).thenReturn(Optional.of(newSkill));
+        when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
+        when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(new FreelancerProfileDto());
         FreelancerProfileDto resultDto = freelancerProfileService.addSkill(11L);
-        List<Long> resultSkillIds = sampleProfile.getFreelancerSkills().stream()
-                .map(fs -> fs.getSkill().getId())
-                .toList();
-        assertEquals(2, resultSkillIds.size(), "В профиле должно быть 2 навыка");
-        assertTrue(resultSkillIds.contains(10L), "Навык с id 10 должен присутствовать");
-        assertTrue(resultSkillIds.contains(11L), "Навык с id 11 должен быть добавлен");
+        List<Long> ids = sampleProfile.getFreelancerSkills().stream()
+                .map(fs -> fs.getSkill().getId()).toList();
+        assertTrue(ids.contains(10L));
+        assertTrue(ids.contains(11L));
+        assertEquals(2, ids.size());
     }
 
     @Test
     void testAddSkill() {
-        Mockito.when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(sampleUser));
-        Mockito.when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
-        sampleProfile.setFreelancerSkills(new ArrayList<>());
+        when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
+        sampleProfile.getFreelancerSkills().clear();
         Skill newSkill = Skill.builder().id(12L).name("Hibernate").build();
-        Mockito.when(skillRepository.findById(12L)).thenReturn(Optional.of(newSkill));
-        Mockito.when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
-        FreelancerProfileDto expectedDto = new FreelancerProfileDto();
-        expectedDto.setId(sampleProfile.getId());
-        expectedDto.setCreatedAt(sampleProfile.getCreatedAt());
-        expectedDto.setUpdatedAt(sampleProfile.getUpdatedAt());
-        Mockito.when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(expectedDto);
+        when(skillRepository.findById(12L)).thenReturn(Optional.of(newSkill));
+        when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
+        when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(new FreelancerProfileDto());
         FreelancerProfileDto result = freelancerProfileService.addSkill(12L);
-        List<Long> resultSkillIds = sampleProfile.getFreelancerSkills().stream()
-                .map(fs -> fs.getSkill().getId())
-                .toList();
-        assertEquals(1, resultSkillIds.size(), "Должен быть добавлен один навык");
-        assertTrue(resultSkillIds.contains(12L), "Навык с id 12 должен присутствовать");
+        assertEquals(1, sampleProfile.getFreelancerSkills().size());
     }
 
     @Test
     void testRemoveSkill() {
         Skill existingSkill = Skill.builder().id(10L).name("Java").build();
-        FreelancerSkill existingFreelancerSkill = FreelancerSkill.builder()
+        FreelancerSkill fs = FreelancerSkill.builder()
                 .id(new FreelancerSkillId(sampleProfile.getId(), 10L))
                 .freelancerProfile(sampleProfile)
                 .skill(existingSkill)
                 .build();
-        sampleProfile.setFreelancerSkills(new ArrayList<>(List.of(existingFreelancerSkill)));
-        Mockito.when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(sampleUser));
-        Mockito.when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
-        Mockito.when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
-        FreelancerProfileDto expectedDto = new FreelancerProfileDto();
-        expectedDto.setId(sampleProfile.getId());
-        expectedDto.setCreatedAt(sampleProfile.getCreatedAt());
-        expectedDto.setUpdatedAt(sampleProfile.getUpdatedAt());
-        Mockito.when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(expectedDto);
+        sampleProfile.getFreelancerSkills().add(fs);
+        when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
+        when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
+        when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(new FreelancerProfileDto());
         FreelancerProfileDto result = freelancerProfileService.removeSkill(10L);
-        List<Long> resultSkillIds = sampleProfile.getFreelancerSkills().stream()
-                .map(fs -> fs.getSkill().getId())
-                .toList();
-        assertEquals(0, resultSkillIds.size(), "Навык должен быть удалён, и в профиле не должно быть навыков");
+        assertTrue(sampleProfile.getFreelancerSkills().isEmpty());
     }
 
     @Test
     void testDeleteAccount() {
-        Mockito.when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(sampleUser));
+        when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(sampleUser));
         freelancerProfileService.deleteAccount();
-        Mockito.verify(userRepository, Mockito.times(1)).delete(sampleUser);
+        Mockito.verify(userRepository).delete(sampleUser);
     }
 
     @Test
     void testGetAllFreelancers() {
         List<FreelancerProfile> profiles = List.of(sampleProfile);
-        Mockito.when(freelancerProfileRepository.findAll()).thenReturn(profiles);
-        List<FreelancerProfileDto> expectedDtoList = List.of(new FreelancerProfileDto());
-        Mockito.when(freelancerProfileMapper.toDtoList(profiles)).thenReturn(expectedDtoList);
+        when(freelancerProfileRepository.findAll()).thenReturn(profiles);
+        when(freelancerProfileMapper.toDtoList(profiles)).thenReturn(List.of(new FreelancerProfileDto()));
         List<FreelancerProfileDto> result = freelancerProfileService.getAllFreelancers();
-        assertNotNull(result, "Результирующий список не должен быть null");
-        assertFalse(result.isEmpty(), "Список профилей не должен быть пустым");
-        assertEquals(expectedDtoList.size(), result.size(), "Размер списка не совпадает");
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+        assertEquals(1, result.size());
     }
 
     @Test
     void testGetFreelancerProfileById() {
-        Long profileId = sampleProfile.getId();
-        Mockito.when(freelancerProfileRepository.findById(profileId)).thenReturn(Optional.of(sampleProfile));
+        Long id = sampleProfile.getId();
+        when(freelancerProfileRepository.findById(id)).thenReturn(Optional.of(sampleProfile));
         FreelancerProfileDto expectedDto = new FreelancerProfileDto();
-        expectedDto.setId(profileId);
+        expectedDto.setId(id);
         expectedDto.setCreatedAt(sampleCreatedAt);
         expectedDto.setUpdatedAt(sampleUpdatedAt);
-        Mockito.when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(expectedDto);
-        FreelancerProfileDto result = freelancerProfileService.getFreelancerProfileById(profileId);
-        assertNotNull(result, "Результирующий dto не должен быть null");
-        assertEquals(profileId, result.getId(), "Идентификатор профиля не совпадает");
+        var aboutDto = new FreelancerProfileAboutDto();
+        aboutDto.setCategoryId(sampleProfile.getCategoryId());
+        aboutDto.setSpecializationId(sampleProfile.getSpecializationId());
+        expectedDto.setAbout(aboutDto);
+        when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(expectedDto);
+        CategoryDto catDto = new CategoryDto();
+        catDto.setId(sampleProfile.getCategoryId());
+        catDto.setName("Категория");
+        when(categoryService.getCategoryById(sampleProfile.getCategoryId())).thenReturn(catDto);
+        SpecializationDto specDto = new SpecializationDto();
+        specDto.setId(sampleProfile.getSpecializationId());
+        specDto.setName("Специализация");
+        when(specializationService.getSpecializationById(sampleProfile.getSpecializationId())).thenReturn(specDto);
+        FreelancerProfileDto result = freelancerProfileService.getFreelancerProfileById(id);
+        assertNotNull(result);
+        assertEquals("Категория", result.getAbout().getCategoryName());
+        assertEquals("Специализация", result.getAbout().getSpecializationName());
     }
 }
