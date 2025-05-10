@@ -10,8 +10,10 @@ jobsyapp.ru {
                 uri strip_prefix /metrics
                 reverse_proxy prometheus:9090
             }
-        handle /grafana/* {
-                uri strip_prefix /grafana
-                reverse_proxy grafana:3000
-        }
+        handle_path /grafana* {
+               reverse_proxy grafana:3000 {
+                   header_up Host {host}
+                   header_up X-Forwarded-Proto {scheme}
+               }
+           }
 }
