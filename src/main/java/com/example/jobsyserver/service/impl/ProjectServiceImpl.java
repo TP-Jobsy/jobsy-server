@@ -1,11 +1,17 @@
 package com.example.jobsyserver.service.impl;
 
+import com.example.jobsyserver.dto.common.SkillDto;
+import com.example.jobsyserver.dto.project.ProjectBasicDto;
 import com.example.jobsyserver.dto.project.ProjectCreateDto;
 import com.example.jobsyserver.dto.project.ProjectDto;
 import com.example.jobsyserver.dto.project.ProjectUpdateDto;
+import com.example.jobsyserver.enums.Complexity;
+import com.example.jobsyserver.enums.PaymentType;
+import com.example.jobsyserver.enums.ProjectDuration;
 import com.example.jobsyserver.enums.ProjectStatus;
 import com.example.jobsyserver.exception.ResourceNotFoundException;
 import com.example.jobsyserver.mapper.ProjectMapper;
+import com.example.jobsyserver.model.Project;
 import com.example.jobsyserver.model.User;
 import com.example.jobsyserver.repository.CategoryRepository;
 import com.example.jobsyserver.repository.ClientProfileRepository;
@@ -20,6 +26,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -83,89 +90,108 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public ProjectDto createProject(ProjectCreateDto dto) {
-        User current = getCurrentUser();
-        var client = clientProfileRepository.findByUser(current)
-                .orElseThrow(() -> new ResourceNotFoundException("Профиль заказчика"));
-        var project = projectMapper.toEntity(dto);
-        project.setClient(client);
-        project.setStatus(ProjectStatus.OPEN);
-
-        if (dto.getCategory() != null) {
-            var cat = categoryRepository.findById(dto.getCategory().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Категория", dto.getCategory().getId()));
-            project.setCategory(cat);
-        }
-
-        if (dto.getSpecialization() != null) {
-            var spec = specializationRepository.findById(dto.getSpecialization().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Специализация", dto.getSpecialization().getId()));
-            project.setSpecialization(spec);
-        }
-
-        var saved = projectRepository.save(project);
-        if (dto.getSkills() != null) {
-            dto.getSkills().forEach(s -> projectSkillService.addSkill(saved.getId(), s.getId()));
-        }
-
-        return projectMapper.toDto(saved);
-    }
-
-    @Override
-    @Transactional
     public ProjectDto updateProject(Long projectId, ProjectUpdateDto dto) {
-        User current = getCurrentUser();
-        var project = projectRepository.findById(projectId)
+        User current = securityService.getCurrentUser();
+        Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Проект", projectId));
-
         if (!project.getClient().getUser().getId().equals(current.getId())) {
             throw new AccessDeniedException("Не ваш проект");
         }
         if (project.getStatus() != ProjectStatus.OPEN) {
-            throw new IllegalStateException("Редактировать можно только проекты в статусе OPEN");
+            throw new IllegalStateException("Редактировать можно только опубликованные проекты");
         }
         projectMapper.toEntity(dto, project);
-
-        if (dto.getCategory() != null) {
-            var cat = categoryRepository.findById(dto.getCategory().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Категория", dto.getCategory().getId()));
-            project.setCategory(cat);
-        }
-
-        if (dto.getSpecialization() != null) {
-            var spec = specializationRepository.findById(dto.getSpecialization().getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Специализация", dto.getSpecialization().getId()));
-            project.setSpecialization(spec);
-        }
-        var updated = projectRepository.save(project);
-
-        if (dto.getSkills() != null) {
-            projectSkillService.getSkillsByProject(projectId)
-                    .forEach(s -> projectSkillService.removeSkill(projectId, s.getId()));
-            dto.getSkills().forEach(s -> projectSkillService.addSkill(projectId, s.getId()));
-        }
-        return projectMapper.toDto(updated);
+        applyCategoryAndSpec(project, dto);
+        syncSkills(project, dto.getSkills());
+        return projectMapper.toDto(projectRepository.save(project));
     }
 
     @Override
     @Transactional
     public void deleteProject(Long projectId) {
-        User current = getCurrentUser();
-        var project = projectRepository.findById(projectId)
+        User current = securityService.getCurrentUser();
+        Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Проект", projectId));
-
         if (!project.getClient().getUser().getId().equals(current.getId())) {
             throw new AccessDeniedException("Не ваш проект");
         }
         if (project.getStatus() != ProjectStatus.OPEN) {
-            throw new IllegalStateException("Удалять можно только OPEN");
+            throw new IllegalStateException("Удалять можно только опубликованные проекты");
         }
         projectRepository.delete(project);
     }
 
-    private User getCurrentUser() {
-        var email = securityService.getCurrentUserEmail();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("Пользователь", "email", email));
+    @Override
+    @Transactional
+    public ProjectDto createDraft(ProjectCreateDto dto) {
+        User current = securityService.getCurrentUser();
+        var client = clientProfileRepository.findByUser(current)
+                .orElseThrow(() -> new ResourceNotFoundException("Профиль клиента"));
+        Project draft = projectMapper.toEntity(dto);
+        draft.setClient(client);
+        applyCategoryAndSpec(draft, dto);
+        draft.setTitle(dto.getTitle());
+        draft.setDescription(dto.getDescription() != null ? dto.getDescription() : "");
+        draft.setPaymentType(dto.getPaymentType() != null
+                ? dto.getPaymentType()
+                : PaymentType.FIXED);
+        draft.setFixedPrice(dto.getFixedPrice() != null
+                ? dto.getFixedPrice()
+                : BigDecimal.ZERO);
+        draft.setProjectComplexity(dto.getComplexity() != null
+                ? dto.getComplexity()
+                : Complexity.EASY);
+        draft.setProjectDuration(dto.getDuration() != null
+                ? dto.getDuration()
+                : ProjectDuration.LESS_THAN_1_MONTH);
+        draft.setStatus(ProjectStatus.DRAFT);
+        draft = projectRepository.save(draft);
+        syncSkills(draft, dto.getSkills());
+        return projectMapper.toDto(draft);
+    }
+
+    @Override
+    @Transactional
+    public ProjectDto updateDraft(Long draftId, ProjectUpdateDto dto) {
+        Project draft = projectRepository.findById(draftId)
+                .orElseThrow(() -> new ResourceNotFoundException("Черновик проекта", draftId));
+        if (draft.getStatus() != ProjectStatus.DRAFT) {
+            throw new IllegalStateException("Редактировать можно только черновик");
+        }
+        projectMapper.toEntity(dto, draft);
+        applyCategoryAndSpec(draft, dto);
+        syncSkills(draft, dto.getSkills());
+        return projectMapper.toDto(projectRepository.save(draft));
+    }
+
+    @Override
+    @Transactional
+    public ProjectDto publish(Long draftId, ProjectUpdateDto dto) {
+        ProjectDto updated = updateDraft(draftId, dto);
+        Project draft = projectRepository.getReferenceById(draftId);
+        draft.setStatus(ProjectStatus.OPEN);
+        projectRepository.save(draft);
+        return updated;
+    }
+
+    private void applyCategoryAndSpec(Project project, ProjectBasicDto dto) {
+        if (dto.getCategory() != null) {
+            var cat = categoryRepository.findById(dto.getCategory().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Категория", dto.getCategory().getId()));
+            project.setCategory(cat);
+        }
+        if (dto.getSpecialization() != null) {
+            var spec = specializationRepository.findById(dto.getSpecialization().getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Специализация", dto.getSpecialization().getId()));
+            project.setSpecialization(spec);
+        }
+    }
+
+    private void syncSkills(Project project, List<SkillDto> skills) {
+        projectSkillService.getSkillsByProject(project.getId())
+                .forEach(s -> projectSkillService.removeSkill(project.getId(), s.getId()));
+        if (skills != null) {
+            skills.forEach(s -> projectSkillService.addSkill(project.getId(), s.getId()));
+        }
     }
 }

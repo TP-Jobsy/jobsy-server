@@ -5,8 +5,8 @@ import lombok.*;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@Builder
+@ToString
+@EqualsAndHashCode(callSuper = true)
 @Schema(description = "DTO обновления информации проекта")
 public class ProjectUpdateDto extends ProjectBasicDto {
 }

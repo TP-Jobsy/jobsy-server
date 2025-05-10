@@ -33,8 +33,6 @@ public interface ProjectMapper {
             @Mapping(target = "updatedAt",             ignore = true),
             @Mapping(target = "client",                ignore = true),
             @Mapping(target = "assignedFreelancer",    ignore = true),
-            @Mapping(target = "category",              ignore = true),
-            @Mapping(target = "specialization",        ignore = true),
             @Mapping(target = "projectSkills", ignore = true),
     })
     Project toEntity(ProjectCreateDto dto);

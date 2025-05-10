@@ -11,11 +11,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/projects/{projectId}/ai")
 @RequiredArgsConstructor
+@Validated
 @Tag(name = "AI Generation", description = "Интеграция с Novita AI для генерации описания проекта")
 public class AiGenerationController {
 
