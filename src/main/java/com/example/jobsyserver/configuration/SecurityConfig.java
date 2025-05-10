@@ -33,7 +33,10 @@ public class SecurityConfig {
             "/auth/login",
             "/auth/resend-confirmation",
             "/auth/password-reset/**",
-            "/freelancers"
+            "/freelancers",
+            "/actuator/health",
+            "/actuator/info",
+            "/actuator/prometheus"
     };
 
     @Bean

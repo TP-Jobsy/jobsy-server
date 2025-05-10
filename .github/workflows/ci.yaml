@@ -36,6 +36,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Start Prometheus container
+        run: |
+            docker pull prom/prometheus:latest
+            docker run -d \
+            --name prometheus-ci \
+            -p 9090:9090 \
+            -v ${{ github.workspace }}/prometheus.yml:/etc/prometheus/prometheus.yml:ro \
+            prom/prometheus:latest
+
+      - name: Wait for Prometheus to be ready
+        run: |
+            for i in {1..10}; do
+              if curl -sf http://localhost:9090/-/ready; then
+                echo "Prometheus is up!" && break
+              fi
+              echo "Waiting for Prometheus..." && sleep 5
+            done
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
