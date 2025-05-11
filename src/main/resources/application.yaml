@@ -105,5 +105,5 @@ management:
 
 geonames:
   api:
-    base-url: ${GEONAMES_URL:http://api.geonames.org}
+    base-url: http://api.geonames.org
     username: ${GEONAMES_USERNAME:demo}
