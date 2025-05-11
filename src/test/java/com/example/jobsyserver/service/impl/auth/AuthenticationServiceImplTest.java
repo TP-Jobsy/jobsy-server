@@ -1,12 +1,14 @@
-package com.example.jobsyserver.service.impl;
+package com.example.jobsyserver.service.impl.auth;
 
-import com.example.jobsyserver.dto.request.AuthenticationRequest;
-import com.example.jobsyserver.dto.response.AuthenticationResponse;
-import com.example.jobsyserver.dto.user.UserDto;
-import com.example.jobsyserver.exception.BadRequestException;
-import com.example.jobsyserver.mapper.UserMapper;
-import com.example.jobsyserver.model.User;
-import com.example.jobsyserver.repository.UserRepository;
+import com.example.jobsyserver.features.auth.dto.request.AuthenticationRequest;
+import com.example.jobsyserver.features.auth.dto.response.AuthenticationResponse;
+import com.example.jobsyserver.features.auth.service.impl.AuthenticationServiceImpl;
+import com.example.jobsyserver.features.auth.service.impl.JwtServiceImpl;
+import com.example.jobsyserver.features.user.dto.UserDto;
+import com.example.jobsyserver.features.common.exception.BadRequestException;
+import com.example.jobsyserver.features.user.mapper.UserMapper;
+import com.example.jobsyserver.features.user.model.User;
+import com.example.jobsyserver.features.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

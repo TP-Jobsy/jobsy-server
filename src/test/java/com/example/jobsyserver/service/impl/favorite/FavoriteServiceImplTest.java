@@ -1,11 +1,20 @@
-package com.example.jobsyserver.service.impl;
+package com.example.jobsyserver.service.impl.favorite;
 
-import com.example.jobsyserver.dto.freelancer.FreelancerProfileDto;
-import com.example.jobsyserver.dto.project.ProjectDto;
-import com.example.jobsyserver.mapper.FreelancerProfileMapper;
-import com.example.jobsyserver.mapper.ProjectMapper;
-import com.example.jobsyserver.model.*;
-import com.example.jobsyserver.repository.*;
+import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileDto;
+import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
+import com.example.jobsyserver.features.freelancer.repository.FreelancerProfileRepository;
+import com.example.jobsyserver.features.project.dto.ProjectDto;
+import com.example.jobsyserver.features.client.model.ClientProfile;
+import com.example.jobsyserver.features.client.repository.ClientProfileRepository;
+import com.example.jobsyserver.features.favorites.model.FavoriteFreelancer;
+import com.example.jobsyserver.features.favorites.model.FavoriteProject;
+import com.example.jobsyserver.features.favorites.repository.FavoriteFreelancerRepository;
+import com.example.jobsyserver.features.favorites.repository.FavoriteProjectRepository;
+import com.example.jobsyserver.features.favorites.service.impl.FavoriteServiceImpl;
+import com.example.jobsyserver.features.project.model.Project;
+import com.example.jobsyserver.features.project.repository.ProjectRepository;
+import com.example.jobsyserver.features.freelancer.mapper.FreelancerProfileMapper;
+import com.example.jobsyserver.features.project.mapper.ProjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

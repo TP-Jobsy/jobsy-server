@@ -1,12 +1,13 @@
 package com.example.jobsyserver.mapper;
 
-import com.example.jobsyserver.dto.client.ClientProfileBasicDto;
-import com.example.jobsyserver.dto.client.ClientProfileContactDto;
-import com.example.jobsyserver.dto.client.ClientProfileDto;
-import com.example.jobsyserver.dto.client.ClientProfileFieldDto;
-import com.example.jobsyserver.dto.user.UserDto;
-import com.example.jobsyserver.model.ClientProfile;
-import com.example.jobsyserver.model.User;
+import com.example.jobsyserver.features.client.dto.ClientProfileBasicDto;
+import com.example.jobsyserver.features.client.dto.ClientProfileContactDto;
+import com.example.jobsyserver.features.client.dto.ClientProfileDto;
+import com.example.jobsyserver.features.client.dto.ClientProfileFieldDto;
+import com.example.jobsyserver.features.user.dto.UserDto;
+import com.example.jobsyserver.features.client.mapper.ClientProfileMapper;
+import com.example.jobsyserver.features.client.model.ClientProfile;
+import com.example.jobsyserver.features.user.model.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

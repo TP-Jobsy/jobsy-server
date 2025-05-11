@@ -1,12 +1,13 @@
-package com.example.jobsyserver.service.impl;
+package com.example.jobsyserver.service.impl.auth;
 
-import com.example.jobsyserver.enums.ConfirmationAction;
-import com.example.jobsyserver.exception.ResourceNotFoundException;
-import com.example.jobsyserver.model.Confirmation;
-import com.example.jobsyserver.model.User;
-import com.example.jobsyserver.repository.UserRepository;
-import com.example.jobsyserver.service.ConfirmationService;
-import com.example.jobsyserver.service.EmailService;
+import com.example.jobsyserver.features.common.enums.ConfirmationAction;
+import com.example.jobsyserver.features.auth.service.impl.PasswordResetServiceImpl;
+import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
+import com.example.jobsyserver.features.auth.model.Confirmation;
+import com.example.jobsyserver.features.user.model.User;
+import com.example.jobsyserver.features.user.repository.UserRepository;
+import com.example.jobsyserver.features.auth.service.ConfirmationService;
+import com.example.jobsyserver.features.auth.service.EmailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

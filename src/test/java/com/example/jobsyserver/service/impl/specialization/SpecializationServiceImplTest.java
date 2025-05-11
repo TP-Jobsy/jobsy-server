@@ -1,12 +1,13 @@
-package com.example.jobsyserver.service.impl;
+package com.example.jobsyserver.service.impl.specialization;
 
-import com.example.jobsyserver.dto.common.SpecializationDto;
-import com.example.jobsyserver.exception.ResourceNotFoundException;
-import com.example.jobsyserver.mapper.SpecializationMapper;
-import com.example.jobsyserver.model.Category;
-import com.example.jobsyserver.model.Specialization;
-import com.example.jobsyserver.repository.SpecializationRepository;
-import com.example.jobsyserver.service.CategoryService;
+import com.example.jobsyserver.features.specialization.dto.SpecializationDto;
+import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
+import com.example.jobsyserver.features.specialization.mapper.SpecializationMapper;
+import com.example.jobsyserver.features.category.model.Category;
+import com.example.jobsyserver.features.specialization.model.Specialization;
+import com.example.jobsyserver.features.specialization.repository.SpecializationRepository;
+import com.example.jobsyserver.features.category.service.CategoryService;
+import com.example.jobsyserver.features.specialization.service.impl.SpecializationServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

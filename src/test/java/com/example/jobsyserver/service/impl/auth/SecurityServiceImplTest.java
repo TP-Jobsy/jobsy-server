@@ -1,9 +1,10 @@
-package com.example.jobsyserver.service.impl;
+package com.example.jobsyserver.service.impl.auth;
 
-import com.example.jobsyserver.model.ClientProfile;
-import com.example.jobsyserver.model.FreelancerProfile;
-import com.example.jobsyserver.repository.ClientProfileRepository;
-import com.example.jobsyserver.repository.FreelancerProfileRepository;
+import com.example.jobsyserver.features.auth.service.impl.SecurityServiceImpl;
+import com.example.jobsyserver.features.client.model.ClientProfile;
+import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
+import com.example.jobsyserver.features.client.repository.ClientProfileRepository;
+import com.example.jobsyserver.features.freelancer.repository.FreelancerProfileRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

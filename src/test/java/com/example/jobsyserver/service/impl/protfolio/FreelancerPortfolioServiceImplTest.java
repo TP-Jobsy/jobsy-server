@@ -1,15 +1,16 @@
-package com.example.jobsyserver.service.impl;
+package com.example.jobsyserver.service.impl.protfolio;
 
-import com.example.jobsyserver.dto.portfolio.FreelancerPortfolioCreateDto;
-import com.example.jobsyserver.dto.portfolio.FreelancerPortfolioDto;
-import com.example.jobsyserver.dto.portfolio.FreelancerPortfolioUpdateDto;
-import com.example.jobsyserver.exception.ResourceNotFoundException;
-import com.example.jobsyserver.mapper.FreelancerPortfolioMapper;
-import com.example.jobsyserver.model.FreelancerPortfolio;
-import com.example.jobsyserver.model.FreelancerProfile;
-import com.example.jobsyserver.repository.FreelancerPortfolioRepository;
-import com.example.jobsyserver.repository.FreelancerProfileRepository;
-import com.example.jobsyserver.service.SecurityService;
+import com.example.jobsyserver.features.portfolio.dto.FreelancerPortfolioCreateDto;
+import com.example.jobsyserver.features.portfolio.dto.FreelancerPortfolioDto;
+import com.example.jobsyserver.features.portfolio.dto.FreelancerPortfolioUpdateDto;
+import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
+import com.example.jobsyserver.features.portfolio.mapper.FreelancerPortfolioMapper;
+import com.example.jobsyserver.features.portfolio.model.FreelancerPortfolio;
+import com.example.jobsyserver.features.portfolio.service.impl.FreelancerPortfolioServiceImpl;
+import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
+import com.example.jobsyserver.features.portfolio.repository.FreelancerPortfolioRepository;
+import com.example.jobsyserver.features.freelancer.repository.FreelancerProfileRepository;
+import com.example.jobsyserver.features.auth.service.SecurityService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

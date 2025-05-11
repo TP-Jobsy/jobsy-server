@@ -1,13 +1,18 @@
-package com.example.jobsyserver.service.impl;
+package com.example.jobsyserver.service.impl.protfolio;
 
-import com.example.jobsyserver.dto.common.SkillDto;
-import com.example.jobsyserver.exception.ResourceNotFoundException;
-import com.example.jobsyserver.mapper.SkillMapper;
-import com.example.jobsyserver.model.*;
-import com.example.jobsyserver.repository.FreelancerPortfolioRepository;
-import com.example.jobsyserver.repository.PortfolioSkillRepository;
-import com.example.jobsyserver.repository.SkillRepository;
-import com.example.jobsyserver.service.SecurityService;
+import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
+import com.example.jobsyserver.features.skill.dto.SkillDto;
+import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
+import com.example.jobsyserver.features.portfolio.model.FreelancerPortfolio;
+import com.example.jobsyserver.features.portfolio.service.impl.PortfolioSkillServiceImpl;
+import com.example.jobsyserver.features.portfolio.model.PortfolioSkill;
+import com.example.jobsyserver.features.portfolio.model.PortfolioSkillId;
+import com.example.jobsyserver.features.skill.model.Skill;
+import com.example.jobsyserver.features.skill.mapper.SkillMapper;
+import com.example.jobsyserver.features.portfolio.repository.FreelancerPortfolioRepository;
+import com.example.jobsyserver.features.portfolio.repository.PortfolioSkillRepository;
+import com.example.jobsyserver.features.skill.repository.SkillRepository;
+import com.example.jobsyserver.features.auth.service.SecurityService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

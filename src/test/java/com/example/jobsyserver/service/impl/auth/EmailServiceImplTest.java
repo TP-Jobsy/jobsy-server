@@ -1,5 +1,6 @@
-package com.example.jobsyserver.service.impl;
+package com.example.jobsyserver.service.impl.auth;
 
+import com.example.jobsyserver.features.auth.service.impl.EmailServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

@@ -1,10 +1,11 @@
-package com.example.jobsyserver.service.impl;
+package com.example.jobsyserver.service.impl.skill;
 
-import com.example.jobsyserver.dto.common.SkillDto;
-import com.example.jobsyserver.exception.ResourceNotFoundException;
-import com.example.jobsyserver.mapper.SkillMapper;
-import com.example.jobsyserver.model.Skill;
-import com.example.jobsyserver.repository.SkillRepository;
+import com.example.jobsyserver.features.skill.dto.SkillDto;
+import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
+import com.example.jobsyserver.features.skill.mapper.SkillMapper;
+import com.example.jobsyserver.features.skill.model.Skill;
+import com.example.jobsyserver.features.skill.repository.SkillRepository;
+import com.example.jobsyserver.features.skill.service.impl.SkillServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

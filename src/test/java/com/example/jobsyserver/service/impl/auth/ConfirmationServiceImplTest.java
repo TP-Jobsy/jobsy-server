@@ -1,10 +1,11 @@
-package com.example.jobsyserver.service.impl;
+package com.example.jobsyserver.service.impl.auth;
 
-import com.example.jobsyserver.enums.ConfirmationAction;
-import com.example.jobsyserver.exception.BadRequestException;
-import com.example.jobsyserver.model.Confirmation;
-import com.example.jobsyserver.model.User;
-import com.example.jobsyserver.repository.ConfirmationRepository;
+import com.example.jobsyserver.features.auth.service.impl.ConfirmationServiceImpl;
+import com.example.jobsyserver.features.common.enums.ConfirmationAction;
+import com.example.jobsyserver.features.common.exception.BadRequestException;
+import com.example.jobsyserver.features.auth.model.Confirmation;
+import com.example.jobsyserver.features.user.model.User;
+import com.example.jobsyserver.features.auth.repository.ConfirmationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

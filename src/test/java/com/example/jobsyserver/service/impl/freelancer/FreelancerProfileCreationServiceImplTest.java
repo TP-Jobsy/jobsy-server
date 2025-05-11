@@ -1,12 +1,13 @@
-package com.example.jobsyserver.service.impl;
+package com.example.jobsyserver.service.impl.freelancer;
 
-import com.example.jobsyserver.enums.UserRole;
-import com.example.jobsyserver.event.UserVerifiedEvent;
-import com.example.jobsyserver.exception.ResourceNotFoundException;
-import com.example.jobsyserver.model.FreelancerProfile;
-import com.example.jobsyserver.model.User;
-import com.example.jobsyserver.repository.FreelancerProfileRepository;
-import com.example.jobsyserver.repository.UserRepository;
+import com.example.jobsyserver.features.common.enums.UserRole;
+import com.example.jobsyserver.features.auth.event.UserVerifiedEvent;
+import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
+import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
+import com.example.jobsyserver.features.freelancer.service.impl.FreelancerProfileCreationServiceImpl;
+import com.example.jobsyserver.features.user.model.User;
+import com.example.jobsyserver.features.freelancer.repository.FreelancerProfileRepository;
+import com.example.jobsyserver.features.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;

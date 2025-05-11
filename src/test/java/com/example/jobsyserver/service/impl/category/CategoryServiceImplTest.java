@@ -1,10 +1,11 @@
-package com.example.jobsyserver.service.impl;
+package com.example.jobsyserver.service.impl.category;
 
-import com.example.jobsyserver.dto.common.CategoryDto;
-import com.example.jobsyserver.exception.ResourceNotFoundException;
-import com.example.jobsyserver.mapper.CategoryMapper;
-import com.example.jobsyserver.model.Category;
-import com.example.jobsyserver.repository.CategoryRepository;
+import com.example.jobsyserver.features.category.dto.CategoryDto;
+import com.example.jobsyserver.features.category.service.impl.CategoryServiceImpl;
+import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
+import com.example.jobsyserver.features.category.mapper.CategoryMapper;
+import com.example.jobsyserver.features.category.model.Category;
+import com.example.jobsyserver.features.category.repository.CategoryRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

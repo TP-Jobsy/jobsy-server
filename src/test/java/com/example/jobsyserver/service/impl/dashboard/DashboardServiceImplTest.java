@@ -1,12 +1,13 @@
-package com.example.jobsyserver.service.impl;
+package com.example.jobsyserver.service.impl.dashboard;
 
-import com.example.jobsyserver.dto.project.ProjectApplicationDto;
-import com.example.jobsyserver.dto.project.ProjectDetailDto;
-import com.example.jobsyserver.dto.project.ProjectDto;
-import com.example.jobsyserver.enums.ProjectApplicationStatus;
-import com.example.jobsyserver.enums.ProjectStatus;
-import com.example.jobsyserver.service.ProjectApplicationService;
-import com.example.jobsyserver.service.ProjectService;
+import com.example.jobsyserver.features.dashboard.service.impl.DashboardServiceImpl;
+import com.example.jobsyserver.features.project.dto.ProjectApplicationDto;
+import com.example.jobsyserver.features.project.dto.ProjectDetailDto;
+import com.example.jobsyserver.features.project.dto.ProjectDto;
+import com.example.jobsyserver.features.common.enums.ProjectApplicationStatus;
+import com.example.jobsyserver.features.common.enums.ProjectStatus;
+import com.example.jobsyserver.features.project.service.ProjectApplicationService;
+import com.example.jobsyserver.features.project.service.ProjectService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

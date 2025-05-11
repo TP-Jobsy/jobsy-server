@@ -1,14 +1,15 @@
-package com.example.jobsyserver.service.impl;
+package com.example.jobsyserver.service.impl.auth;
 
-import com.example.jobsyserver.dto.request.RegistrationRequest;
-import com.example.jobsyserver.dto.response.RegistrationResponse;
-import com.example.jobsyserver.enums.UserRole;
-import com.example.jobsyserver.exception.BadRequestException;
-import com.example.jobsyserver.model.Confirmation;
-import com.example.jobsyserver.model.User;
-import com.example.jobsyserver.repository.UserRepository;
-import com.example.jobsyserver.service.ConfirmationService;
-import com.example.jobsyserver.event.ConfirmationCodeResentEvent;
+import com.example.jobsyserver.features.auth.service.impl.RegistrationServiceImpl;
+import com.example.jobsyserver.features.auth.dto.request.RegistrationRequest;
+import com.example.jobsyserver.features.auth.dto.response.RegistrationResponse;
+import com.example.jobsyserver.features.common.enums.UserRole;
+import com.example.jobsyserver.features.common.exception.BadRequestException;
+import com.example.jobsyserver.features.auth.model.Confirmation;
+import com.example.jobsyserver.features.user.model.User;
+import com.example.jobsyserver.features.user.repository.UserRepository;
+import com.example.jobsyserver.features.auth.service.ConfirmationService;
+import com.example.jobsyserver.features.auth.event.ConfirmationCodeResentEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

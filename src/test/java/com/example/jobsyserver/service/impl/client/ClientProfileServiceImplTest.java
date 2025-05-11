@@ -1,11 +1,16 @@
-package com.example.jobsyserver.service.impl;
+package com.example.jobsyserver.service.impl.client;
 
-import com.example.jobsyserver.dto.client.*;
-import com.example.jobsyserver.mapper.ClientProfileMapper;
-import com.example.jobsyserver.model.ClientProfile;
-import com.example.jobsyserver.model.User;
-import com.example.jobsyserver.repository.ClientProfileRepository;
-import com.example.jobsyserver.repository.UserRepository;
+import com.example.jobsyserver.features.auth.service.impl.SecurityServiceImpl;
+import com.example.jobsyserver.features.client.dto.ClientProfileBasicDto;
+import com.example.jobsyserver.features.client.dto.ClientProfileContactDto;
+import com.example.jobsyserver.features.client.dto.ClientProfileDto;
+import com.example.jobsyserver.features.client.dto.ClientProfileFieldDto;
+import com.example.jobsyserver.features.client.mapper.ClientProfileMapper;
+import com.example.jobsyserver.features.client.model.ClientProfile;
+import com.example.jobsyserver.features.client.service.impl.ClientProfileServiceImpl;
+import com.example.jobsyserver.features.user.model.User;
+import com.example.jobsyserver.features.client.repository.ClientProfileRepository;
+import com.example.jobsyserver.features.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

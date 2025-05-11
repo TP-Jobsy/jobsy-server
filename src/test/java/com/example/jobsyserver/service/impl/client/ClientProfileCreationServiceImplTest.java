@@ -1,10 +1,11 @@
-package com.example.jobsyserver.service.impl;
+package com.example.jobsyserver.service.impl.client;
 
-import com.example.jobsyserver.event.UserVerifiedEvent;
-import com.example.jobsyserver.model.ClientProfile;
-import com.example.jobsyserver.model.User;
-import com.example.jobsyserver.repository.ClientProfileRepository;
-import com.example.jobsyserver.repository.UserRepository;
+import com.example.jobsyserver.features.auth.event.UserVerifiedEvent;
+import com.example.jobsyserver.features.client.model.ClientProfile;
+import com.example.jobsyserver.features.client.service.impl.ClientProfileCreationServiceImpl;
+import com.example.jobsyserver.features.user.model.User;
+import com.example.jobsyserver.features.client.repository.ClientProfileRepository;
+import com.example.jobsyserver.features.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -14,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-import static com.example.jobsyserver.enums.UserRole.*;
+import static com.example.jobsyserver.features.common.enums.UserRole.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
