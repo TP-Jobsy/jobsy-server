@@ -3,9 +3,11 @@ package com.example.jobsyserver.features.common.validation.service.impl;
 import com.example.jobsyserver.features.common.validation.client.GeoNamesClient;
 import com.example.jobsyserver.features.common.validation.service.CityLookupService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 @Service
+@Profile("!test")
 @RequiredArgsConstructor
 public class GeoNamesCityLookupService implements CityLookupService {
     private final GeoNamesClient client;

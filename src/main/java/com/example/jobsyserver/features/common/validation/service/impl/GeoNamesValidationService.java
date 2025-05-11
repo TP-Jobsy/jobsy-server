@@ -3,10 +3,12 @@ package com.example.jobsyserver.features.common.validation.service.impl;
 import com.example.jobsyserver.features.common.validation.service.CityLookupService;
 import com.example.jobsyserver.features.common.validation.service.CountryLookupService;
 import com.example.jobsyserver.features.common.validation.service.LocationValidationService;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 
 @Service
+@Profile("!test")
 public class GeoNamesValidationService implements LocationValidationService {
 
     private final CountryLookupService countryLookup;
