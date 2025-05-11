@@ -103,9 +103,7 @@ management:
     health:
       show-details: always
 
-validation:
+geonames:
   api:
-    rest-countries:
-      base-url: ${RESTCOUNTRIES_URL:https://restcountries.com/v3.1}
-    countries-now:
-      base-url: ${COUNTRIESNOW_URL:https://countriesnow.space/api/v0.1}
+    base-url: ${GEONAMES_URL:http://api.geonames.org}
+    username: ${GEONAMES_USERNAME:demo}

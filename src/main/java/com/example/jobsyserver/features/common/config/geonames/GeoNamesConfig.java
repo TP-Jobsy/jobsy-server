@@ -1,11 +1,10 @@
-package com.example.jobsyserver.features.common.config.validation;
+package com.example.jobsyserver.features.common.config.geonames;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@EnableConfigurationProperties(ValidationApiProperties.class)
+@EnableConfigurationProperties(GeoNamesProperties.class)
 @RequiredArgsConstructor
-public class ValidationApiConfig {
-}
+public class GeoNamesConfig {}
