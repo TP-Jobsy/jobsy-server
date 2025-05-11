@@ -6,7 +6,7 @@ import com.example.jobsyserver.features.specialization.dto.SpecializationDto;
 import com.example.jobsyserver.features.common.enums.Complexity;
 import com.example.jobsyserver.features.common.enums.PaymentType;
 import com.example.jobsyserver.features.common.enums.ProjectDuration;
-import com.example.jobsyserver.features.common.validation.Publish;
+import com.example.jobsyserver.features.common.validation.group.Publish;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 
