@@ -1,7 +1,7 @@
 package com.example.jobsyserver.features.auth.dto.request;
 
 import com.example.jobsyserver.features.user.dto.UserBaseDto;
-import com.example.jobsyserver.features.common.validation.Adult;
+import com.example.jobsyserver.features.common.validation.annotation.Adult;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;

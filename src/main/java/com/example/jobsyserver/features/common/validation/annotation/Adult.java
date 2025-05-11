@@ -1,5 +1,6 @@
-package com.example.jobsyserver.features.common.validation;
+package com.example.jobsyserver.features.common.validation.annotation;
 
+import com.example.jobsyserver.features.common.validation.validator.AdultValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
