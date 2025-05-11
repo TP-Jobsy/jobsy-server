@@ -12,7 +12,13 @@ public class GeoNamesCityLookupService implements CityLookupService {
 
     @Override
     public boolean existsInCountry(String city, String countryCode) {
-        var resp = client.searchCity(city.trim(), countryCode, 1);
-        return resp.geonames() != null && !resp.geonames().isEmpty();
+        try {
+            var resp = client.searchCity(city.trim(), countryCode, 1);
+            return resp != null
+                    && resp.geonames() != null
+                    && !resp.geonames().isEmpty();
+        } catch (Exception ex) {
+            return false;
+        }
     }
 }
