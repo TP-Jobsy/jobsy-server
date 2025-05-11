@@ -19,7 +19,15 @@ public class GeoNamesCountryLookupService implements CountryLookupService {
 
     @PostConstruct
     private void init() {
-        cache = client.fetchAllCountries("ru").geonames();
+        try {
+            var resp = client.fetchAllCountries("ru");
+            if (resp != null && resp.geonames() != null) {
+                cache = resp.geonames();
+            }
+        } catch (Exception ex) {
+            System.err.println("Не удалось загрузить список стран из GeoNames: " + ex.getMessage());
+            cache = List.of();
+        }
     }
 
     @Override
