@@ -1,19 +1,26 @@
 package com.example.jobsyserver.mapper;
 
+import com.example.jobsyserver.features.project.mapper.ProjectApplicationMapper;
 import com.example.jobsyserver.features.user.dto.UserDto;
 import com.example.jobsyserver.features.common.enums.UserRole;
 import com.example.jobsyserver.features.user.mapper.UserMapper;
+import com.example.jobsyserver.features.user.mapper.UserMapperImpl;
 import com.example.jobsyserver.features.user.model.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(properties = "spring.profiles.active=test")
+@ActiveProfiles("test")
+@SpringBootTest(
+        classes = UserMapperImpl.class,
+        properties = "spring.config.activate.on-profile=test"
+)
 public class UserMapperTest {
 
     @Autowired
