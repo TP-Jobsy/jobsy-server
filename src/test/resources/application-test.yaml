@@ -1,3 +1,7 @@
+spring:
+  config:
+    activate:
+      on-profile: test
 s3:
   enabled: false
 geonames:

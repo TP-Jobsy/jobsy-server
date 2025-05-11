@@ -4,9 +4,11 @@ import com.example.jobsyserver.features.common.config.geonames.GeoNamesPropertie
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
+@Profile("!test")
 @RequiredArgsConstructor
 public class GeoNamesWebClientConfig {
     private final GeoNamesProperties props;

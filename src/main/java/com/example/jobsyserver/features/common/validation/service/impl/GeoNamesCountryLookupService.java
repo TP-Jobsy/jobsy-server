@@ -5,12 +5,14 @@ import com.example.jobsyserver.features.common.validation.dto.CountryInfo;
 import com.example.jobsyserver.features.common.validation.service.CountryLookupService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Profile("!test")
 @RequiredArgsConstructor
 public class GeoNamesCountryLookupService implements CountryLookupService {
     private final GeoNamesClient client;

@@ -1,6 +1,7 @@
 package com.example.jobsyserver.mapper;
 
 import com.example.jobsyserver.features.freelancer.mapper.FreelancerProfileMapper;
+import com.example.jobsyserver.features.freelancer.mapper.FreelancerProfileMapperImpl;
 import com.example.jobsyserver.features.skill.dto.SkillDto;
 import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileAboutDto;
 import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileBasicDto;
@@ -12,17 +13,20 @@ import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
 import com.example.jobsyserver.features.freelancer.model.FreelancerSkill;
 import com.example.jobsyserver.features.freelancer.model.FreelancerSkillId;
 import com.example.jobsyserver.features.skill.model.Skill;
+import com.example.jobsyserver.features.user.mapper.UserMapperImpl;
 import com.example.jobsyserver.features.user.model.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(properties = "spring.profiles.active=test")
+@Import({ UserMapperImpl.class, FreelancerProfileMapperImpl.class })
+@SpringBootTest(classes = { UserMapperImpl.class, FreelancerProfileMapperImpl.class })
 class FreelancerProfileMapperTest {
 
     @Autowired
