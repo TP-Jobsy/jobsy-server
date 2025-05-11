@@ -38,7 +38,7 @@ jobs:
           echo "NOVITA_API_KEY=${{ secrets.NOVITA_API_KEY }}" >> app.env
           echo "NOVITA_API_MODEL=${{ secrets.NOVITA_API_MODEL }}" >> app.env
           echo "NOVITA_API_DEFAULT_SYSTEM_PROMPT=${{ secrets.NOVITA_API_DEFAULT_SYSTEM_PROMPT }}" >> app.env
-            echo "GEONAMES_USERNAME=${{ secrets.GEONAMES_USERNAME }}" >> app.env
+          echo "GEONAMES_USERNAME=${{ secrets.GEONAMES_USERNAME }}" >> app.env
 
       - name: Copy files to the server
         run: |
