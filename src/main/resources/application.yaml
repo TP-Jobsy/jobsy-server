@@ -107,3 +107,10 @@ geonames:
   api:
     base-url: http://api.geonames.org
     username: ${GEONAMES_USERNAME:demo}
+
+validation:
+  api:
+    rest-countries:
+      base-url: https://restcountries.com/v3.1
+    countries-now:
+      base-url: https://countriesnow.space/api/v0.1
