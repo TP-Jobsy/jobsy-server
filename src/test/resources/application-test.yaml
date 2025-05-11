@@ -1,2 +1,5 @@
 s3:
   enabled: false
+geonames:
+  api:
+    username: demo
