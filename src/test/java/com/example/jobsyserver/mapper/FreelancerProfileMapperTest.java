@@ -1,27 +1,32 @@
 package com.example.jobsyserver.mapper;
 
-import com.example.jobsyserver.dto.common.SkillDto;
-import com.example.jobsyserver.dto.freelancer.FreelancerProfileAboutDto;
-import com.example.jobsyserver.dto.freelancer.FreelancerProfileBasicDto;
-import com.example.jobsyserver.dto.freelancer.FreelancerProfileContactDto;
-import com.example.jobsyserver.dto.freelancer.FreelancerProfileDto;
-import com.example.jobsyserver.dto.user.UserDto;
-import com.example.jobsyserver.enums.Experience;
-import com.example.jobsyserver.model.FreelancerProfile;
-import com.example.jobsyserver.model.FreelancerSkill;
-import com.example.jobsyserver.model.FreelancerSkillId;
-import com.example.jobsyserver.model.Skill;
-import com.example.jobsyserver.model.User;
+import com.example.jobsyserver.features.freelancer.mapper.FreelancerProfileMapper;
+import com.example.jobsyserver.features.freelancer.mapper.FreelancerProfileMapperImpl;
+import com.example.jobsyserver.features.skill.dto.SkillDto;
+import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileAboutDto;
+import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileBasicDto;
+import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileContactDto;
+import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileDto;
+import com.example.jobsyserver.features.user.dto.UserDto;
+import com.example.jobsyserver.features.common.enums.Experience;
+import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
+import com.example.jobsyserver.features.freelancer.model.FreelancerSkill;
+import com.example.jobsyserver.features.freelancer.model.FreelancerSkillId;
+import com.example.jobsyserver.features.skill.model.Skill;
+import com.example.jobsyserver.features.user.mapper.UserMapperImpl;
+import com.example.jobsyserver.features.user.model.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(properties = "spring.profiles.active=test")
+@Import({ UserMapperImpl.class, FreelancerProfileMapperImpl.class })
+@SpringBootTest(classes = { UserMapperImpl.class, FreelancerProfileMapperImpl.class })
 class FreelancerProfileMapperTest {
 
     @Autowired

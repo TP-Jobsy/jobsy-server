@@ -3,4 +3,22 @@ jobsyapp.ru {
                 uri strip_prefix /api
                 reverse_proxy app:8080
         }
+        handle /actuator/* {
+                reverse_proxy app:8081
+        }
+        handle /metrics/* {
+                uri strip_prefix /metrics
+                reverse_proxy prometheus:9090
+        }
+
+        @graf_no_slash {
+            path /grafana
+        }
+        redir @graf_no_slash /grafana/ 308
+
+        handle /grafana/* {
+            reverse_proxy grafana:3000 {
+                header_up Host {http.request.host}
+            }
+        }
 }

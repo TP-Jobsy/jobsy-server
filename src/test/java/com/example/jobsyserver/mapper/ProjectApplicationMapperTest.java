@@ -1,21 +1,25 @@
 package com.example.jobsyserver.mapper;
 
-import com.example.jobsyserver.dto.project.ProjectApplicationDto;
-import com.example.jobsyserver.dto.project.ProjectApplicationRequestDto;
-import com.example.jobsyserver.enums.ApplicationType;
-import com.example.jobsyserver.enums.ProjectApplicationStatus;
-import com.example.jobsyserver.model.FreelancerProfile;
-import com.example.jobsyserver.model.Project;
-import com.example.jobsyserver.model.ProjectApplication;
+import com.example.jobsyserver.features.project.dto.ProjectApplicationDto;
+import com.example.jobsyserver.features.project.dto.ProjectApplicationRequestDto;
+import com.example.jobsyserver.features.common.enums.ApplicationType;
+import com.example.jobsyserver.features.common.enums.ProjectApplicationStatus;
+import com.example.jobsyserver.features.project.mapper.ProjectApplicationMapper;
+import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
+import com.example.jobsyserver.features.project.mapper.ProjectApplicationMapperImpl;
+import com.example.jobsyserver.features.project.model.Project;
+import com.example.jobsyserver.features.project.model.ProjectApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(properties = "spring.profiles.active=test")
+@Import({ ProjectApplicationMapperImpl.class })
+@SpringBootTest(classes = {ProjectApplicationMapperImpl.class })
 class ProjectApplicationMapperTest {
 
     @Autowired

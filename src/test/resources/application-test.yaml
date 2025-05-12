@@ -1,2 +1,15 @@
+spring:
+  config:
+    activate:
+      on-profile: test
 s3:
   enabled: false
+geonames:
+  api:
+    username: demo
+validation:
+  api:
+    rest-countries:
+      base-url: https://restcountries.com/v3.1
+    countries-now:
+      base-url: https://countriesnow.space/api/v0.1
