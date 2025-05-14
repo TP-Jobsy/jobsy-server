@@ -20,7 +20,7 @@ tags:
     description: Управление категориями
   - name: specializations
     description: Управление специализациями
-  
+
 paths:
 
   /auth/me:
@@ -42,7 +42,7 @@ paths:
           description: Пользователь не аутентифицирован
         '500':
           description: Внутренняя ошибка сервера
-          
+
   /auth/register:
     post:
       tags:
@@ -65,7 +65,7 @@ paths:
                 $ref: '#/components/schemas/RegistrationResponse'
         '400':
           description: Неверные данные запроса
-          
+
   /auth/login:
     post:
       tags:
@@ -90,7 +90,7 @@ paths:
           description: Неверные учетные данные
         '500':
           description: Внутренняя ошибка сервера
-          
+
   /auth/confirm-email:
     post:
       tags:
@@ -141,7 +141,7 @@ paths:
           description: Пользователь не найден или уже подтверждён
         '500':
           description: Внутренняя ошибка сервера
-          
+
   /auth/password-reset/request:
     post:
       tags:
@@ -164,7 +164,7 @@ paths:
                 $ref: '#/components/schemas/DefaultResponse'
         '404':
           description: Пользователь с указанным e-mail не найден
-        
+
   /auth/password-reset/confirm:
     post:
       tags:
@@ -187,7 +187,7 @@ paths:
                 $ref: '#/components/schemas/DefaultResponse'
         '400':
           description: Неверный или просроченный код восстановления
-          
+
   /auth/logout:
     post:
       tags:
@@ -202,8 +202,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DefaultResponse'  
-                
+                $ref: '#/components/schemas/DefaultResponse'
+
   /freelancers:
     get:
       tags:
@@ -221,7 +221,7 @@ paths:
                   $ref: '#/components/schemas/FreelancerProfile'
         '404':
           description: Фрилансеры не найдены
-          
+
   /freelancers/{id}:
     get:
       tags:
@@ -243,8 +243,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/FreelancerProfile'
         '404':
-          description: Фрилансер не найден  
-          
+          description: Фрилансер не найден
+
   /profile/freelancer:
     get:
       tags:
@@ -300,7 +300,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DefaultResponse'
         '404':
-          description: Аккаунт не найден     
+          description: Аккаунт не найден
 
   /profile/freelancer/{id}:
     get:
@@ -316,6 +316,7 @@ paths:
             type: integer
       responses:
         '200':
+          description: Аккаунт фрилансера успешно получен.
           content:
             application/json:
               schema:
@@ -361,7 +362,7 @@ paths:
                 $ref: '#/components/schemas/FreelancerPortfolio'
         '400':
           description: Ошибка создания элемента портфолио
-          
+
   /profile/freelancer/portfolio/{id}:
     put:
       tags:
@@ -441,7 +442,7 @@ paths:
         '500':
           description: Внутренняя ошибка сервера
 
-    /profile/freelancer/portfolio/{portfolioId}/skills/{skillId}:
+  /profile/freelancer/portfolio/{portfolioId}/skills/{skillId}:
     post:
       tags:
         - freelancer
@@ -514,6 +515,7 @@ paths:
             type: integer
       responses:
         '200':
+          description: Навык успешно добавлен
           content:
             application/json:
               schema:
@@ -537,6 +539,7 @@ paths:
             type: integer
       responses:
         '200':
+          description: Навык успешно удалён
           content:
             application/json:
               schema:
@@ -565,7 +568,7 @@ paths:
           description: Клиенты не найдены.
         '500':
           description: Внутренняя ошибка сервера
-          
+
   /clients/{id}:
     get:
       tags:
@@ -596,7 +599,7 @@ paths:
       tags:
         - client
       summary: Поиск фрилансеров
-      description:
+      description: Возвращает список фрилансеров
       security:
         - bearerAuth: []
       parameters:
@@ -612,6 +615,7 @@ paths:
             type: string
       responses:
         '200':
+          description: Список фрилансеров успешно получен
           content:
             application/json:
               schema:
@@ -715,7 +719,7 @@ paths:
           description: Профиль клиента не найден
         '500':
           description: Ошибка сохранения аватара
-          
+
   /projects:
     get:
       tags:
@@ -818,12 +822,12 @@ paths:
         '400':
           description: Проект нельзя удалить, так как его статус не "open"
 
-  projects/{projectId}/responses:
+  /projects/{projectId}/responses:
     post:
       tags:
         - client
       summary: Откликнуться на проект
-      description: Клиент может удалить проект, если его статус "open". Проекты в работе или завершённые удалять нельзя
+      description: Отклики на проект
       security:
         - bearerAuth: []
       parameters:
@@ -842,6 +846,7 @@ paths:
                   type: integer
       responses:
         '201':
+          description: Отклик на проект успешно отправлен
           content:
             application/json:
               schema:
@@ -943,7 +948,7 @@ paths:
                 $ref: '#/components/schemas/DefaultResponse'
         '404':
           description: Фрилансер не найден
-          
+
   /admin/clients:
     get:
       tags:
@@ -987,7 +992,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ClientProfile'
         '404':
-          description: Клиент не найден  
+          description: Клиент не найден
     delete:
       tags:
         - admin
@@ -1010,7 +1015,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DefaultResponse'
         '404':
-          description: Клиент не найден        
+          description: Клиент не найден
 
   /admin/clients/{id}/projects:
     get:
@@ -1173,7 +1178,7 @@ paths:
                 $ref: '#/components/schemas/DefaultResponse'
         '404':
           description: Элемент портфолио не найден
-  
+
   /projects/{projectId}/ai/description:
     post:
       tags:
@@ -1184,6 +1189,13 @@ paths:
         Опционально можно указать ID проекта для обновления существующего проекта
       security:
         - bearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID проекта, для которого генерируется описание
       requestBody:
         description: Данные для генерации описания проекта
         required: true
@@ -1215,7 +1227,7 @@ paths:
                     example: "Сгенерированное подробное описание проекта, включающее функциональные требования, технические детали и рекомендации по дизайну"
         '400':
           description: Ошибка генерации описания проекта
-  
+
   /categories:
     get:
       tags:
@@ -1233,7 +1245,7 @@ paths:
                   $ref: '#/components/schemas/Category'
         '404':
           description: Категории не найдены
-  
+
   /categories/{categoryId}/specializations:
     get:
       tags:
@@ -1258,7 +1270,7 @@ paths:
                   $ref: '#/components/schemas/Specialization'
         '404':
           description: Специализации не найдены для данной категории
-  
+
   /skills:
     get:
       tags:
@@ -1352,24 +1364,24 @@ paths:
           description: Навык не найден
         '500':
           description: Внутренняя ошибка сервера
-      delete:
-        tags:
-          - skills
-        summary: Удалить навык
-        description: Удаляет навык из системы по ID
-        parameters:
-          - name: id
-            in: path
-            required: true
-            schema:
-              type: integer
-        responses:
-          '204':
-            description: Навык успешно удалён
-          '404':
-            description: Навык не найден
-          '500':
-            description: Внутренняя ошибка сервера
+    delete:
+      tags:
+        - skills
+      summary: Удалить навык
+      description: Удаляет навык из системы по ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Навык успешно удалён
+        '404':
+          description: Навык не найден
+        '500':
+          description: Внутренняя ошибка сервера
 
   /skills/autocomplete:
     get:
@@ -1552,119 +1564,119 @@ paths:
         '500':
           description: Внутренняя ошибка сервера
 
-    /favorites/projects/{projectId}:
-      post:
-        tags:
-          - freelancer
-        summary: Добавить проект в избранное
-        description: Добавляет проект в избранное текущего фрилансера
-        security:
-          - bearerAuth: []
-        parameters:
-          - name: projectId
-            in: path
-            required: true
-            schema:
-              type: integer
-        responses:
-          '201':
-            description: Проект успешно добавлен
-          '400':
-            description: Неверный ID проекта
-          '401':
-            description: Неавторизованный доступ
-          '500':
-            description: Внутренняя ошибка сервера
-      delete:
-        tags:
-          - freelancer
-        summary: Удалить проект из избранного
-        description: Удаляет проект из избранного текущего фрилансера
-        security:
-          - bearerAuth: []
-        parameters:
-          - name: projectId
-            in: path
-            required: true
-            schema:
-              type: integer
-        responses:
-          '204':
-            description: Проект успешно удалён
-          '400':
-            description: Неверный ID проекта
-          '401':
-            description: Неавторизованный доступ
-          '500':
-            description: Внутренняя ошибка сервера
+  /favorites/projects/{projectId}:
+    post:
+      tags:
+        - freelancer
+      summary: Добавить проект в избранное
+      description: Добавляет проект в избранное текущего фрилансера
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: Проект успешно добавлен
+        '400':
+          description: Неверный ID проекта
+        '401':
+          description: Неавторизованный доступ
+        '500':
+          description: Внутренняя ошибка сервера
+    delete:
+      tags:
+        - freelancer
+      summary: Удалить проект из избранного
+      description: Удаляет проект из избранного текущего фрилансера
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Проект успешно удалён
+        '400':
+          description: Неверный ID проекта
+        '401':
+          description: Неавторизованный доступ
+        '500':
+          description: Внутренняя ошибка сервера
 
-    /favorites/freelancers:
-      get:
-        tags:
-          - client
-        summary: Список избранных фрилансеров клиента
-        description: Возвращает всех фрилансеров, которых текущий клиент добавил в избранное
-        security:
-          - bearerAuth: []
-        responses:
-          '200':
-            description: Список найденных фрилансеров
-            content:
-              application/json:
-                schema:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/FreelancerProfile'
-          '401':
-            description: Неавторизованный доступ
-          '500':
-            description: Внутренняя ошибка сервера
+  /favorites/freelancers:
+    get:
+      tags:
+        - client
+      summary: Список избранных фрилансеров клиента
+      description: Возвращает всех фрилансеров, которых текущий клиент добавил в избранное
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список найденных фрилансеров
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                $ref: '#/components/schemas/FreelancerProfile'
+        '401':
+          description: Неавторизованный доступ
+        '500':
+          description: Внутренняя ошибка сервера
 
-    /favorites/freelancers/{freelancerId}:
-      post:
-        tags:
-          - client
-        summary: Добавить фрилансера в избранное
-        description: Добавляет фрилансера в избранное текущего клиента
-        security:
-          - bearerAuth: []
-        parameters:
-          - name: freelancerId
-            in: path
-            required: true
-            schema:
-              type: integer
-        responses:
-          '201':
-            description: Фрилансер успешно добавлен
-          '400':
-            description: Неверный ID фрилансера
-          '401':
-            description: Неавторизованный доступ
-          '500':
-            description: Внутренняя ошибка сервера
-      delete:
-        tags:
-          - client
-        summary: Удалить фрилансера из избранного
-        description: Удаляет фрилансера из избранного текущего клиента
-        security:
-          - bearerAuth: []
-        parameters:
-          - name: freelancerId
-            in: path
-            required: true
-            schema:
-              type: integer
-        responses:
-          '204':
-            description: Фрилансер успешно удалён
-          '400':
-            description: Неверный ID фрилансера
-          '401':
-            description: Неавторизованный доступ
-          '500':
-            description: Внутренняя ошибка сервера
+  /favorites/freelancers/{freelancerId}:
+    post:
+      tags:
+        - client
+      summary: Добавить фрилансера в избранное
+      description: Добавляет фрилансера в избранное текущего клиента
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: freelancerId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: Фрилансер успешно добавлен
+        '400':
+          description: Неверный ID фрилансера
+        '401':
+          description: Неавторизованный доступ
+        '500':
+          description: Внутренняя ошибка сервера
+    delete:
+      tags:
+        - client
+      summary: Удалить фрилансера из избранного
+      description: Удаляет фрилансера из избранного текущего клиента
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: freelancerId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Фрилансер успешно удалён
+        '400':
+          description: Неверный ID фрилансера
+        '401':
+          description: Неавторизованный доступ
+        '500':
+          description: Внутренняя ошибка сервера
 
   /specializations:
     get:
@@ -1685,27 +1697,27 @@ paths:
                   $ref: '#/components/schemas/Specialization'
         '500':
           description: Внутренняя ошибка сервера
-      post:
-        tags:
-          - specializations
-        summary: Создать специализацию
-        description: Добавляет новую специализацию в систему
-        requestBody:
+    post:
+      tags:
+        - specializations
+      summary: Создать специализацию
+      description: Добавляет новую специализацию в систему
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Specialization'
+      responses:
+        '201':
+          description: Специализация успешно создана
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Specialization'
-        responses:
-          '201':
-            description: Специализация успешно создана
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Specialization'
-          '400':
-            description: Неверные данные для создания
-          '500':
-            description: Внутренняя ошибка сервера
+        '400':
+          description: Неверные данные для создания
+        '500':
+          description: Внутренняя ошибка сервера
 
   /specializations/{id}:
     get:
@@ -1913,40 +1925,40 @@ components:
           type: string
           example: "Операция выполнена успешно"
     FreelancerProfile:
-        type: object
-        properties:
-          id:
-            type: integer
-            example: 1
-          user_id:
-            type: integer
-            example: 1
-          birth_date:
-            type: string
-            format: date
-            example: "2000-01-01"
-          hourly_rate:
-            type: number
-            example: 50.0
-          category_id:
-            type: integer
-            example: 2
-          specialization_id:
-            type: integer
-            example: 5
-          experience_level:
-            type: string
-            enum: [beginner, middle, expert]
-            example: "middle"
-          about_me:
-            type: string
-            example: "Опытный фронтендер с 5-летним стажем"
-          created_at:
-            type: string
-            format: date-time
-          updated_at:
-            type: string
-            format: date-time
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 1
+        birth_date:
+          type: string
+          format: date
+          example: "2000-01-01"
+        hourly_rate:
+          type: number
+          example: 50.0
+        category_id:
+          type: integer
+          example: 2
+        specialization_id:
+          type: integer
+          example: 5
+        experience_level:
+          type: string
+          enum: [beginner, middle, expert]
+          example: "middle"
+        about_me:
+          type: string
+          example: "Опытный фронтендер с 5-летним стажем"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
     FreelancerProfileUpdate:
       type: object
       properties:
@@ -2219,6 +2231,22 @@ components:
           type: string
           enum: [pending, approved, declined]
           example: "pending"
+    ProjectDetail:
+      type: object
+      properties:
+        projectId:
+          type: integer
+          example: 1
+        responses:
+          type: array
+          items:
+            type: integer
+            example: [1, 2, 3]
+        invitations:
+          type: array
+          items:
+            type: integer
+            example: [1, 2, 3]
     Category:
       type: object
       properties:
