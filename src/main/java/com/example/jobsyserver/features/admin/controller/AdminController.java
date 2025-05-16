@@ -1,7 +1,7 @@
 package com.example.jobsyserver.features.admin.controller;
 
 import com.example.jobsyserver.features.admin.service.AdminService;
-import com.example.jobsyserver.features.client.response.DefaultResponse;
+import com.example.jobsyserver.features.common.dto.response.DefaultResponse;
 import com.example.jobsyserver.features.project.dto.ProjectDto;
 import com.example.jobsyserver.features.portfolio.dto.FreelancerPortfolioDto;
 import com.example.jobsyserver.features.user.dto.UserDto;
