@@ -1,5 +1,6 @@
 package com.example.jobsyserver.features.admin.service.impl;
 
+import com.example.jobsyserver.features.admin.service.AdminService;
 import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
 import com.example.jobsyserver.features.portfolio.model.FreelancerPortfolio;
 import com.example.jobsyserver.features.project.model.Project;
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,7 +27,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class AdminServiceImpl {
+public class AdminServiceImpl implements AdminService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
@@ -34,13 +36,15 @@ public class AdminServiceImpl {
     private final FreelancerPortfolioRepository portfolioRepository;
     private final FreelancerPortfolioMapper portfolioMapper;
 
-    public List<UserDto> getAllFreelancerProfiles() {
+    @Override
+    public List<UserDto> getAllFreelancers() {
         log.info("Получение всех профилей фрилансеров");
         return userRepository.findByRole(UserRole.FREELANCER).stream()
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());
     }
 
+    @Override
     public UserDto getFreelancerById(Long id) {
         User freelancer = userRepository.findByIdAndRole(id, UserRole.FREELANCER)
                 .orElseThrow(() -> new ResourceNotFoundException("Пользователь", id));
@@ -48,6 +52,7 @@ public class AdminServiceImpl {
         return userMapper.toDto(freelancer);
     }
 
+    @Override
     public void deactivateFreelancer(Long id) {
         User freelancer = userRepository.findByIdAndRole(id, UserRole.FREELANCER)
                 .orElseThrow(() -> new ResourceNotFoundException("Пользователь", id));
@@ -56,12 +61,14 @@ public class AdminServiceImpl {
         userRepository.save(freelancer);
     }
 
+    @Override
     public List<UserDto> getAllClients() {
         return userRepository.findByRole(UserRole.CLIENT).stream()
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());
     }
 
+    @Override
     public UserDto getClientById(Long id) {
         User client = userRepository.findByIdAndRole(id, UserRole.CLIENT)
                 .orElseThrow(() -> new ResourceNotFoundException("Пользователь", id));
@@ -69,6 +76,7 @@ public class AdminServiceImpl {
         return userMapper.toDto(client);
     }
 
+    @Override
     public void deactivateClient(Long id) {
         User client = userRepository.findByIdAndRole(id, UserRole.CLIENT)
                 .orElseThrow(() -> new ResourceNotFoundException("Пользователь", id));
@@ -77,6 +85,7 @@ public class AdminServiceImpl {
         userRepository.save(client);
     }
 
+    @Override
     public List<ProjectDto> getClientProjects(Long clientId) {
         log.info("Получение проектов заказчика с clientId: {}", clientId);
         return projectRepository.findByClientId(clientId).stream()
@@ -84,6 +93,7 @@ public class AdminServiceImpl {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public ProjectDto getProjectById(Long id) {
         log.info("Получение проекта по projectId: {}", id);
         return projectRepository.findById(id)
@@ -91,6 +101,7 @@ public class AdminServiceImpl {
                 .orElseThrow(() -> new ResourceNotFoundException("Проект", id));
     }
 
+    @Override
     public void deleteProject(Long id) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Проект", id));
@@ -98,6 +109,7 @@ public class AdminServiceImpl {
         projectRepository.delete(project);
     }
 
+    @Override
     public List<FreelancerPortfolioDto> getFreelancerPortfolio(Long freelancerId) {
         log.info("Получение портфолио фрилансера с id: {}", freelancerId);
         return portfolioRepository.findByFreelancerId(freelancerId).stream()
@@ -105,6 +117,7 @@ public class AdminServiceImpl {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public void deletePortfolio(Long freelancerId, Long portfolioId) {
         log.info("Удаление портфолио фрилансера с id: {}", portfolioId);
         FreelancerPortfolio portfolio = portfolioRepository.findByIdAndFreelancerId(portfolioId, freelancerId)
