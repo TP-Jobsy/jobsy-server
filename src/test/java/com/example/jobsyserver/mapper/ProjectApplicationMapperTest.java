@@ -1,5 +1,6 @@
 package com.example.jobsyserver.mapper;
 
+import com.example.jobsyserver.features.freelancer.mapper.FreelancerProfileMapperImpl;
 import com.example.jobsyserver.features.project.dto.ProjectApplicationDto;
 import com.example.jobsyserver.features.project.dto.ProjectApplicationRequestDto;
 import com.example.jobsyserver.features.common.enums.ApplicationType;
@@ -9,6 +10,7 @@ import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
 import com.example.jobsyserver.features.project.mapper.ProjectApplicationMapperImpl;
 import com.example.jobsyserver.features.project.model.Project;
 import com.example.jobsyserver.features.project.model.ProjectApplication;
+import com.example.jobsyserver.features.user.mapper.UserMapperImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,8 +20,16 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Import({ ProjectApplicationMapperImpl.class })
-@SpringBootTest(classes = {ProjectApplicationMapperImpl.class })
+@Import({
+        ProjectApplicationMapperImpl.class,
+        FreelancerProfileMapperImpl.class,
+        UserMapperImpl.class
+})
+@SpringBootTest(classes = {
+        ProjectApplicationMapperImpl.class,
+        FreelancerProfileMapperImpl.class,
+        UserMapperImpl.class
+})
 class ProjectApplicationMapperTest {
 
     @Autowired
@@ -64,5 +74,6 @@ class ProjectApplicationMapperTest {
         assertEquals(ProjectApplicationStatus.APPROVED, dto.getStatus(), "status должен скопироваться");
         assertEquals(ApplicationType.RESPONSE, dto.getApplicationType(), "type должен скопироваться");
         assertEquals(now, dto.getCreatedAt(), "createdAt должен скопироваться");
+        assertNotNull(dto.getFreelancer(), "Поле freelancer должно мапиться в dto");
     }
 }
