@@ -13,6 +13,9 @@ import java.time.LocalDate;
 @Schema(description = "Базовый класс для передачи информации о пользователе")
 public abstract class UserBaseDto {
 
+    @Schema(description = "Идентификатор пользователя", example = "2")
+    private Long id;
+
     @NotBlank(message = "Email не может быть пустым")
     @Email(message = "Некорректный формат email")
     @Schema(description = "E-mail пользователя", example = "user@example.com")
