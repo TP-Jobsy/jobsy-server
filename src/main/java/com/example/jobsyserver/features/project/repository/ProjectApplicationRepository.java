@@ -15,21 +15,20 @@ public interface ProjectApplicationRepository extends JpaRepository<ProjectAppli
             ApplicationType applicationType,
             ProjectApplicationStatus status
     );
-    default List<ProjectApplication> findByProjectIdAndApplicationType(
+
+    List<ProjectApplication> findByProjectIdAndApplicationType(
             Long projectId,
             ApplicationType applicationType
-    ) {
-        return findByProjectIdAndApplicationTypeAndStatus(projectId, applicationType, null);
-    }
+    );
+
     List<ProjectApplication> findByFreelancerIdAndApplicationTypeAndStatus(
             Long freelancerId,
             ApplicationType applicationType,
             ProjectApplicationStatus status
     );
-    default List<ProjectApplication> findByFreelancerIdAndApplicationType(
+
+    List<ProjectApplication> findByFreelancerIdAndApplicationType(
             Long freelancerId,
             ApplicationType applicationType
-    ) {
-        return findByFreelancerIdAndApplicationTypeAndStatus(freelancerId, applicationType, null);
-    }
+    );
 }
