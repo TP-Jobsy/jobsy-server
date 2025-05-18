@@ -84,4 +84,10 @@ public class Project {
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ProjectSkill> projectSkills = new ArrayList<>();
+
+    @Column(name = "client_completed", nullable = false)
+    private boolean clientCompleted = false;
+
+    @Column(name = "freelancer_completed", nullable = false)
+    private boolean freelancerCompleted = false;
 }

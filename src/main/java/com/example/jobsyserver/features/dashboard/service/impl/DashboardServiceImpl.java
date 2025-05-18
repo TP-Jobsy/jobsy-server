@@ -35,6 +35,8 @@ public class DashboardServiceImpl implements DashboardService {
                 .project(projectDto)
                 .responses(responses)
                 .invitations(invites)
+                .clientCompleted(projectDto.isClientCompleted())
+                .freelancerCompleted(projectDto.isFreelancerCompleted())
                 .build();
     }
 

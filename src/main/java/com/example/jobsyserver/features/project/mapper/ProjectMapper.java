@@ -71,8 +71,9 @@ public interface ProjectMapper {
             @Mapping(source = "specialization",     target = "specialization"),
             @Mapping(source = "client",             target = "client"),
             @Mapping(source = "assignedFreelancer", target = "assignedFreelancer"),
-            @Mapping(source = "projectSkills", target = "skills", qualifiedByName = "mapProjectSkills"
-            )
+            @Mapping(source = "projectSkills", target = "skills", qualifiedByName = "mapProjectSkills"),
+            @Mapping(source = "clientCompleted",    target = "clientCompleted"),
+            @Mapping(source = "freelancerCompleted",target = "freelancerCompleted")
     })
     ProjectDto toDto(Project project);
 
