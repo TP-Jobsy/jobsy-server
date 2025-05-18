@@ -72,6 +72,9 @@ public class RatingServiceImpl implements RatingService {
 
         return frRepo.findById(profileId)
                 .map(fr -> {
+                    if (ratingRepo.existsByProjectIdAndRaterFreelancerId(project.getId(), fr.getId())) {
+                        throw new BadRequestException("Вы уже выставили оценку этому клиенту");
+                    }
                     rating.setRaterFreelancer(fr);
                     ClientProfile client = project.getClient();
                     if (client == null) {
@@ -83,6 +86,9 @@ public class RatingServiceImpl implements RatingService {
                 .orElseGet(() -> {
                     ClientProfile cl = clRepo.findById(profileId)
                             .orElseThrow(() -> new ResourceNotFoundException("Профиль оценщика"));
+                    if (ratingRepo.existsByProjectIdAndRaterClientId(project.getId(), cl.getId())) {
+                        throw new BadRequestException("Вы уже выставили оценку этому фрилансеру");
+                    }
                     rating.setRaterClient(cl);
 
                     FreelancerProfile fp = project.getAssignedFreelancer();

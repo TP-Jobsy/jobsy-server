@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface RatingRepository extends JpaRepository<Rating, Long> {
     List<Rating> findByProjectId(Long projectId);
+    boolean existsByProjectIdAndRaterFreelancerId(Long projectId, Long freelancerId);
+    boolean existsByProjectIdAndRaterClientId    (Long projectId, Long clientId);
 }
