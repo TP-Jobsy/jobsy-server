@@ -29,8 +29,8 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public ProjectDetailDto getClientProjectDetail(Long clientId, Long projectId) {
         var projectDto = projectService.getProjectByIdAndClient(projectId, clientId);
-        var responses = appService.getResponsesForProject(projectId, null);
-        var invites = appService.getInvitationsForProject(projectId, null);
+        var responses = appService.getResponsesForProject(projectId, ProjectApplicationStatus.PENDING);
+        var invites = appService.getInvitationsForProject(projectId, ProjectApplicationStatus.PENDING);
         return ProjectDetailDto.builder()
                 .project(projectDto)
                 .responses(responses)
