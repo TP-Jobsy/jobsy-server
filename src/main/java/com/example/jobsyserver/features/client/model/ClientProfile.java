@@ -50,4 +50,10 @@ public class ClientProfile {
 
     @Column(name="avatar_url")
     private String avatarUrl;
+
+    @Column(name = "average_rating", nullable = false)
+    private Double averageRating = 0.0;
+
+    @Column(name = "rating_count",   nullable = false)
+    private Integer ratingCount   = 0;
 }

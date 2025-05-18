@@ -32,4 +32,10 @@ public class ClientProfileDto {
 
     @Schema(description = "url аватарки клиента")
     private String avatarUrl;
+
+    @Schema(description = "Средний рейтинг клиента", example = "4.2")
+    private Double averageRating;
+
+    @Schema(description = "Количество полученных оценок", example = "5")
+    private Integer ratingCount;
 }

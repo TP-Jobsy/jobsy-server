@@ -1,5 +1,6 @@
 package com.example.jobsyserver.features.auth.service.impl;
 
+import com.example.jobsyserver.features.common.enums.UserRole;
 import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
 import com.example.jobsyserver.features.client.model.ClientProfile;
 import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
@@ -11,6 +12,7 @@ import com.example.jobsyserver.features.project.repository.ProjectRepository;
 import com.example.jobsyserver.features.user.repository.UserRepository;
 import com.example.jobsyserver.features.auth.service.SecurityService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -57,8 +59,8 @@ public class SecurityServiceImpl implements SecurityService {
         String email = getCurrentUserEmail();
         ClientProfile profile = clientProfileRepository
                 .findByUserEmail(email)
-                .orElseThrow(() -> new RuntimeException(
-                        "Профиль клиента не найден для пользователя " + email));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Профиль клиента для пользователя " + email));
         return profile.getId();
     }
 
@@ -67,8 +69,21 @@ public class SecurityServiceImpl implements SecurityService {
         String email = getCurrentUserEmail();
         FreelancerProfile profile = freelancerProfileRepository
                 .findByUserEmail(email)
-                .orElseThrow(() -> new RuntimeException(
-                        "Профиль фрилансера не найден для пользователя " + email));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Профиль фрилансера для пользователя " + email));
         return profile.getId();
+    }
+
+    @Override
+    public Long getCurrentProfileId() {
+        User user = getCurrentUser();
+        UserRole role = user.getRole();
+        if (role == UserRole.CLIENT) {
+            return getCurrentClientProfileId();
+        }
+        if (role == UserRole.FREELANCER) {
+            return getCurrentFreelancerProfileId();
+        }
+        throw new AccessDeniedException("У пользователя нет роли CLIENT или FREELANCER");
     }
 }
