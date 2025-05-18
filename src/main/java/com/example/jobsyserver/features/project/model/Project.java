@@ -86,8 +86,10 @@ public class Project {
     private List<ProjectSkill> projectSkills = new ArrayList<>();
 
     @Column(name = "client_completed", nullable = false)
+    @Builder.Default
     private boolean clientCompleted = false;
 
     @Column(name = "freelancer_completed", nullable = false)
+    @Builder.Default
     private boolean freelancerCompleted = false;
 }
