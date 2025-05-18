@@ -1,8 +1,10 @@
 package com.example.jobsyserver.features.rating.service.impl;
 
+import com.example.jobsyserver.features.auth.service.SecurityService;
 import com.example.jobsyserver.features.client.model.ClientProfile;
 import com.example.jobsyserver.features.client.repository.ClientProfileRepository;
 import com.example.jobsyserver.features.common.enums.ProjectStatus;
+import com.example.jobsyserver.features.common.enums.UserRole;
 import com.example.jobsyserver.features.common.exception.BadRequestException;
 import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
 import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
@@ -29,18 +31,18 @@ public class RatingServiceImpl implements RatingService {
     private final FreelancerProfileRepository frRepo;
     private final ClientProfileRepository clRepo;
     private final RatingMapper ratingMapper;
+    private final SecurityService security;
 
     @Override
     @Transactional
     public void rateProject(Long projectId, Long profileId, Integer score) {
         validateScore(score);
-        Project project = loadCompletedProject(projectId);
-        Rating rating = buildRating(project, profileId, score);
-        ratingRepo.save(rating);
-        if (rating.getTargetFreelancer() != null) {
-            updateFreelancerStats(rating.getTargetFreelancer(), score);
+        var project = loadCompletedProject(projectId);
+        var role = security.getCurrentUser().getRole();
+        if (role == UserRole.FREELANCER) {
+            rateByFreelancer(project, profileId, score);
         } else {
-            updateClientStats(rating.getTargetClient(), score);
+            rateByClient(project, profileId, score);
         }
     }
 
@@ -65,39 +67,42 @@ public class RatingServiceImpl implements RatingService {
         return project;
     }
 
-    private Rating buildRating(Project project, Long profileId, Integer score) {
-        Rating rating = new Rating();
+    private void rateByFreelancer(Project project, Long freelancerId, int score) {
+        if (ratingRepo.existsByProjectIdAndRaterFreelancerId(project.getId(), freelancerId)) {
+            throw new BadRequestException("Вы уже выставили оценку этому клиенту");
+        }
+        var fr = frRepo.findById(freelancerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Профиль фрилансера"));
+        var client = project.getClient();
+        if (client == null) {
+            throw new BadRequestException("У проекта нет клиента для оценки");
+        }
+        var rating = new Rating();
         rating.setProject(project);
+        rating.setRaterFreelancer(fr);
+        rating.setTargetClient(client);
         rating.setScore(score);
+        ratingRepo.save(rating);
+        updateClientStats(client, score);
+    }
 
-        return frRepo.findById(profileId)
-                .map(fr -> {
-                    if (ratingRepo.existsByProjectIdAndRaterFreelancerId(project.getId(), fr.getId())) {
-                        throw new BadRequestException("Вы уже выставили оценку этому клиенту");
-                    }
-                    rating.setRaterFreelancer(fr);
-                    ClientProfile client = project.getClient();
-                    if (client == null) {
-                        throw new BadRequestException("У проекта нет клиента для оценки");
-                    }
-                    rating.setTargetClient(client);
-                    return rating;
-                })
-                .orElseGet(() -> {
-                    ClientProfile cl = clRepo.findById(profileId)
-                            .orElseThrow(() -> new ResourceNotFoundException("Профиль оценщика"));
-                    if (ratingRepo.existsByProjectIdAndRaterClientId(project.getId(), cl.getId())) {
-                        throw new BadRequestException("Вы уже выставили оценку этому фрилансеру");
-                    }
-                    rating.setRaterClient(cl);
-
-                    FreelancerProfile fp = project.getAssignedFreelancer();
-                    if (fp == null) {
-                        throw new BadRequestException("У проекта нет исполнителя для оценки");
-                    }
-                    rating.setTargetFreelancer(fp);
-                    return rating;
-                });
+    private void rateByClient(Project project, Long clientId, int score) {
+        if (ratingRepo.existsByProjectIdAndRaterClientId(project.getId(), clientId)) {
+            throw new BadRequestException("Вы уже выставили оценку этому фрилансеру");
+        }
+        var cl = clRepo.findById(clientId)
+                .orElseThrow(() -> new ResourceNotFoundException("Профиль клиента"));
+        var fp = project.getAssignedFreelancer();
+        if (fp == null) {
+            throw new BadRequestException("У проекта нет исполнителя для оценки");
+        }
+        var rating = new Rating();
+        rating.setProject(project);
+        rating.setRaterClient(cl);
+        rating.setTargetFreelancer(fp);
+        rating.setScore(score);
+        ratingRepo.save(rating);
+        updateFreelancerStats(fp, score);
     }
 
     private void updateFreelancerStats(FreelancerProfile fp, int score) {
