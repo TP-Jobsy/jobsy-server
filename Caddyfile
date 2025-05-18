@@ -21,12 +21,4 @@ jobsyapp.ru {
                 header_up Host {http.request.host}
             }
         }
-        handle /avatars/* {
-                uri strip_prefix /avatars
-                reverse_proxy minio:9000 {
-                    transport http {
-                        tls_insecure_skip_verify
-                    }
-                }
-        }
 }
