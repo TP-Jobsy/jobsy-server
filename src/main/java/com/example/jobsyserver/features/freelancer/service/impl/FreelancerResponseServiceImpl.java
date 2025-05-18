@@ -65,7 +65,13 @@ public class FreelancerResponseServiceImpl implements FreelancerResponseService 
         if (application.getApplicationType() != ApplicationType.RESPONSE) {
             throw new IllegalArgumentException("Это не отклик фрилансера");
         }
-
+        if (application.getStatus() != ProjectApplicationStatus.PENDING) {
+            throw new BadRequestException(
+                    application.getStatus() == ProjectApplicationStatus.APPROVED
+                            ? "Отклик уже одобрен"
+                            : "Отклик уже отклонён"
+            );
+        }
         application.setStatus(status);
         if (status == ProjectApplicationStatus.APPROVED) {
             Project project = application.getProject();
