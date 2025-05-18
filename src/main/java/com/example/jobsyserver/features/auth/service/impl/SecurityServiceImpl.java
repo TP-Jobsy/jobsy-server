@@ -60,7 +60,7 @@ public class SecurityServiceImpl implements SecurityService {
         ClientProfile profile = clientProfileRepository
                 .findByUserEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Профиль клиента не найден для пользователя " + email));
+                        "Профиль клиента для пользователя " + email));
         return profile.getId();
     }
 
@@ -70,7 +70,7 @@ public class SecurityServiceImpl implements SecurityService {
         FreelancerProfile profile = freelancerProfileRepository
                 .findByUserEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Профиль фрилансера не найден для пользователя " + email));
+                        "Профиль фрилансера для пользователя " + email));
         return profile.getId();
     }
 

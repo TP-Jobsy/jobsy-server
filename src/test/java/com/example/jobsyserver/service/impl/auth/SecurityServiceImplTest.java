@@ -2,6 +2,7 @@ package com.example.jobsyserver.service.impl.auth;
 
 import com.example.jobsyserver.features.auth.service.impl.SecurityServiceImpl;
 import com.example.jobsyserver.features.client.model.ClientProfile;
+import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
 import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
 import com.example.jobsyserver.features.client.repository.ClientProfileRepository;
 import com.example.jobsyserver.features.freelancer.repository.FreelancerProfileRepository;
@@ -92,9 +93,11 @@ public class SecurityServiceImplTest {
         when(clientProfileRepository.findByUserEmail(TEST_EMAIL)).thenReturn(Optional.empty());
         when(authentication.isAuthenticated()).thenReturn(true);
         when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(authentication);
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> securityService.getCurrentClientProfileId());
-        assertEquals("Профиль клиента не найден для пользователя " + TEST_EMAIL, exception.getMessage());
+
+        String expected = "Профиль клиента для пользователя " + TEST_EMAIL + " не найден";
+        assertEquals(expected, exception.getMessage());
     }
 
     @Test
@@ -119,9 +122,10 @@ public class SecurityServiceImplTest {
         when(freelancerProfileRepository.findByUserEmail(TEST_EMAIL)).thenReturn(Optional.empty());
         when(authentication.isAuthenticated()).thenReturn(true);
         when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(authentication);
-
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> securityService.getCurrentFreelancerProfileId());
-        assertEquals("Профиль фрилансера не найден для пользователя " + TEST_EMAIL, exception.getMessage());
+
+        String expected = "Профиль фрилансера для пользователя " + TEST_EMAIL + " не найден";
+        assertEquals(expected, exception.getMessage());
     }
 }
