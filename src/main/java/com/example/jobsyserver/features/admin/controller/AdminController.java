@@ -1,10 +1,11 @@
 package com.example.jobsyserver.features.admin.controller;
 
 import com.example.jobsyserver.features.admin.service.AdminService;
+import com.example.jobsyserver.features.client.dto.ClientProfileDto;
 import com.example.jobsyserver.features.common.dto.response.DefaultResponse;
+import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileDto;
 import com.example.jobsyserver.features.project.dto.ProjectDto;
 import com.example.jobsyserver.features.portfolio.dto.FreelancerPortfolioDto;
-import com.example.jobsyserver.features.user.dto.UserDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -25,76 +26,76 @@ public class AdminController {
 
     private final AdminService adminService;
 
-    @Operation(summary = "Получить список фрилансеров", description = "Возвращает список всех пользователей с ролью FREELANCER")
+    @Operation(summary = "Получить список фрилансеров", description = "Возвращает список всех профилей пользователей с ролью FREELANCER")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Профиль получен успешно"),
             @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован или не имеет прав"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
     @GetMapping("/freelancers")
-    public ResponseEntity<List<UserDto>> getAllFreelancers() {
+    public ResponseEntity<List<FreelancerProfileDto>> getAllFreelancers() {
         return ResponseEntity.ok(adminService.getAllFreelancers());
     }
 
-    @Operation(summary = "Получить профиль фрилансеров", description = "Возвращает пользователя по id с ролью FREELANCER")
+    @Operation(summary = "Получить профиль фрилансеров", description = "Возвращает профиль пользователя по userId с ролью FREELANCER")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Профиль получен успешно"),
             @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован или не имеет прав"),
             @ApiResponse(responseCode = "404", description = "Профиль не найден"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
-    @GetMapping("/freelancers/{id}")
-    public ResponseEntity<UserDto> getFreelancerById(@PathVariable Long id) {
-        return ResponseEntity.ok(adminService.getFreelancerById(id));
+    @GetMapping("/freelancers/{userId}")
+    public ResponseEntity<FreelancerProfileDto> getFreelancerById(@PathVariable Long userId) {
+        return ResponseEntity.ok(adminService.getFreelancerById(userId));
     }
 
-    @Operation(summary = "Деактивировать фрилансера", description = "Деактивирует пользователя по id с ролью FREELANCER")
+    @Operation(summary = "Удалить фрилансера", description = "Удаляет профиль фрилансера по userId")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Фрилансер успешно деактивирован"),
             @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован или не имеет прав"),
             @ApiResponse(responseCode = "404", description = "Профиль не найден"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
-    @DeleteMapping("/freelancers/{id}")
-    public ResponseEntity<?> deactivateFreelancer(@PathVariable Long id) {
-        adminService.deactivateFreelancer(id);
-        return ResponseEntity.ok(new DefaultResponse("Фрилансер успешно деактивирован"));
+    @DeleteMapping("/freelancers/{userId}")
+    public ResponseEntity<?> deleteFreelancer(@PathVariable Long userId) {
+        adminService.deactivateFreelancer(userId);
+        return ResponseEntity.ok(new DefaultResponse("Фрилансер успешно удалён"));
     }
 
-    @Operation(summary = "Получить список заказчиков", description = "Возвращает список всех пользователей с ролью CLIENT")
+    @Operation(summary = "Получить список заказчиков", description = "Возвращает список всех профилей пользователей с ролью CLIENT")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Профиль получен успешно"),
             @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован или не имеет прав"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
     @GetMapping("/clients")
-    public ResponseEntity<List<UserDto>> getAllClients() {
+    public ResponseEntity<List<ClientProfileDto>> getAllClients() {
         return ResponseEntity.ok(adminService.getAllClients());
     }
 
-    @Operation(summary = "Получить профиль заказчика", description = "Возвращает пользователя по id с ролью CLIENT")
+    @Operation(summary = "Получить профиль заказчика", description = "Возвращает профиль пользователя по id с ролью CLIENT")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Профиль получен успешно"),
             @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован или не имеет прав"),
             @ApiResponse(responseCode = "404", description = "Профиль не найден"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
-    @GetMapping("/clients/{id}")
-    public ResponseEntity<UserDto> getClientById(@PathVariable Long id) {
-        return ResponseEntity.ok(adminService.getClientById(id));
+    @GetMapping("/clients/{userId}")
+    public ResponseEntity<ClientProfileDto> getClientById(@PathVariable Long userId) {
+        return ResponseEntity.ok(adminService.getClientById(userId));
     }
 
-    @Operation(summary = "Деактивировать заказчика", description = "Деактивирует пользователя по id с ролью CLIENT")
+    @Operation(summary = "Удалить заказчика", description = "Удаляет профиль пользователя по userId с ролью CLIENT")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Фрилансер успешно деактивирован"),
             @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован или не имеет прав"),
             @ApiResponse(responseCode = "404", description = "Профиль не найден"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
-    @DeleteMapping("/clients/{id}")
-    public ResponseEntity<?> deactivateClient(@PathVariable Long id) {
-        adminService.deactivateClient(id);
-        return ResponseEntity.ok(new DefaultResponse("Клиент успешно деактивирован"));
+    @DeleteMapping("/clients/{userId}")
+    public ResponseEntity<?> deleteClient(@PathVariable Long userId) {
+        adminService.deleteClient(userId);
+        return ResponseEntity.ok(new DefaultResponse("Заказчик успешно удалён"));
     }
 
     @Operation(summary = "Получить список проектов пользователя", description = "Возвращает список проектов по id заказчика")
