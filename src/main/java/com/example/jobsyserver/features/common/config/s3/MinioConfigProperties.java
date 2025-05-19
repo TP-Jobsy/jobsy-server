@@ -14,6 +14,7 @@ import java.util.List;
 public record MinioConfigProperties(
         @NotBlank String endpoint,
         @NotBlank String region,
+        @NotBlank String publicUrl,
         @NotBlank(message = "Не задан ключ доступа S3") String accessKey,
         @NotBlank(message = "Не задан секретный ключ S3") String secretKey,
         @NotBlank String bucket,

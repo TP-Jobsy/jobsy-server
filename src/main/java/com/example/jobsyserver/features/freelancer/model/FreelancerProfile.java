@@ -61,4 +61,12 @@ public class FreelancerProfile {
 
     @Column(name="avatar_url")
     private String avatarUrl;
+
+    @Column(name = "average_rating", nullable = false)
+    @Builder.Default
+    private Double averageRating = 0.0;
+
+    @Column(name = "rating_count",   nullable = false)
+    @Builder.Default
+    private Integer ratingCount   = 0;
 }

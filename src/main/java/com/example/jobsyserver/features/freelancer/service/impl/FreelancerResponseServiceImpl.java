@@ -1,5 +1,6 @@
 package com.example.jobsyserver.features.freelancer.service.impl;
 
+import com.example.jobsyserver.features.common.exception.BadRequestException;
 import com.example.jobsyserver.features.project.dto.ProjectApplicationDto;
 import com.example.jobsyserver.features.common.enums.ApplicationType;
 import com.example.jobsyserver.features.common.enums.ProjectApplicationStatus;
@@ -29,6 +30,17 @@ public class FreelancerResponseServiceImpl implements FreelancerResponseService 
     @Override
     @Transactional
     public ProjectApplicationDto respond(Long projectId, Long freelancerId) {
+        boolean already = applicationRepository
+                .findByProjectIdAndFreelancerIdAndApplicationType(
+                        projectId,
+                        freelancerId,
+                        ApplicationType.RESPONSE
+                )
+                .isPresent();
+
+        if (already) {
+            throw new BadRequestException("Вы уже оставили отклик на этот проект");
+        }
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Проект"));
         FreelancerProfile freelancer = freelancerProfileRepository.findById(freelancerId)
@@ -53,7 +65,13 @@ public class FreelancerResponseServiceImpl implements FreelancerResponseService 
         if (application.getApplicationType() != ApplicationType.RESPONSE) {
             throw new IllegalArgumentException("Это не отклик фрилансера");
         }
-
+        if (application.getStatus() != ProjectApplicationStatus.PENDING) {
+            throw new BadRequestException(
+                    application.getStatus() == ProjectApplicationStatus.APPROVED
+                            ? "Отклик уже одобрен"
+                            : "Отклик уже отклонён"
+            );
+        }
         application.setStatus(status);
         if (status == ProjectApplicationStatus.APPROVED) {
             Project project = application.getProject();

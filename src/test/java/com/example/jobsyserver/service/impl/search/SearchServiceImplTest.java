@@ -15,6 +15,7 @@ import com.example.jobsyserver.features.search.service.impl.SearchServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,6 +68,7 @@ public class SearchServiceImplTest {
         FreelancerProfileAboutDto aboutDto = new FreelancerProfileAboutDto();
         aboutDto.setAboutMe("Experienced developer with 5 years of experience...");
         freelancerProfileDto.setAbout(aboutDto);
+
         project = new Project();
         project.setId(1L);
         project.setTitle("Project 1");
@@ -80,8 +81,11 @@ public class SearchServiceImplTest {
     void searchFreelancers_ShouldReturnList_WhenMatchingFreelancersFound() {
         List<Long> skillIds = List.of(1L, 2L);
         String textTerm = "Java";
-        when(freelancerProfileRepository.findAll(any(Specification.class))).thenReturn(List.of(freelancerProfile));
-        when(freelancerProfileMapper.toDto(freelancerProfile)).thenReturn(freelancerProfileDto);
+        when(freelancerProfileRepository.findAll(
+                ArgumentMatchers.<Specification<FreelancerProfile>>any()
+        )).thenReturn(List.of(freelancerProfile));
+        when(freelancerProfileMapper.toDto(freelancerProfile))
+                .thenReturn(freelancerProfileDto);
 
         List<FreelancerProfileDto> result = searchService.searchFreelancers(skillIds, textTerm);
 
@@ -89,28 +93,40 @@ public class SearchServiceImplTest {
         assertEquals(1, result.size());
         assertEquals("Russia", result.get(0).getBasic().getCountry());
         assertEquals("Moscow", result.get(0).getBasic().getCity());
-        assertEquals("https://linkedin.com/in/username", result.get(0).getContact().getContactLink());
-        assertEquals("Experienced developer with 5 years of experience...", result.get(0).getAbout().getAboutMe());
-        verify(freelancerProfileRepository, times(1)).findAll(any(Specification.class));
+        assertEquals("https://linkedin.com/in/username",
+                result.get(0).getContact().getContactLink());
+        assertEquals("Experienced developer with 5 years of experience...",
+                result.get(0).getAbout().getAboutMe());
+        verify(freelancerProfileRepository, times(1)).findAll(
+                ArgumentMatchers.<Specification<FreelancerProfile>>any()
+        );
     }
 
     @Test
     void searchFreelancers_ShouldReturnEmptyList_WhenNoMatchingFreelancersFound() {
         List<Long> skillIds = List.of(1L, 2L);
         String textTerm = "NonExistentSkill";
-        when(freelancerProfileRepository.findAll(any(Specification.class))).thenReturn(Collections.emptyList());
+
+        when(freelancerProfileRepository.findAll(
+                ArgumentMatchers.<Specification<FreelancerProfile>>any()
+        )).thenReturn(Collections.emptyList());
 
         List<FreelancerProfileDto> result = searchService.searchFreelancers(skillIds, textTerm);
 
         assertTrue(result.isEmpty());
-        verify(freelancerProfileRepository, times(1)).findAll(any(Specification.class));
+        verify(freelancerProfileRepository, times(1)).findAll(
+                ArgumentMatchers.<Specification<FreelancerProfile>>any()
+        );
     }
 
     @Test
     void searchProjects_ShouldReturnList_WhenMatchingProjectsFound() {
         List<Long> skillIds = List.of(1L, 2L);
         String textTerm = "Project";
-        when(projectRepository.findAll(any(Specification.class))).thenReturn(List.of(project));
+
+        when(projectRepository.findAll(
+                ArgumentMatchers.<Specification<Project>>any()
+        )).thenReturn(List.of(project));
         when(projectMapper.toDto(project)).thenReturn(projectDto);
 
         List<ProjectDto> result = searchService.searchProjects(skillIds, textTerm);
@@ -118,18 +134,22 @@ public class SearchServiceImplTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("Project 1", result.get(0).getTitle());
-        verify(projectRepository, times(1)).findAll(any(Specification.class));
+        verify(projectRepository, times(1)).findAll(
+                ArgumentMatchers.<Specification<Project>>any()
+        );
     }
 
     @Test
     void searchProjects_ShouldReturnEmptyList_WhenNoMatchingProjectsFound() {
         List<Long> skillIds = List.of(1L, 2L);
         String textTerm = "NonExistentProject";
-        when(projectRepository.findAll(any(Specification.class))).thenReturn(Collections.emptyList());
-
+        when(projectRepository.findAll(
+                ArgumentMatchers.<Specification<Project>>any()
+        )).thenReturn(Collections.emptyList());
         List<ProjectDto> result = searchService.searchProjects(skillIds, textTerm);
-
         assertTrue(result.isEmpty());
-        verify(projectRepository, times(1)).findAll(any(Specification.class));
+        verify(projectRepository, times(1)).findAll(
+                ArgumentMatchers.<Specification<Project>>any()
+        );
     }
 }

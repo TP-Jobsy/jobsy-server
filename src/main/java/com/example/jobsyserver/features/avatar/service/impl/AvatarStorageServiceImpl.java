@@ -43,9 +43,7 @@ public class AvatarStorageServiceImpl implements AvatarStorageService {
             throw new AvatarStorageException("Не удалось сохранить аватар: " + e.getMessage());
         }
 
-        return s3.utilities()
-                .getUrl(b -> b.bucket(props.bucket()).key(key))
-                .toExternalForm();
+        return String.format("%s/avatars/%s", props.publicUrl(), key);
     }
 
     private void validateFile(MultipartFile file) {

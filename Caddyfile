@@ -21,4 +21,8 @@ jobsyapp.ru {
                 header_up Host {http.request.host}
             }
         }
+         handle /avatars/* {
+                reverse_proxy http://minio:9000 {
+                }
+         }
 }
