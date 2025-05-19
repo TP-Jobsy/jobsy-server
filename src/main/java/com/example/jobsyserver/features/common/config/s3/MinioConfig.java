@@ -1,5 +1,6 @@
 package com.example.jobsyserver.features.common.config.s3;
 
+import org.springframework.core.annotation.Order;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,8 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @Slf4j
 @Configuration
@@ -37,6 +40,7 @@ public class MinioConfig {
     }
 
     @Bean
+    @Order(1)
     public ApplicationRunner initBucket(S3Client s3) {
         return args -> {
             String bucket = props.bucket();
@@ -63,6 +67,20 @@ public class MinioConfig {
             } catch (S3Exception e) {
                 log.error("Ошибка при работе с S3 при инициализации бакета '{}'", bucket, e);
             }
+        };
+    }
+
+    @Bean
+    @Order(2)
+    public ApplicationRunner applyBucketPolicy(S3Client s3) {
+        return args -> {
+            String bucket = props.bucket();
+            String policy = Files.readString(Path.of("readpolicy.json"));
+            s3.putBucketPolicy(PutBucketPolicyRequest.builder()
+                    .bucket(bucket)
+                    .policy(policy)
+                    .build());
+            log.info("Bucket policy applied to '{}'", bucket);
         };
     }
 }
