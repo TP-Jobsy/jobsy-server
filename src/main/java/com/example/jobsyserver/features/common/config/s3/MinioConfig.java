@@ -1,6 +1,8 @@
 package com.example.jobsyserver.features.common.config.s3;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.io.Resource;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,8 +18,8 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
 import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
+
 
 @Slf4j
 @Configuration
@@ -27,6 +29,9 @@ import java.nio.file.Path;
 public class MinioConfig {
 
     private final MinioConfigProperties props;
+
+    @Value("classpath:readpolicy.json")
+    private Resource bucketPolicy;
 
     @Bean
     public S3Client s3Client() {
@@ -74,13 +79,15 @@ public class MinioConfig {
     @Order(2)
     public ApplicationRunner applyBucketPolicy(S3Client s3) {
         return args -> {
-            String bucket = props.bucket();
-            String policy = Files.readString(Path.of("readpolicy.json"));
+            String policy = new String(
+                    bucketPolicy.getInputStream().readAllBytes(),
+                    StandardCharsets.UTF_8
+            );
             s3.putBucketPolicy(PutBucketPolicyRequest.builder()
-                    .bucket(bucket)
+                    .bucket(props.bucket())
                     .policy(policy)
                     .build());
-            log.info("Bucket policy applied to '{}'", bucket);
+            log.info("Bucket policy applied to '{}'", props.bucket());
         };
     }
 }
