@@ -1,6 +1,5 @@
 package com.example.jobsyserver.features.project.dto;
 
-import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -16,7 +15,4 @@ public class ProjectApplicationDto extends ProjectApplicationBasicDto {
 
     @Schema(description = "Дата создания заявки", example = "2024-04-18T14:00:00")
     private LocalDateTime createdAt;
-
-    @Schema(description = "Профиль фрилансера, который оставил заявку")
-    private FreelancerProfileDto freelancer;
 }

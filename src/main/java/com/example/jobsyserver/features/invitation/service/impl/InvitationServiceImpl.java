@@ -1,6 +1,5 @@
 package com.example.jobsyserver.features.invitation.service.impl;
 
-import com.example.jobsyserver.features.common.exception.BadRequestException;
 import com.example.jobsyserver.features.project.dto.ProjectApplicationDto;
 import com.example.jobsyserver.features.common.enums.ApplicationType;
 import com.example.jobsyserver.features.common.enums.ProjectApplicationStatus;
@@ -30,17 +29,6 @@ public class InvitationServiceImpl implements InvitationService {
     @Override
     @Transactional
     public ProjectApplicationDto invite(Long projectId, Long freelancerId) {
-        boolean alreadyInvited = applicationRepository
-                .findByProjectIdAndFreelancerIdAndApplicationType(
-                        projectId,
-                        freelancerId,
-                        ApplicationType.INVITATION
-                )
-                .isPresent();
-
-        if (alreadyInvited) {
-            throw new BadRequestException("Вы уже приглашали этого фрилансера на проект");
-        }
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Проект"));
         FreelancerProfile freelancer = freelancerProfileRepository.findById(freelancerId)
@@ -65,13 +53,7 @@ public class InvitationServiceImpl implements InvitationService {
         if (application.getApplicationType() != ApplicationType.INVITATION) {
             throw new IllegalArgumentException("Это не приглашение клиента");
         }
-        if (application.getStatus() != ProjectApplicationStatus.PENDING) {
-            throw new BadRequestException(
-                    application.getStatus() == ProjectApplicationStatus.APPROVED
-                            ? "Приглашение уже принято"
-                            : "Приглашение уже отклонено"
-            );
-        }
+
         application.setStatus(status);
         if (status == ProjectApplicationStatus.APPROVED) {
             Project project = application.getProject();

@@ -83,11 +83,11 @@ public class AiGenerationServiceImpl implements AiGenerationService {
                 .bodyToMono(JsonNode.class)
                 .block();
 
-        if (response == null) {
-            throw new IllegalStateException("AI-сервис Novita вернул пустой ответ");
-        }
         String raw = response
-                .at("/choices/0/message/content")
+                .path("choices")
+                .path(0)
+                .path("message")
+                .path("content")
                 .asText("");
 
         String cleaned = raw.replaceAll("(?s)<think>.*?</think>\\s*", "").trim();
@@ -105,7 +105,7 @@ public class AiGenerationServiceImpl implements AiGenerationService {
     private Bucket newBucket(Long userId) {
         Refill refill   = Refill.intervally(10, Duration.ofHours(1));
         Bandwidth limit = Bandwidth.classic(10, refill);
-        return Bucket.builder()
+        return Bucket4j.builder()
                 .addLimit(limit)
                 .build();
     }

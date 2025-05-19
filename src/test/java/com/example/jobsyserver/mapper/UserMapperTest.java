@@ -1,5 +1,6 @@
 package com.example.jobsyserver.mapper;
 
+import com.example.jobsyserver.features.project.mapper.ProjectApplicationMapper;
 import com.example.jobsyserver.features.user.dto.UserDto;
 import com.example.jobsyserver.features.common.enums.UserRole;
 import com.example.jobsyserver.features.user.mapper.UserMapper;

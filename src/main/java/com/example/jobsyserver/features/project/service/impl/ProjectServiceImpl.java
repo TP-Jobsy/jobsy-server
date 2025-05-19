@@ -173,35 +173,6 @@ public class ProjectServiceImpl implements ProjectService {
         projectRepository.save(draft);
         return updated;
     }
-    @Override
-    @Transactional
-    public ProjectDto completeByClient(Long projectId) {
-        Project p = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Проект", projectId));
-        if (!securityService.getCurrentClientProfileId().equals(p.getClient().getId())) {
-            throw new AccessDeniedException("Не ваш проект");
-        }
-        p.setClientCompleted(true);
-        if (p.isFreelancerCompleted()) {
-            p.setStatus(ProjectStatus.COMPLETED);
-        }
-        return projectMapper.toDto(projectRepository.save(p));
-    }
-    @Override
-    @Transactional
-    public ProjectDto completeByFreelancer(Long projectId) {
-        Project p = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ResourceNotFoundException("Проект", projectId));
-        if (p.getAssignedFreelancer() == null ||
-                !securityService.getCurrentFreelancerProfileId().equals(p.getAssignedFreelancer().getId())) {
-            throw new AccessDeniedException("Вы не назначены на этот проект");
-        }
-        p.setFreelancerCompleted(true);
-        if (p.isClientCompleted()) {
-            p.setStatus(ProjectStatus.COMPLETED);
-        }
-        return projectMapper.toDto(projectRepository.save(p));
-    }
 
     private void applyCategoryAndSpec(Project project, ProjectBasicDto dto) {
         if (dto.getCategory() != null) {

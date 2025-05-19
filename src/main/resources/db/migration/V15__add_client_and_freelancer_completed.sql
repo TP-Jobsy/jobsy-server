@@ -1,3 +1,0 @@
-ALTER TABLE projects
-    ADD COLUMN client_completed BOOLEAN NOT NULL DEFAULT FALSE,
-  ADD COLUMN freelancer_completed BOOLEAN NOT NULL DEFAULT FALSE;

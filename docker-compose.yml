@@ -55,8 +55,6 @@ services:
       NOVITA_API_DEFAULT_SYSTEM_PROMPT: "${NOVITA_API_DEFAULT_SYSTEM_PROMPT}"
       MANAGEMENT_SERVER_PORT: "8081"
       GEONAMES_USERNAME: "${GEONAMES_USERNAME}"
-    volumes:
-      - ./readpolicy.json:/app/readpolicy.json
     ports:
       - "8080:8080"
       - "8081:8081"

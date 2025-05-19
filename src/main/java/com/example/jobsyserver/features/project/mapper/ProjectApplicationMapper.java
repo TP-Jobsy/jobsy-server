@@ -1,6 +1,5 @@
 package com.example.jobsyserver.features.project.mapper;
 
-import com.example.jobsyserver.features.freelancer.mapper.FreelancerProfileMapper;
 import com.example.jobsyserver.features.project.dto.ProjectApplicationDto;
 import com.example.jobsyserver.features.project.dto.ProjectApplicationRequestDto;
 import com.example.jobsyserver.features.project.model.ProjectApplication;
@@ -8,7 +7,7 @@ import org.mapstruct.*;
 import org.springframework.context.annotation.Primary;
 
 @Primary
-@Mapper(componentModel = "spring", uses = FreelancerProfileMapper.class)
+@Mapper(componentModel = "spring")
 public interface ProjectApplicationMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -27,8 +26,7 @@ public interface ProjectApplicationMapper {
             @Mapping(source = "applicationType",  target = "applicationType"),
             @Mapping(source = "status",           target = "status"),
             @Mapping(source = "id",               target = "id"),
-            @Mapping(source = "createdAt",        target = "createdAt"),
-            @Mapping(source = "freelancer",      target = "freelancer")
+            @Mapping(source = "createdAt",        target = "createdAt")
     })
     ProjectApplicationDto toDto(ProjectApplication projectApplication);
 }

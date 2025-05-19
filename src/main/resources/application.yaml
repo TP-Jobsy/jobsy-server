@@ -60,7 +60,7 @@ s3:
       - png
       - jpg
       - jpeg
-
+      -
 search:
   max-skills: 10
 

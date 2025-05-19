@@ -19,10 +19,4 @@ public class ProjectDetailDto {
 
     @Schema(description = "Список приглашений, отправленных клиентом фрилансерам")
     private List<ProjectApplicationDto> invitations;
-
-    @Schema(description = "Клиент нажал \"Завершил\"")
-    private boolean clientCompleted;
-
-    @Schema(description = "Фрилансер нажал \"Завершил\"")
-    private boolean freelancerCompleted;
 }

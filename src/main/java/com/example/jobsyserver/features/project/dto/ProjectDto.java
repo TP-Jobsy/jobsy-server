@@ -68,12 +68,4 @@ public class ProjectDto {
 
     @Schema(description = "Исполнитель проекта (фрилансер), если назначен")
     private FreelancerProfileDto assignedFreelancer;
-
-    @Schema(description = "Клиент нажал \"Завершил\"")
-    @Builder.Default
-    private boolean clientCompleted = false;
-
-    @Schema(description = "Фрилансер нажал \"Завершил\"")
-    @Builder.Default
-    private boolean freelancerCompleted = false;
 }

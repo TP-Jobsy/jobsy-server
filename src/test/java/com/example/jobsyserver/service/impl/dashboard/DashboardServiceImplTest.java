@@ -55,9 +55,9 @@ class DashboardServiceImplTest {
     void getClientProjectDetail_shouldReturnProjectDetail() {
         when(projectService.getProjectByIdAndClient(testProjectId, testClientId))
                 .thenReturn(testProjectDto);
-        when(appService.getResponsesForProject(testProjectId, ProjectApplicationStatus.PENDING))
+        when(appService.getResponsesForProject(testProjectId, null))
                 .thenReturn(List.of(testAppDto));
-        when(appService.getInvitationsForProject(testProjectId, ProjectApplicationStatus.PENDING))
+        when(appService.getInvitationsForProject(testProjectId, null))
                 .thenReturn(List.of(testAppDto));
 
         ProjectDetailDto result = dashboardService.getClientProjectDetail(testClientId, testProjectId);
@@ -120,9 +120,9 @@ class DashboardServiceImplTest {
     void getClientProjectDetail_shouldHandleEmptyResponsesAndInvitations() {
         when(projectService.getProjectByIdAndClient(testProjectId, testClientId))
                 .thenReturn(testProjectDto);
-        when(appService.getResponsesForProject(testProjectId, ProjectApplicationStatus.PENDING))
+        when(appService.getResponsesForProject(testProjectId, null))
                 .thenReturn(List.of());
-        when(appService.getInvitationsForProject(testProjectId, ProjectApplicationStatus.PENDING))
+        when(appService.getInvitationsForProject(testProjectId, null))
                 .thenReturn(List.of());
 
         ProjectDetailDto result = dashboardService.getClientProjectDetail(testClientId, testProjectId);

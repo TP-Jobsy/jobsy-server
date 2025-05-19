@@ -33,10 +33,4 @@ public class FreelancerProfileDto {
 
     @Schema(description = "url аватарки фрилансера")
     private String avatarUrl;
-
-    @Schema(description = "Средний рейтинг фрилансера", example = "4.5")
-    private Double averageRating;
-
-    @Schema(description = "Количество полученных оценок", example = "12")
-    private Integer ratingCount;
 }
