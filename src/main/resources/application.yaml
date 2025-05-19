@@ -55,6 +55,7 @@ s3:
     access‑key: ${S3_CLIENT_ACCESS_KEY:S3_CLIENT_ACCESS_KEY}
     secret‑key: ${S3_CLIENT_SECRET_KEY:S3_CLIENT_SECRET_KEY}
     bucket: avatars
+    public-url: https://jobsyapp.ru
     maxSize: 2097152
     allowed-ext:
       - png
