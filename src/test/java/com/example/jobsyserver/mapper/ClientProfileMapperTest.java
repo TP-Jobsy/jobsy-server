@@ -1,5 +1,6 @@
 package com.example.jobsyserver.mapper;
 
+import com.example.jobsyserver.TestValidationStubs;
 import com.example.jobsyserver.features.client.dto.ClientProfileBasicDto;
 import com.example.jobsyserver.features.client.dto.ClientProfileContactDto;
 import com.example.jobsyserver.features.client.dto.ClientProfileDto;
@@ -14,13 +15,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Import({ UserMapperImpl.class, ClientProfileMapperImpl.class })
+@ActiveProfiles("test")
+@Import({ UserMapperImpl.class, ClientProfileMapperImpl.class, TestValidationStubs.class })
 @SpringBootTest
 class ClientProfileMapperTest {
 
