@@ -18,4 +18,6 @@ public interface ProjectService {
     ProjectDto createDraft(ProjectCreateDto dto);
     ProjectDto updateDraft(Long draftId, ProjectUpdateDto dto);
     ProjectDto publish(Long draftId, ProjectUpdateDto dto);
+    ProjectDto completeByClient(Long projectId);
+    ProjectDto completeByFreelancer(Long projectId);
 }

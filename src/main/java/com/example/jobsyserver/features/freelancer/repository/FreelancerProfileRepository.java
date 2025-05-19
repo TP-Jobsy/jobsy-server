@@ -12,5 +12,4 @@ import java.util.Optional;
 public interface FreelancerProfileRepository extends JpaRepository<FreelancerProfile, Long>, JpaSpecificationExecutor<FreelancerProfile> {
     Optional<FreelancerProfile> findByUser(User user);
     Optional<FreelancerProfile> findByUserEmail(String email);
-    Optional<FreelancerProfile> findByUserId(Long userId);
 }

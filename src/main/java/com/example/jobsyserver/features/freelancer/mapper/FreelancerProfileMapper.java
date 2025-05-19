@@ -41,8 +41,6 @@ public interface FreelancerProfileMapper {
     })
     FreelancerProfileDto toDto(FreelancerProfile profile);
 
-    List<FreelancerProfileDto> toDtoList(List<FreelancerProfile> profiles);
-
     @Named("mapFreelancerSkills")
     default List<SkillDto> mapFreelancerSkills(List<FreelancerSkill> freelancerSkills) {
         if (freelancerSkills == null) {
