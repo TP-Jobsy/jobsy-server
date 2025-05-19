@@ -1,20 +1,14 @@
 package com.example.jobsyserver.features.admin.service.impl;
 
 import com.example.jobsyserver.features.admin.service.AdminService;
-import com.example.jobsyserver.features.client.dto.ClientProfileDto;
-import com.example.jobsyserver.features.client.mapper.ClientProfileMapper;
-import com.example.jobsyserver.features.client.model.ClientProfile;
-import com.example.jobsyserver.features.client.repository.ClientProfileRepository;
 import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
-import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileDto;
-import com.example.jobsyserver.features.freelancer.mapper.FreelancerProfileMapper;
-import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
-import com.example.jobsyserver.features.freelancer.repository.FreelancerProfileRepository;
 import com.example.jobsyserver.features.portfolio.model.FreelancerPortfolio;
 import com.example.jobsyserver.features.project.model.Project;
+import com.example.jobsyserver.features.user.dto.UserDto;
 import com.example.jobsyserver.features.user.model.User;
 import com.example.jobsyserver.features.common.enums.UserRole;
 import com.example.jobsyserver.features.user.repository.UserRepository;
+import com.example.jobsyserver.features.user.mapper.UserMapper;
 import com.example.jobsyserver.features.project.repository.ProjectRepository;
 import com.example.jobsyserver.features.project.mapper.ProjectMapper;
 import com.example.jobsyserver.features.portfolio.repository.FreelancerPortfolioRepository;
@@ -27,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -37,83 +30,59 @@ import java.util.stream.Collectors;
 public class AdminServiceImpl implements AdminService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final FreelancerPortfolioRepository portfolioRepository;
     private final FreelancerPortfolioMapper portfolioMapper;
-    private final FreelancerProfileRepository freelancerProfileRepository;
-    private final FreelancerProfileMapper freelancerProfileMapper;
-    private final ClientProfileRepository clientProfileRepository;
-    private final ClientProfileMapper clientProfileMapper;
 
     @Override
-    public List<FreelancerProfileDto> getAllFreelancers() {
+    public List<UserDto> getAllFreelancers() {
         log.info("Получение всех профилей фрилансеров");
         return userRepository.findByRole(UserRole.FREELANCER).stream()
-                .map(freelancerProfileRepository::findByUser)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(freelancerProfileMapper::toDto)
+                .map(userMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public FreelancerProfileDto getFreelancerById(Long userId) {
-        FreelancerProfile freelancerProfile = freelancerProfileRepository.findByUserId(userId).orElseThrow(() -> new ResourceNotFoundException("Профиль фрилансера", userId));
-        log.info("Получение профиля фрилансера с userId: {}", userId);
-        return freelancerProfileMapper.toDto(freelancerProfile);
+    public UserDto getFreelancerById(Long id) {
+        User freelancer = userRepository.findByIdAndRole(id, UserRole.FREELANCER)
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь", id));
+        log.info("Получение профиля фрилансера с id: {}", id);
+        return userMapper.toDto(freelancer);
     }
 
     @Override
-    public void deactivateFreelancer(Long userId) {
-        User freelancer = userRepository.findByIdAndRole(userId, UserRole.FREELANCER)
-                .orElseThrow(() -> new ResourceNotFoundException("Пользователь", userId));
+    public void deactivateFreelancer(Long id) {
+        User freelancer = userRepository.findByIdAndRole(id, UserRole.FREELANCER)
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь", id));
         freelancer.setIsActive(false);
-        log.info("Деактивация профиля фрилансера с userId: {}", userId);
+        log.info("Деактивация профиля фрилансера с id: {}", id);
         userRepository.save(freelancer);
     }
 
     @Override
-    public void deleteFreelancer(Long userId) {
-        User user = userRepository.findByIdAndRole(userId, UserRole.FREELANCER)
-                .orElseThrow(() -> new ResourceNotFoundException("Фрилансер", "id", userId));
-        userRepository.delete(user);
-        log.info("Аккаунт фрилансера с userId {} успешно удалён", userId);
-    }
-
-    @Override
-    public List<ClientProfileDto> getAllClients() {
+    public List<UserDto> getAllClients() {
         return userRepository.findByRole(UserRole.CLIENT).stream()
-                .map(clientProfileRepository::findByUser)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(clientProfileMapper::toDto)
+                .map(userMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public ClientProfileDto getClientById(Long userId) {
-        ClientProfile clientProfile = clientProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Профиль заказчика", userId));
-        log.info("Получение профиля заказчика с userId: {}", userId);
-        return clientProfileMapper.toDto(clientProfile);
+    public UserDto getClientById(Long id) {
+        User client = userRepository.findByIdAndRole(id, UserRole.CLIENT)
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь", id));
+        log.info("Получение профиля заказчика с id: {}", id);
+        return userMapper.toDto(client);
     }
 
     @Override
-    public void deactivateClient(Long userId) {
-        User client = userRepository.findByIdAndRole(userId, UserRole.CLIENT)
-                .orElseThrow(() -> new ResourceNotFoundException("Пользователь", userId));
+    public void deactivateClient(Long id) {
+        User client = userRepository.findByIdAndRole(id, UserRole.CLIENT)
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь", id));
         client.setIsActive(false);
-        log.info("Деактивация профиля заказчика с userId: {}", userId);
+        log.info("Деактивация профиля фрилансера с id: {}", id);
         userRepository.save(client);
-    }
-
-    @Override
-    public void deleteClient(Long userId) {
-        User user = userRepository.findByIdAndRole(userId, UserRole.CLIENT)
-                .orElseThrow(() -> new ResourceNotFoundException("Фрилансер", "id", userId));
-        userRepository.delete(user);
-        log.info("Аккаунт заказчика с userId {} успешно удалён", userId);
     }
 
     @Override

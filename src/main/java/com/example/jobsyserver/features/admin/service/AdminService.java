@@ -1,7 +1,5 @@
 package com.example.jobsyserver.features.admin.service;
 
-import com.example.jobsyserver.features.client.dto.ClientProfileDto;
-import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileDto;
 import com.example.jobsyserver.features.portfolio.dto.FreelancerPortfolioDto;
 import com.example.jobsyserver.features.project.dto.ProjectDto;
 import com.example.jobsyserver.features.user.dto.UserDto;
@@ -9,14 +7,12 @@ import com.example.jobsyserver.features.user.dto.UserDto;
 import java.util.List;
 
 public interface AdminService {
-    List<FreelancerProfileDto> getAllFreelancers();
-    FreelancerProfileDto getFreelancerById(Long id);
+    List<UserDto> getAllFreelancers();
+    UserDto getFreelancerById(Long id);
     void deactivateFreelancer(Long id);
-    void deleteFreelancer(Long id);
-    List<ClientProfileDto> getAllClients();
-    ClientProfileDto getClientById(Long id);
+    List<UserDto> getAllClients();
+    UserDto getClientById(Long id);
     void deactivateClient(Long id);
-    void deleteClient(Long id);
     List<ProjectDto> getClientProjects(Long clientId);
     ProjectDto getProjectById(Long id);
     void deleteProject(Long id);
