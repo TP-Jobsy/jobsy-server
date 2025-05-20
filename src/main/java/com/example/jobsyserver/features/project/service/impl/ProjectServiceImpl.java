@@ -41,17 +41,12 @@ public class ProjectServiceImpl implements ProjectService {
     private final SecurityService securityService;
     private final ProjectSkillService projectSkillService;
 
-    @Override
     public List<ProjectDto> getAllProjects(ProjectStatus status) {
-        List<Project> projects = (status != null)
-                ? projectRepository.findAllWithEverythingByStatus(status)
-                : projectRepository.findAllWithEverything();
-
+        List<Project> projects = projectRepository.findAllWithGraph(status);
         return projects.stream()
                 .map(projectMapper::toDto)
                 .toList();
     }
-
 
     @Override
     public ProjectDto getProjectById(Long projectId) {

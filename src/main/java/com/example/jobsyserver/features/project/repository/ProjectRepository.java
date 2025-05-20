@@ -2,6 +2,7 @@ package com.example.jobsyserver.features.project.repository;
 
 import com.example.jobsyserver.features.common.enums.ProjectStatus;
 import com.example.jobsyserver.features.project.model.Project;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -21,36 +22,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
 
     List<Project> findByAssignedFreelancerId(Long freelancerProfileId);
 
-    @Query("""
-        select distinct p
-        from Project p
-        left join fetch p.category
-        left join fetch p.specialization
-        left join fetch p.client cp
-        left join fetch cp.user
-        left join fetch p.projectSkills ps
-        left join fetch ps.skill
-        left join fetch p.assignedFreelancer af
-        left join fetch af.user
-        left join fetch af.freelancerSkills fs
-        left join fetch fs.skill
-        """)
-    List<Project> findAllWithEverything();
-
-    @Query("""
-        select distinct p
-        from Project p
-        left join fetch p.category
-        left join fetch p.specialization
-        left join fetch p.client cp
-        left join fetch cp.user
-        left join fetch p.projectSkills ps
-        left join fetch ps.skill
-        left join fetch p.assignedFreelancer af
-        left join fetch af.user
-        left join fetch af.freelancerSkills fs
-        left join fetch fs.skill
-        where p.status = :status
-        """)
-    List<Project> findAllWithEverythingByStatus(@Param("status") ProjectStatus status);
+    @EntityGraph(value = "Project.full", type = EntityGraph.EntityGraphType.LOAD)
+    @Query("select distinct p from Project p where (:status is null or p.status = :status)")
+    List<Project> findAllWithGraph(@Param("status") ProjectStatus status);
 }

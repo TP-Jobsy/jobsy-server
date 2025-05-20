@@ -9,9 +9,9 @@ import com.example.jobsyserver.features.client.model.ClientProfile;
 import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
 import com.example.jobsyserver.features.specialization.model.Specialization;
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -21,6 +21,25 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
+@NamedEntityGraph(
+        name = "Project.full",
+        attributeNodes = {
+                @NamedAttributeNode("category"),
+                @NamedAttributeNode("specialization"),
+                @NamedAttributeNode(value = "client", subgraph = "client-user"),
+                @NamedAttributeNode(value = "assignedFreelancer", subgraph = "freelancer-user")
+        },
+        subgraphs = {
+                @NamedSubgraph(
+                        name = "client-user",
+                        attributeNodes = @NamedAttributeNode("user")
+                ),
+                @NamedSubgraph(
+                        name = "freelancer-user",
+                        attributeNodes = @NamedAttributeNode("user")
+                )
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -85,7 +104,9 @@ public class Project {
     @JoinColumn(name = "assigned_freelancer_id")
     private FreelancerProfile assignedFreelancer;
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SUBSELECT)
+    @BatchSize(size = 20)
     @Builder.Default
     private Set<ProjectSkill> projectSkills = new HashSet<>();
 

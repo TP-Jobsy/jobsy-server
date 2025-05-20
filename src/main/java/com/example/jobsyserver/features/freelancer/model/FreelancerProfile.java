@@ -63,18 +63,18 @@ public class FreelancerProfile {
 
     @OneToMany(mappedBy = "freelancerProfile", fetch = FetchType.LAZY)
     @Fetch(FetchMode.SUBSELECT)
-    @BatchSize(size = 50)
+    @BatchSize(size = 20)
     @Builder.Default
     private Set<FreelancerSkill> freelancerSkills = new HashSet<>();
 
-    @Column(name="avatar_url")
+    @Column(name = "avatar_url")
     private String avatarUrl;
 
     @Column(name = "average_rating", nullable = false)
     @Builder.Default
     private Double averageRating = 0.0;
 
-    @Column(name = "rating_count",   nullable = false)
+    @Column(name = "rating_count", nullable = false)
     @Builder.Default
-    private Integer ratingCount   = 0;
+    private Integer ratingCount = 0;
 }
