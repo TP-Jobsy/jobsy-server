@@ -24,7 +24,6 @@ public class FreelancerSkill {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("skillId")
-    @BatchSize(size = 50)
     @JoinColumn(name = "skill_id", nullable = false)
     private Skill skill;
 
