@@ -17,7 +17,6 @@ import com.example.jobsyserver.features.category.repository.CategoryRepository;
 import com.example.jobsyserver.features.client.repository.ClientProfileRepository;
 import com.example.jobsyserver.features.project.repository.ProjectRepository;
 import com.example.jobsyserver.features.specialization.repository.SpecializationRepository;
-import com.example.jobsyserver.features.user.repository.UserRepository;
 import com.example.jobsyserver.features.project.service.ProjectService;
 import com.example.jobsyserver.features.project.service.ProjectSkillService;
 import com.example.jobsyserver.features.auth.service.SecurityService;
@@ -39,15 +38,12 @@ public class ProjectServiceImpl implements ProjectService {
     private final CategoryRepository categoryRepository;
     private final SpecializationRepository specializationRepository;
     private final ProjectMapper projectMapper;
-    private final UserRepository userRepository;
     private final SecurityService securityService;
     private final ProjectSkillService projectSkillService;
 
     @Override
     public List<ProjectDto> getAllProjects(ProjectStatus status) {
-        var projects = status != null
-                ? projectRepository.findByStatus(status)
-                : projectRepository.findAll();
+        var projects = projectRepository.findAllWithAllData(status);
         return projects.stream()
                 .map(projectMapper::toDto)
                 .toList();
