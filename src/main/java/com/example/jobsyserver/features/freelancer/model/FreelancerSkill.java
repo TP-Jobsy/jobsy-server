@@ -3,6 +3,7 @@ package com.example.jobsyserver.features.freelancer.model;
 import com.example.jobsyserver.features.skill.model.Skill;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 @Data
 @NoArgsConstructor
@@ -23,6 +24,7 @@ public class FreelancerSkill {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("skillId")
+    @BatchSize(size = 50)
     @JoinColumn(name = "skill_id", nullable = false)
     private Skill skill;
 

@@ -32,9 +32,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
         LEFT JOIN FETCH ps.skill
         LEFT JOIN FETCH p.assignedFreelancer af
         LEFT JOIN FETCH af.user
-        LEFT JOIN FETCH af.freelancerSkills fs
-        LEFT JOIN FETCH fs.skill
         WHERE (:status IS NULL OR p.status = :status)
         """)
-    List<Project> findAllWithEverything(@Param("status") ProjectStatus status);
+    List<Project> findAllWithCoreData(@Param("status") ProjectStatus status);
 }

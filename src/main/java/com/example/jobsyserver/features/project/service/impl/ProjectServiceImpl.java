@@ -43,9 +43,13 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectDto> getAllProjects(ProjectStatus status) {
-        return projectRepository
-                .findAllWithEverything(status)
-                .stream()
+        List<Project> projects = projectRepository.findAllWithCoreData(status);
+        projects.forEach(p -> {
+            if (p.getAssignedFreelancer() != null) {
+                p.getAssignedFreelancer().getFreelancerSkills().size();
+            }
+        });
+        return projects.stream()
                 .map(projectMapper::toDto)
                 .toList();
     }

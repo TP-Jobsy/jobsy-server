@@ -4,6 +4,9 @@ import com.example.jobsyserver.features.common.enums.Experience;
 import com.example.jobsyserver.features.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -58,8 +61,9 @@ public class FreelancerProfile {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "freelancerProfile", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
+    @OneToMany(mappedBy = "freelancerProfile", fetch = FetchType.LAZY)
+    @Fetch(FetchMode.SUBSELECT)
+    @BatchSize(size = 50)
     private Set<FreelancerSkill> freelancerSkills = new HashSet<>();
 
     @Column(name="avatar_url")
