@@ -21,7 +21,6 @@ import com.example.jobsyserver.features.project.service.ProjectService;
 import com.example.jobsyserver.features.project.service.ProjectSkillService;
 import com.example.jobsyserver.features.auth.service.SecurityService;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,17 +43,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectDto> getAllProjects(ProjectStatus status) {
-        List<Project> projects = (status != null)
-                ? projectRepository.findAllWithSkillsAndFreelancerByStatus(status)
-                : projectRepository.findAllWithSkillsAndFreelancer();
-
-        for (Project p : projects) {
-            if (p.getAssignedFreelancer() != null) {
-                Hibernate.initialize(p.getAssignedFreelancer().getFreelancerSkills());
-            }
-        }
-
-        return projects.stream()
+        return projectRepository
+                .findAllWithEverything(status)
+                .stream()
                 .map(projectMapper::toDto)
                 .toList();
     }

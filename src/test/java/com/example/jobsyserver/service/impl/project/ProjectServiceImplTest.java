@@ -62,15 +62,17 @@ class ProjectServiceImplTest {
 
     @Test
     void getAllProjects_withAndWithoutStatus() {
-        when(projectRepository.findAllWithSkillsAndFreelancer())
+        when(projectRepository.findAllWithEverything(null))
                 .thenReturn(List.of(openProj));
-        when(projectRepository.findAllWithSkillsAndFreelancerByStatus(ProjectStatus.OPEN))
+        when(projectRepository.findAllWithEverything(ProjectStatus.OPEN))
                 .thenReturn(List.of(openProj));
         when(projectMapper.toDto(openProj)).thenReturn(new ProjectDto());
         var all = service.getAllProjects(null);
         assertEquals(1, all.size());
         var filtered = service.getAllProjects(ProjectStatus.OPEN);
         assertEquals(1, filtered.size());
+        verify(projectRepository).findAllWithEverything(null);
+        verify(projectRepository).findAllWithEverything(ProjectStatus.OPEN);
     }
 
     @Test
