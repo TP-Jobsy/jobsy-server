@@ -16,7 +16,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -83,7 +85,7 @@ public class Project {
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<ProjectSkill> projectSkills = new ArrayList<>();
+    private Set<ProjectSkill> projectSkills = new HashSet<>();
 
     @Column(name = "client_completed", nullable = false)
     @Builder.Default
