@@ -22,7 +22,12 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
 
     List<Project> findByAssignedFreelancerId(Long freelancerProfileId);
 
+
     @EntityGraph(value = "Project.full", type = EntityGraph.EntityGraphType.LOAD)
-    @Query("select distinct p from Project p where (:status is null or p.status = :status)")
-    List<Project> findAllWithGraph(@Param("status") ProjectStatus status);
+    @Query("SELECT DISTINCT p FROM Project p")
+    List<Project> findAllWithGraph();
+
+    @EntityGraph(value = "Project.full", type = EntityGraph.EntityGraphType.LOAD)
+    @Query("SELECT DISTINCT p FROM Project p WHERE p.status = :status")
+    List<Project> findAllWithGraphByStatus(@Param("status") ProjectStatus status);
 }

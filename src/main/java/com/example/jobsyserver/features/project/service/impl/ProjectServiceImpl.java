@@ -42,7 +42,9 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectSkillService projectSkillService;
 
     public List<ProjectDto> getAllProjects(ProjectStatus status) {
-        List<Project> projects = projectRepository.findAllWithGraph(status);
+        List<Project> projects = (status != null)
+                ? projectRepository.findAllWithGraphByStatus(status)
+                : projectRepository.findAllWithGraph();
         return projects.stream()
                 .map(projectMapper::toDto)
                 .toList();
