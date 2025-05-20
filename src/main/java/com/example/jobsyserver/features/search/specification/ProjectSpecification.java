@@ -1,7 +1,7 @@
 package com.example.jobsyserver.features.search.specification;
 
 import com.example.jobsyserver.features.project.model.Project;
-import com.example.jobsyserver.features.project.model.ProjectSkill;
+import com.example.jobsyserver.features.skill.model.Skill;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -25,8 +25,8 @@ public final class ProjectSpecification {
             if (resultType != null && !Long.class.equals(resultType)) {
                 query.distinct(true);
             }
-            Join<Project, ProjectSkill> skills =
-                    root.join("projectSkills", JoinType.INNER);
+            Join<Project, Skill> skills =
+                    root.join("skills", JoinType.INNER);
             return skills.get("skill").get("id").in(skillIds);
         };
     }

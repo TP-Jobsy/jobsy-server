@@ -10,24 +10,30 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
+
+import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphType.LOAD;
 
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpecificationExecutor<Project> {
-
+    @EntityGraph(value = "Project.full", type = LOAD)
     List<Project> findByClientId(Long clientId);
-
+    @EntityGraph(value = "Project.full", type = LOAD)
     List<Project> findByClientIdAndStatus(Long clientId, ProjectStatus status);
-
+    @EntityGraph(value = "Project.full", type = LOAD)
     List<Project> findByAssignedFreelancerIdAndStatus(Long freelancerProfileId, ProjectStatus status);
-
+    @EntityGraph(value = "Project.full", type = LOAD)
     List<Project> findByAssignedFreelancerId(Long freelancerProfileId);
 
-
-    @EntityGraph(value = "Project.full", type = EntityGraph.EntityGraphType.LOAD)
-    @Query("SELECT DISTINCT p FROM Project p")
+    @EntityGraph(value = "Project.full", type = LOAD)
+    @Query("SELECT p FROM Project p")
     List<Project> findAllWithGraph();
 
-    @EntityGraph(value = "Project.full", type = EntityGraph.EntityGraphType.LOAD)
-    @Query("SELECT DISTINCT p FROM Project p WHERE p.status = :status")
+    @EntityGraph(value = "Project.full", type = LOAD)
+    @Query("SELECT p FROM Project p WHERE p.status = :status")
     List<Project> findAllWithGraphByStatus(@Param("status") ProjectStatus status);
+
+    @Override
+    @EntityGraph(value = "Project.full", type = LOAD)
+    Optional<Project> findById(Long id);
 }

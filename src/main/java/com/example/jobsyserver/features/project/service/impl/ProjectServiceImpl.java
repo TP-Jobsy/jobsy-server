@@ -1,5 +1,6 @@
 package com.example.jobsyserver.features.project.service.impl;
 
+import com.example.jobsyserver.features.common.exception.BadRequestException;
 import com.example.jobsyserver.features.skill.dto.SkillDto;
 import com.example.jobsyserver.features.project.dto.ProjectBasicDto;
 import com.example.jobsyserver.features.project.dto.ProjectCreateDto;
@@ -12,13 +13,14 @@ import com.example.jobsyserver.features.common.enums.ProjectStatus;
 import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
 import com.example.jobsyserver.features.project.mapper.ProjectMapper;
 import com.example.jobsyserver.features.project.model.Project;
+import com.example.jobsyserver.features.skill.model.Skill;
+import com.example.jobsyserver.features.skill.repository.SkillRepository;
 import com.example.jobsyserver.features.user.model.User;
 import com.example.jobsyserver.features.category.repository.CategoryRepository;
 import com.example.jobsyserver.features.client.repository.ClientProfileRepository;
 import com.example.jobsyserver.features.project.repository.ProjectRepository;
 import com.example.jobsyserver.features.specialization.repository.SpecializationRepository;
 import com.example.jobsyserver.features.project.service.ProjectService;
-import com.example.jobsyserver.features.project.service.ProjectSkillService;
 import com.example.jobsyserver.features.auth.service.SecurityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
@@ -32,27 +34,26 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ProjectServiceImpl implements ProjectService {
-
     private final ProjectRepository projectRepository;
+    private final SkillRepository skillRepository;
     private final ClientProfileRepository clientProfileRepository;
     private final CategoryRepository categoryRepository;
     private final SpecializationRepository specializationRepository;
     private final ProjectMapper projectMapper;
     private final SecurityService securityService;
-    private final ProjectSkillService projectSkillService;
 
+    @Override
     public List<ProjectDto> getAllProjects(ProjectStatus status) {
         List<Project> projects = (status != null)
                 ? projectRepository.findAllWithGraphByStatus(status)
                 : projectRepository.findAllWithGraph();
-        return projects.stream()
-                .map(projectMapper::toDto)
-                .toList();
+        return projectMapper.toDtoList(projects);
     }
+
 
     @Override
     public ProjectDto getProjectById(Long projectId) {
-        var project = projectRepository.findById(projectId)
+        Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ResourceNotFoundException("Проект", projectId));
         return projectMapper.toDto(project);
     }
@@ -170,6 +171,7 @@ public class ProjectServiceImpl implements ProjectService {
         projectRepository.save(draft);
         return updated;
     }
+
     @Override
     @Transactional
     public ProjectDto completeByClient(Long projectId) {
@@ -184,6 +186,7 @@ public class ProjectServiceImpl implements ProjectService {
         }
         return projectMapper.toDto(projectRepository.save(p));
     }
+
     @Override
     @Transactional
     public ProjectDto completeByFreelancer(Long projectId) {
@@ -213,11 +216,14 @@ public class ProjectServiceImpl implements ProjectService {
         }
     }
 
-    private void syncSkills(Project project, List<SkillDto> skills) {
-        projectSkillService.getSkillsByProject(project.getId())
-                .forEach(s -> projectSkillService.removeSkill(project.getId(), s.getId()));
-        if (skills != null) {
-            skills.forEach(s -> projectSkillService.addSkill(project.getId(), s.getId()));
+    private void syncSkills(Project project, List<SkillDto> skillDtos) {
+        project.getSkills().clear();
+        if (skillDtos != null) {
+            for (SkillDto sd : skillDtos) {
+                Skill skill = skillRepository.findById(sd.getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Навык", sd.getId()));
+                project.getSkills().add(skill);
+            }
         }
     }
 }

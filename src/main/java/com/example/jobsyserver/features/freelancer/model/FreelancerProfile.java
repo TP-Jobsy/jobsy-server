@@ -1,17 +1,14 @@
 package com.example.jobsyserver.features.freelancer.model;
 
 import com.example.jobsyserver.features.common.enums.Experience;
+import com.example.jobsyserver.features.skill.model.Skill;
 import com.example.jobsyserver.features.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Data
@@ -19,7 +16,6 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Entity
-@EqualsAndHashCode(exclude = "freelancerSkills")
 @Table(name = "freelancer_profiles")
 public class FreelancerProfile {
 
@@ -61,11 +57,13 @@ public class FreelancerProfile {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "freelancerProfile", fetch = FetchType.LAZY)
-    @Fetch(FetchMode.SUBSELECT)
+    @ManyToMany
+    @JoinTable(name = "freelancer_skills",
+            joinColumns        = @JoinColumn(name = "freelancer_id"),
+            inverseJoinColumns = @JoinColumn(name = "skill_id"))
     @BatchSize(size = 20)
     @Builder.Default
-    private Set<FreelancerSkill> freelancerSkills = new HashSet<>();
+    private Set<Skill> skills = new HashSet<>();
 
     @Column(name = "avatar_url")
     private String avatarUrl;

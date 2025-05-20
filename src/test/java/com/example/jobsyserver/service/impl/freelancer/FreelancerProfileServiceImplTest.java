@@ -1,33 +1,27 @@
 package com.example.jobsyserver.service.impl.freelancer;
 
 import com.example.jobsyserver.features.category.dto.CategoryDto;
-import com.example.jobsyserver.features.freelancer.service.impl.FreelancerProfileServiceImpl;
-import com.example.jobsyserver.features.specialization.dto.SpecializationDto;
 import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileAboutDto;
 import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileBasicDto;
 import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileContactDto;
 import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileDto;
-import com.example.jobsyserver.features.common.enums.Experience;
-import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
-import com.example.jobsyserver.features.freelancer.mapper.FreelancerProfileMapper;
 import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
-import com.example.jobsyserver.features.freelancer.model.FreelancerSkill;
-import com.example.jobsyserver.features.freelancer.model.FreelancerSkillId;
 import com.example.jobsyserver.features.skill.model.Skill;
 import com.example.jobsyserver.features.user.model.User;
+import com.example.jobsyserver.features.common.enums.Experience;
+import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
+import com.example.jobsyserver.features.category.service.CategoryService;
+import com.example.jobsyserver.features.specialization.dto.SpecializationDto;
+import com.example.jobsyserver.features.specialization.service.SpecializationService;
+import com.example.jobsyserver.features.freelancer.mapper.FreelancerProfileMapper;
 import com.example.jobsyserver.features.freelancer.repository.FreelancerProfileRepository;
 import com.example.jobsyserver.features.skill.repository.SkillRepository;
 import com.example.jobsyserver.features.user.repository.UserRepository;
-import com.example.jobsyserver.features.category.service.CategoryService;
 import com.example.jobsyserver.features.auth.service.SecurityService;
-import com.example.jobsyserver.features.specialization.service.SpecializationService;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import com.example.jobsyserver.features.freelancer.service.impl.FreelancerProfileServiceImpl;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -38,50 +32,49 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class FreelancerProfileServiceImplTest {
 
     @InjectMocks
-    private FreelancerProfileServiceImpl freelancerProfileService;
+    private FreelancerProfileServiceImpl service;
 
     @Mock(lenient = true)
     private SecurityService securityService;
     @Mock
-    private FreelancerProfileRepository freelancerProfileRepository;
+    private FreelancerProfileRepository repo;
     @Mock
-    private UserRepository userRepository;
+    private UserRepository userRepo;
     @Mock
-    private SkillRepository skillRepository;
+    private SkillRepository skillRepo;
     @Mock
     private CategoryService categoryService;
     @Mock
     private SpecializationService specializationService;
     @Mock
-    private FreelancerProfileMapper freelancerProfileMapper;
+    private FreelancerProfileMapper mapper;
 
-    private final String testEmail = "freelancer@example.com";
-    private User sampleUser;
-    private FreelancerProfile sampleProfile;
-    private LocalDateTime sampleCreatedAt;
-    private LocalDateTime sampleUpdatedAt;
+    private final String email = "freelancer@example.com";
+    private User user;
+    private FreelancerProfile profile;
+    private LocalDateTime createdAt, updatedAt;
 
     @BeforeEach
-    void setup() {
-        sampleUser = User.builder()
+    void setUp() {
+        user = User.builder()
                 .id(1L)
-                .email(testEmail)
+                .email(email)
                 .firstName("Иван")
                 .lastName("Иванов")
                 .dateBirth(LocalDate.of(1990, 1, 1))
                 .phone("+79123456789")
                 .build();
-        sampleCreatedAt = LocalDateTime.of(2024, 3, 30, 12, 0);
-        sampleUpdatedAt = LocalDateTime.of(2024, 3, 30, 12, 0);
-        sampleProfile = FreelancerProfile.builder()
+        createdAt = LocalDateTime.of(2024, 3, 30, 12, 0);
+        updatedAt = LocalDateTime.of(2024, 3, 30, 12, 0);
+        profile = FreelancerProfile.builder()
                 .id(100L)
-                .user(sampleUser)
+                .user(user)
                 .experienceLevel(Experience.EXPERT)
                 .categoryId(2L)
                 .specializationId(3L)
@@ -89,30 +82,29 @@ class FreelancerProfileServiceImplTest {
                 .city("Москва")
                 .aboutMe("Фрилансер с опытом в разработке ПО")
                 .contactLink("http://portfolio.example.com")
-                .freelancerSkills(new HashSet<>())
-                .createdAt(sampleCreatedAt)
-                .updatedAt(sampleUpdatedAt)
+                .createdAt(createdAt)
+                .updatedAt(updatedAt)
+                .skills(new HashSet<>())
                 .build();
         Authentication auth = new UsernamePasswordAuthenticationToken(
-                new org.springframework.security.core.userdetails.User(testEmail, "", Collections.emptyList()),
-                null,
-                Collections.emptyList());
+                new org.springframework.security.core.userdetails.User(email, "", Collections.emptyList()),
+                null, Collections.emptyList());
         SecurityContextHolder.getContext().setAuthentication(auth);
-        Mockito.lenient().when(securityService.getCurrentUserEmail()).thenReturn(testEmail);
-        Mockito.lenient().when(securityService.getCurrentUser()).thenReturn(sampleUser);
-        Mockito.lenient().when(categoryService.getCategoryById(Mockito.anyLong())).thenAnswer(invocation -> {
-            Long id = invocation.getArgument(0);
-            CategoryDto dto = new CategoryDto();
-            dto.setId(id);
-            dto.setName("Category" + id);
-            return dto;
+        lenient().when(securityService.getCurrentUserEmail()).thenReturn(email);
+        lenient().when(securityService.getCurrentUser()).thenReturn(user);
+        lenient().when(categoryService.getCategoryById(anyLong())).thenAnswer(inv -> {
+            Long id = inv.getArgument(0);
+            CategoryDto d = new CategoryDto();
+            d.setId(id);
+            d.setName("Cat" + id);
+            return d;
         });
-        Mockito.lenient().when(specializationService.getSpecializationById(Mockito.anyLong())).thenAnswer(invocation -> {
-            Long id = invocation.getArgument(0);
-            SpecializationDto dto = new SpecializationDto();
-            dto.setId(id);
-            dto.setName("Spec" + id);
-            return dto;
+        lenient().when(specializationService.getSpecializationById(anyLong())).thenAnswer(inv -> {
+            Long id = inv.getArgument(0);
+            SpecializationDto d = new SpecializationDto();
+            d.setId(id);
+            d.setName("Spec" + id);
+            return d;
         });
     }
 
@@ -123,194 +115,176 @@ class FreelancerProfileServiceImplTest {
 
     @Test
     void testGetProfileSuccess() {
-        when(freelancerProfileRepository.findByUser(sampleUser))
-                .thenReturn(Optional.of(sampleProfile));
-        FreelancerProfileDto baseDto = new FreelancerProfileDto();
-        baseDto.setId(sampleProfile.getId());
-        baseDto.setCreatedAt(sampleCreatedAt);
-        baseDto.setUpdatedAt(sampleUpdatedAt);
-        var aboutDto = new FreelancerProfileAboutDto();
-        aboutDto.setCategoryId(2L);
-        aboutDto.setSpecializationId(3L);
-        baseDto.setAbout(aboutDto);
-        when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(baseDto);
-        CategoryDto catDto = new CategoryDto(); catDto.setId(2L); catDto.setName("Веб-разработка");
+        when(repo.findByUser(user)).thenReturn(Optional.of(profile));
+        FreelancerProfileDto dtoStub = new FreelancerProfileDto();
+        dtoStub.setId(profile.getId());
+        dtoStub.setCreatedAt(createdAt);
+        dtoStub.setUpdatedAt(updatedAt);
+        var about = new FreelancerProfileAboutDto();
+        about.setCategoryId(2L);
+        about.setSpecializationId(3L);
+        dtoStub.setAbout(about);
+        when(mapper.toDto(profile)).thenReturn(dtoStub);
+        CategoryDto catDto = new CategoryDto();
+        catDto.setId(2L);
+        catDto.setName("Веб-разработка");
+        SpecializationDto spDto = new SpecializationDto();
+        spDto.setId(3L);
+        spDto.setName("Front-end");
         when(categoryService.getCategoryById(2L)).thenReturn(catDto);
-        SpecializationDto specDto = new SpecializationDto(); specDto.setId(3L); specDto.setName("Front-end");
-        when(specializationService.getSpecializationById(3L)).thenReturn(specDto);
-        FreelancerProfileDto result = freelancerProfileService.getProfile();
-        assertNotNull(result);
-        assertEquals(100L, result.getId());
-        assertEquals("Веб-разработка", result.getAbout().getCategoryName());
-        assertEquals("Front-end", result.getAbout().getSpecializationName());
+        when(specializationService.getSpecializationById(3L)).thenReturn(spDto);
+        FreelancerProfileDto res = service.getProfile();
+        assertNotNull(res);
+        assertEquals(100L, res.getId());
+        assertEquals("Веб-разработка", res.getAbout().getCategoryName());
+        assertEquals("Front-end", res.getAbout().getSpecializationName());
     }
 
     @Test
     void testGetProfileNotFound() {
-        when(freelancerProfileRepository.findByUser(sampleUser))
-                .thenReturn(Optional.empty());
-        ResourceNotFoundException exception = assertThrows(
+        when(repo.findByUser(user)).thenReturn(Optional.empty());
+        ResourceNotFoundException ex = assertThrows(
                 ResourceNotFoundException.class,
-                () -> freelancerProfileService.getProfile()
+                () -> service.getProfile()
         );
-        assertTrue(exception.getMessage().contains("Профиль фрилансера"));
+        assertTrue(ex.getMessage().contains("Профиль фрилансера"));
     }
 
     @Test
     void testUpdateBasic() {
-        FreelancerProfileBasicDto basicDto = new FreelancerProfileBasicDto();
-        basicDto.setCountry("Canada");
-        basicDto.setCity("Toronto");
-        basicDto.setFirstName("Алексей");
-        basicDto.setLastName("Сергеев");
-        basicDto.setPhone("+7234567890");
-        when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
-        when(userRepository.save(sampleUser)).thenReturn(sampleUser);
-        when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
-        FreelancerProfileDto expectedDto = new FreelancerProfileDto();
-        expectedDto.setId(sampleProfile.getId());
-        expectedDto.setCreatedAt(sampleCreatedAt);
-        expectedDto.setUpdatedAt(sampleUpdatedAt);
-        var expectedBasic = new FreelancerProfileBasicDto();
-        expectedBasic.setCountry("Canada");
-        expectedBasic.setCity("Toronto");
-        expectedBasic.setFirstName("Алексей");
-        expectedBasic.setLastName("Сергеев");
-        expectedBasic.setPhone("+1234567890");
-        expectedDto.setBasic(expectedBasic);
-        when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(expectedDto);
-
-        FreelancerProfileDto result = freelancerProfileService.updateBasic(basicDto);
-        var resultBasic = result.getBasic();
-        assertEquals("Canada", resultBasic.getCountry());
-        assertEquals("Toronto", resultBasic.getCity());
-        assertEquals("Алексей", resultBasic.getFirstName());
-        assertEquals("Сергеев", resultBasic.getLastName());
-        assertEquals("+1234567890", resultBasic.getPhone());
+        FreelancerProfileBasicDto basic = new FreelancerProfileBasicDto();
+        basic.setCountry("Canada");
+        basic.setCity("Toronto");
+        basic.setFirstName("Алексей");
+        basic.setLastName("Сергеев");
+        basic.setPhone("+1234567890");
+        when(repo.findByUser(user)).thenReturn(Optional.of(profile));
+        when(userRepo.save(user)).thenReturn(user);
+        when(repo.save(profile)).thenReturn(profile);
+        FreelancerProfileDto dtoStub = new FreelancerProfileDto();
+        dtoStub.setBasic(basic);
+        when(mapper.toDto(profile)).thenReturn(dtoStub);
+        FreelancerProfileDto result = service.updateBasic(basic);
+        var rb = result.getBasic();
+        assertEquals("Canada", rb.getCountry());
+        assertEquals("Toronto", rb.getCity());
+        assertEquals("Алексей", rb.getFirstName());
+        assertEquals("Сергеев", rb.getLastName());
+        assertEquals("+1234567890", rb.getPhone());
     }
 
     @Test
     void testUpdateContact() {
-        FreelancerProfileContactDto contactDto = new FreelancerProfileContactDto();
-        contactDto.setContactLink("http://newcontact.example.com");
-        when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
-        when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
-        when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(new FreelancerProfileDto());
-        FreelancerProfileDto result = freelancerProfileService.updateContact(contactDto);
-        assertEquals("http://newcontact.example.com", sampleProfile.getContactLink());
+        FreelancerProfileContactDto c = new FreelancerProfileContactDto();
+        c.setContactLink("http://new.example.com");
+        when(repo.findByUser(user)).thenReturn(Optional.of(profile));
+        when(repo.save(profile)).thenReturn(profile);
+        when(mapper.toDto(profile)).thenReturn(new FreelancerProfileDto());
+        FreelancerProfileDto res = service.updateContact(c);
+        assertEquals("http://new.example.com", profile.getContactLink());
     }
 
     @Test
     void testUpdateAboutWithoutSkills() {
-        FreelancerProfileAboutDto aboutDto = new FreelancerProfileAboutDto();
-        aboutDto.setCategoryId(20L);
-        aboutDto.setSpecializationId(30L);
-        aboutDto.setExperienceLevel(Experience.MIDDLE);
-        aboutDto.setAboutMe("Описание");
-        when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
-        when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
-        when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(new FreelancerProfileDto());
-        freelancerProfileService.updateAbout(aboutDto);
-        assertTrue(sampleProfile.getFreelancerSkills().isEmpty());
+        FreelancerProfileAboutDto a = new FreelancerProfileAboutDto();
+        a.setCategoryId(20L);
+        a.setSpecializationId(30L);
+        a.setExperienceLevel(Experience.MIDDLE);
+        a.setAboutMe("Описание");
+        when(repo.findByUser(user)).thenReturn(Optional.of(profile));
+        when(repo.save(profile)).thenReturn(profile);
+        when(mapper.toDto(profile)).thenReturn(new FreelancerProfileDto());
+        service.updateAbout(a);
+        assertTrue(profile.getSkills().isEmpty(),
+                "После updateAbout коллекция skills должна остаться пустой");
     }
 
     @Test
     void testAddSkillIncrementally() {
-        Skill existingSkill = Skill.builder().id(10L).name("Java").build();
-        FreelancerSkill fsExisting = FreelancerSkill.builder()
-                .id(new FreelancerSkillId(sampleProfile.getId(), 10L))
-                .freelancerProfile(sampleProfile)
-                .skill(existingSkill)
-                .build();
-        sampleProfile.getFreelancerSkills().add(fsExisting);
-        when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
-        Skill newSkill = Skill.builder().id(11L).name("Spring Boot").build();
-        when(skillRepository.findById(11L)).thenReturn(Optional.of(newSkill));
-        when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
-        when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(new FreelancerProfileDto());
-        freelancerProfileService.addSkill(11L);
-        assertEquals(2, sampleProfile.getFreelancerSkills().size());
+        Skill java = Skill.builder().id(10L).name("Java").build();
+        profile.getSkills().add(java);
+        when(repo.findByUser(user)).thenReturn(Optional.of(profile));
+        Skill spring = Skill.builder().id(11L).name("Spring").build();
+        when(skillRepo.findById(11L)).thenReturn(Optional.of(spring));
+        when(repo.save(profile)).thenReturn(profile);
+        when(mapper.toDto(profile)).thenReturn(new FreelancerProfileDto());
+        service.addSkill(11L);
+        assertEquals(2, profile.getSkills().size());
     }
 
     @Test
     void testAddSkill() {
-        when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
-        sampleProfile.getFreelancerSkills().clear();
-        Skill newSkill = Skill.builder().id(12L).name("Hibernate").build();
-        when(skillRepository.findById(12L)).thenReturn(Optional.of(newSkill));
-        when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
-        when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(new FreelancerProfileDto());
-        freelancerProfileService.addSkill(12L);
-        assertEquals(1, sampleProfile.getFreelancerSkills().size());
+        profile.getSkills().clear();
+        when(repo.findByUser(user)).thenReturn(Optional.of(profile));
+        Skill hib = Skill.builder().id(12L).name("Hibernate").build();
+        when(skillRepo.findById(12L)).thenReturn(Optional.of(hib));
+        when(repo.save(profile)).thenReturn(profile);
+        when(mapper.toDto(profile)).thenReturn(new FreelancerProfileDto());
+        service.addSkill(12L);
+        assertEquals(1, profile.getSkills().size());
     }
 
     @Test
     void testRemoveSkill() {
-        Skill existingSkill = Skill.builder().id(10L).name("Java").build();
-        FreelancerSkill fs = FreelancerSkill.builder()
-                .id(new FreelancerSkillId(sampleProfile.getId(), 10L))
-                .freelancerProfile(sampleProfile)
-                .skill(existingSkill)
-                .build();
-        sampleProfile.getFreelancerSkills().add(fs);
-        when(freelancerProfileRepository.findByUser(sampleUser)).thenReturn(Optional.of(sampleProfile));
-        when(freelancerProfileRepository.save(sampleProfile)).thenReturn(sampleProfile);
-        when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(new FreelancerProfileDto());
-        freelancerProfileService.removeSkill(10L);
-        assertTrue(sampleProfile.getFreelancerSkills().isEmpty());
+        Skill java = Skill.builder().id(10L).name("Java").build();
+        profile.getSkills().add(java);
+        when(repo.findByUser(user)).thenReturn(Optional.of(profile));
+        when(repo.save(profile)).thenReturn(profile);
+        when(mapper.toDto(profile)).thenReturn(new FreelancerProfileDto());
+        service.removeSkill(10L);
+        assertTrue(profile.getSkills().isEmpty());
     }
 
     @Test
     void testDeleteAccount() {
-        when(userRepository.findByEmail(testEmail)).thenReturn(Optional.of(sampleUser));
-        freelancerProfileService.deleteAccount();
-        Mockito.verify(userRepository).delete(sampleUser);
+        when(userRepo.findByEmail(email)).thenReturn(Optional.of(user));
+        service.deleteAccount();
+        verify(userRepo).delete(user);
     }
 
     @Test
     void testGetAllFreelancers() {
-        List<FreelancerProfile> profiles = List.of(sampleProfile);
-        when(freelancerProfileRepository.findAll()).thenReturn(profiles);
-        FreelancerProfileDto dto = new FreelancerProfileDto();
-        dto.setId(sampleProfile.getId());
-        dto.setCreatedAt(sampleCreatedAt);
-        dto.setUpdatedAt(sampleUpdatedAt);
-        var aboutDto = new FreelancerProfileAboutDto();
-        aboutDto.setCategoryId(sampleProfile.getCategoryId());
-        aboutDto.setSpecializationId(sampleProfile.getSpecializationId());
-        dto.setAbout(aboutDto);
-        when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(dto);
-        CategoryDto catDto = new CategoryDto(); catDto.setId(sampleProfile.getCategoryId()); catDto.setName("Категория");
-        when(categoryService.getCategoryById(sampleProfile.getCategoryId())).thenReturn(catDto);
-        SpecializationDto specDto = new SpecializationDto(); specDto.setId(sampleProfile.getSpecializationId()); specDto.setName("Специализация");
-        when(specializationService.getSpecializationById(sampleProfile.getSpecializationId())).thenReturn(specDto);
-        List<FreelancerProfileDto> result = freelancerProfileService.getAllFreelancers();
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals("Категория", result.get(0).getAbout().getCategoryName());
-        assertEquals("Специализация", result.get(0).getAbout().getSpecializationName());
+        when(repo.findAll()).thenReturn(List.of(profile));
+        FreelancerProfileDto dtoStub = new FreelancerProfileDto();
+        dtoStub.setId(profile.getId());
+        dtoStub.setCreatedAt(createdAt);
+        dtoStub.setUpdatedAt(updatedAt);
+        dtoStub.setAbout(new FreelancerProfileAboutDto());
+        when(mapper.toDto(profile)).thenReturn(dtoStub);
+        CategoryDto cd = new CategoryDto();
+        cd.setId(profile.getCategoryId());
+        cd.setName("Категория");
+        SpecializationDto sd = new SpecializationDto();
+        sd.setId(profile.getSpecializationId());
+        sd.setName("Специализация");
+        when(categoryService.getCategoryById(profile.getCategoryId())).thenReturn(cd);
+        when(specializationService.getSpecializationById(profile.getSpecializationId())).thenReturn(sd);
+        List<FreelancerProfileDto> out = service.getAllFreelancers();
+        assertEquals(1, out.size());
+        assertEquals("Категория", out.get(0).getAbout().getCategoryName());
+        assertEquals("Специализация", out.get(0).getAbout().getSpecializationName());
     }
 
     @Test
     void testGetFreelancerProfileById() {
-        Long id = sampleProfile.getId();
-        when(freelancerProfileRepository.findById(id)).thenReturn(Optional.of(sampleProfile));
-        FreelancerProfileDto expectedDto = new FreelancerProfileDto();
-        expectedDto.setId(id);
-        expectedDto.setCreatedAt(sampleCreatedAt);
-        expectedDto.setUpdatedAt(sampleUpdatedAt);
-        var aboutDto = new FreelancerProfileAboutDto();
-        aboutDto.setCategoryId(sampleProfile.getCategoryId());
-        aboutDto.setSpecializationId(sampleProfile.getSpecializationId());
-        expectedDto.setAbout(aboutDto);
-        when(freelancerProfileMapper.toDto(sampleProfile)).thenReturn(expectedDto);
-        CategoryDto catDto = new CategoryDto(); catDto.setId(sampleProfile.getCategoryId()); catDto.setName("Категория");
-        when(categoryService.getCategoryById(sampleProfile.getCategoryId())).thenReturn(catDto);
-        SpecializationDto specDto = new SpecializationDto(); specDto.setId(sampleProfile.getSpecializationId()); specDto.setName("Специализация");
-        when(specializationService.getSpecializationById(sampleProfile.getSpecializationId())).thenReturn(specDto);
-        FreelancerProfileDto result = freelancerProfileService.getFreelancerProfileById(id);
-        assertNotNull(result);
-        assertEquals("Категория", result.getAbout().getCategoryName());
-        assertEquals("Специализация", result.getAbout().getSpecializationName());
+        Long id = profile.getId();
+        when(repo.findById(id)).thenReturn(Optional.of(profile));
+        FreelancerProfileDto dtoStub = new FreelancerProfileDto();
+        dtoStub.setId(id);
+        dtoStub.setCreatedAt(createdAt);
+        dtoStub.setUpdatedAt(updatedAt);
+        dtoStub.setAbout(new FreelancerProfileAboutDto());
+        when(mapper.toDto(profile)).thenReturn(dtoStub);
+        CategoryDto cd = new CategoryDto();
+        cd.setId(profile.getCategoryId());
+        cd.setName("Категория");
+        SpecializationDto sd = new SpecializationDto();
+        sd.setId(profile.getSpecializationId());
+        sd.setName("Специализация");
+        when(categoryService.getCategoryById(profile.getCategoryId())).thenReturn(cd);
+        when(specializationService.getSpecializationById(profile.getSpecializationId())).thenReturn(sd);
+        FreelancerProfileDto res = service.getFreelancerProfileById(id);
+        assertEquals("Категория", res.getAbout().getCategoryName());
+        assertEquals("Специализация", res.getAbout().getSpecializationName());
     }
 }
