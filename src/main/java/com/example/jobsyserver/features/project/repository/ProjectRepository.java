@@ -12,7 +12,6 @@ import java.util.List;
 
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpecificationExecutor<Project> {
-    List<Project> findByStatus(ProjectStatus status);
 
     List<Project> findByClientId(Long clientId);
 
@@ -23,18 +22,17 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
     List<Project> findByAssignedFreelancerId(Long freelancerProfileId);
 
     @Query("""
-              select p 
-              from Project p
-              left join fetch p.category
-              left join fetch p.specialization
-              left join fetch p.client cp
-              left join fetch cp.user
-              left join fetch p.projectSkills ps
-              left join fetch ps.skill
-              left join fetch p.assignedFreelancer af
-              left join fetch af.user
-              left join fetch af.freelancerSkills fs
-              where (:status is null or p.status = :status)
+                select distinct p
+                from Project p
+                left join fetch p.category
+                left join fetch p.specialization
+                left join fetch p.client cp
+                left join fetch cp.user
+                left join fetch p.projectSkills ps
+                left join fetch ps.skill
+                left join fetch p.assignedFreelancer af
+                left join fetch af.user
+                where (:status is null or p.status = :status)
             """)
-    List<Project> findAllWithAllData(@Param("status") ProjectStatus status);
+    List<Project> findAllWithSkillsAndFreelancer(@Param("status") ProjectStatus status);
 }
