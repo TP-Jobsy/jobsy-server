@@ -44,11 +44,13 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectDto> getAllProjects(ProjectStatus status) {
-        List<Project> projects = projectRepository.findAllWithSkillsAndFreelancer(status);
+        List<Project> projects = (status != null)
+                ? projectRepository.findAllWithSkillsAndFreelancerByStatus(status)
+                : projectRepository.findAllWithSkillsAndFreelancer();
+
         for (Project p : projects) {
-            var freelancer = p.getAssignedFreelancer();
-            if (freelancer != null) {
-                Hibernate.initialize(freelancer.getFreelancerSkills());
+            if (p.getAssignedFreelancer() != null) {
+                Hibernate.initialize(p.getAssignedFreelancer().getFreelancerSkills());
             }
         }
 
@@ -56,6 +58,7 @@ public class ProjectServiceImpl implements ProjectService {
                 .map(projectMapper::toDto)
                 .toList();
     }
+
 
     @Override
     public ProjectDto getProjectById(Long projectId) {

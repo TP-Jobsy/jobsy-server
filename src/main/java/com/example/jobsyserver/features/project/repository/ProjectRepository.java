@@ -22,17 +22,31 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
     List<Project> findByAssignedFreelancerId(Long freelancerProfileId);
 
     @Query("""
-                select distinct p
-                from Project p
-                left join fetch p.category
-                left join fetch p.specialization
-                left join fetch p.client cp
-                left join fetch cp.user
-                left join fetch p.projectSkills ps
-                left join fetch ps.skill
-                left join fetch p.assignedFreelancer af
-                left join fetch af.user
-                where (:status is null or p.status = :status)
-            """)
-    List<Project> findAllWithSkillsAndFreelancer(@Param("status") ProjectStatus status);
+        select distinct p
+        from Project p
+        left join fetch p.category
+        left join fetch p.specialization
+        left join fetch p.client cp
+        left join fetch cp.user
+        left join fetch p.projectSkills ps
+        left join fetch ps.skill
+        left join fetch p.assignedFreelancer af
+        left join fetch af.user
+        """)
+    List<Project> findAllWithSkillsAndFreelancer();
+
+    @Query("""
+        select distinct p
+        from Project p
+        left join fetch p.category
+        left join fetch p.specialization
+        left join fetch p.client cp
+        left join fetch cp.user
+        left join fetch p.projectSkills ps
+        left join fetch ps.skill
+        left join fetch p.assignedFreelancer af
+        left join fetch af.user
+        where p.status = :status
+        """)
+    List<Project> findAllWithSkillsAndFreelancerByStatus(@Param("status") ProjectStatus status);
 }

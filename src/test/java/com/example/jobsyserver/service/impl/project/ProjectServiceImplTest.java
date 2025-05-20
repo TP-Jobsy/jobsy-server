@@ -62,15 +62,15 @@ class ProjectServiceImplTest {
 
     @Test
     void getAllProjects_withAndWithoutStatus() {
-        when(projectRepository.findAllWithSkillsAndFreelancer(null))
+        when(projectRepository.findAllWithSkillsAndFreelancer())
                 .thenReturn(List.of(openProj));
-        when(projectRepository.findAllWithSkillsAndFreelancer(ProjectStatus.OPEN))
+        when(projectRepository.findAllWithSkillsAndFreelancerByStatus(ProjectStatus.OPEN))
                 .thenReturn(List.of(openProj));
         when(projectMapper.toDto(openProj)).thenReturn(new ProjectDto());
         var all = service.getAllProjects(null);
-        assertEquals(1, all.size(), "Должен быть 1 проект без фильтра по статусу");
+        assertEquals(1, all.size());
         var filtered = service.getAllProjects(ProjectStatus.OPEN);
-        assertEquals(1, filtered.size(), "Должен быть 1 проект со статусом OPEN");
+        assertEquals(1, filtered.size());
     }
 
     @Test
