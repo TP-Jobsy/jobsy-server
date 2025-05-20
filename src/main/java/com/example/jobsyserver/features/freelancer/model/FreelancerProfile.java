@@ -64,6 +64,7 @@ public class FreelancerProfile {
     @OneToMany(mappedBy = "freelancerProfile", fetch = FetchType.LAZY)
     @Fetch(FetchMode.SUBSELECT)
     @BatchSize(size = 50)
+    @Builder.Default
     private Set<FreelancerSkill> freelancerSkills = new HashSet<>();
 
     @Column(name="avatar_url")
