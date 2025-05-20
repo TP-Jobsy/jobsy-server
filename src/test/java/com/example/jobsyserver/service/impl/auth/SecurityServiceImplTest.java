@@ -1,41 +1,24 @@
 package com.example.jobsyserver.service.impl.auth;
 
+import com.example.jobsyserver.features.auth.provider.CurrentUserProvider;
 import com.example.jobsyserver.features.auth.service.impl.SecurityServiceImpl;
-import com.example.jobsyserver.features.client.model.ClientProfile;
 import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
-import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
-import com.example.jobsyserver.features.client.repository.ClientProfileRepository;
-import com.example.jobsyserver.features.freelancer.repository.FreelancerProfileRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class SecurityServiceImplTest {
+class SecurityServiceImplTest {
 
     @Mock
-    private ClientProfileRepository clientProfileRepository;
-
-    @Mock
-    private FreelancerProfileRepository freelancerProfileRepository;
-
-    @Mock
-    private Authentication authentication;
-
-    @Mock
-    private UserDetails userDetails;
+    private CurrentUserProvider userProv;
 
     @InjectMocks
     private SecurityServiceImpl securityService;
@@ -45,87 +28,91 @@ public class SecurityServiceImplTest {
     private static final Long FREELANCER_PROFILE_ID = 2L;
 
     @BeforeEach
-    void setup() {
-        SecurityContext context = mock(SecurityContext.class);
-        SecurityContextHolder.setContext(context);
+    void setUp() {
     }
 
     @Test
-    void getCurrentUserEmail_ShouldReturnEmail_WhenUserIsAuthenticated() {
-        when(authentication.getPrincipal()).thenReturn(userDetails);
-        when(userDetails.getUsername()).thenReturn(TEST_EMAIL);
-        when(authentication.isAuthenticated()).thenReturn(true);
-        when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(authentication);
-
+    void getCurrentUserEmail_ShouldReturnEmail() {
+        when(userProv.getEmail()).thenReturn(TEST_EMAIL);
         String email = securityService.getCurrentUserEmail();
-
         assertEquals(TEST_EMAIL, email);
+        verify(userProv).getEmail();
     }
 
     @Test
-    void getCurrentUserEmail_ShouldThrowBadCredentialsException_WhenUserIsNotAuthenticated() {
-        when(authentication.isAuthenticated()).thenReturn(false);
-        when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(authentication);
-
-        BadCredentialsException exception = assertThrows(BadCredentialsException.class,
+    void getCurrentUserEmail_ShouldPropagateException() {
+        when(userProv.getEmail()).thenThrow(new BadCredentialsException("Пользователь не аутентифицирован"));
+        BadCredentialsException ex = assertThrows(BadCredentialsException.class,
                 () -> securityService.getCurrentUserEmail());
-        assertEquals("Пользователь не аутентифицирован", exception.getMessage());
+        assertEquals("Пользователь не аутентифицирован", ex.getMessage());
     }
 
     @Test
-    void getCurrentClientProfileId_ShouldReturnProfileId_WhenClientProfileExists() {
-        ClientProfile clientProfile = new ClientProfile();
-        clientProfile.setId(CLIENT_PROFILE_ID);
-        when(authentication.getPrincipal()).thenReturn(userDetails);
-        when(userDetails.getUsername()).thenReturn(TEST_EMAIL);
-        when(clientProfileRepository.findByUserEmail(TEST_EMAIL)).thenReturn(Optional.of(clientProfile));
-        when(authentication.isAuthenticated()).thenReturn(true);
-        when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(authentication);
-
-        Long clientProfileId = securityService.getCurrentClientProfileId();
-        assertEquals(CLIENT_PROFILE_ID, clientProfileId);
+    void getCurrentClientProfileId_ShouldReturnProfileId() {
+        when(userProv.getClientProfileId()).thenReturn(CLIENT_PROFILE_ID);
+        Long id = securityService.getCurrentClientProfileId();
+        assertEquals(CLIENT_PROFILE_ID, id);
+        verify(userProv).getClientProfileId();
     }
 
     @Test
-    void getCurrentClientProfileId_ShouldThrowRuntimeException_WhenClientProfileNotFound() {
-        when(authentication.getPrincipal()).thenReturn(userDetails);
-        when(userDetails.getUsername()).thenReturn(TEST_EMAIL);
-        when(clientProfileRepository.findByUserEmail(TEST_EMAIL)).thenReturn(Optional.empty());
-        when(authentication.isAuthenticated()).thenReturn(true);
-        when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(authentication);
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+    void getCurrentClientProfileId_ShouldPropagateNotFound() {
+        when(userProv.getClientProfileId())
+                .thenThrow(new ResourceNotFoundException("Профиль клиента для пользователя " + TEST_EMAIL));
+        ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
                 () -> securityService.getCurrentClientProfileId());
-
-        String expected = "Профиль клиента для пользователя " + TEST_EMAIL + " не найден";
-        assertEquals(expected, exception.getMessage());
+        assertTrue(ex.getMessage().contains("Профиль клиента для пользователя"));
     }
 
     @Test
-    void getCurrentFreelancerProfileId_ShouldReturnProfileId_WhenFreelancerProfileExists() {
-        FreelancerProfile freelancerProfile = new FreelancerProfile();
-        freelancerProfile.setId(FREELANCER_PROFILE_ID);
-        when(authentication.getPrincipal()).thenReturn(userDetails);
-        when(userDetails.getUsername()).thenReturn(TEST_EMAIL);
-        when(freelancerProfileRepository.findByUserEmail(TEST_EMAIL)).thenReturn(Optional.of(freelancerProfile));
-        when(authentication.isAuthenticated()).thenReturn(true);
-        when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(authentication);
-
-        Long freelancerProfileId = securityService.getCurrentFreelancerProfileId();
-
-        assertEquals(FREELANCER_PROFILE_ID, freelancerProfileId);
+    void getCurrentFreelancerProfileId_ShouldReturnProfileId() {
+        when(userProv.getFreelancerProfileId()).thenReturn(FREELANCER_PROFILE_ID);
+        Long id = securityService.getCurrentFreelancerProfileId();
+        assertEquals(FREELANCER_PROFILE_ID, id);
+        verify(userProv).getFreelancerProfileId();
     }
 
     @Test
-    void getCurrentFreelancerProfileId_ShouldThrowRuntimeException_WhenFreelancerProfileNotFound() {
-        when(authentication.getPrincipal()).thenReturn(userDetails);
-        when(userDetails.getUsername()).thenReturn(TEST_EMAIL);
-        when(freelancerProfileRepository.findByUserEmail(TEST_EMAIL)).thenReturn(Optional.empty());
-        when(authentication.isAuthenticated()).thenReturn(true);
-        when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(authentication);
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
+    void getCurrentFreelancerProfileId_ShouldPropagateNotFound() {
+        when(userProv.getFreelancerProfileId())
+                .thenThrow(new ResourceNotFoundException("Профиль фрилансера для пользователя " + TEST_EMAIL));
+        ResourceNotFoundException ex = assertThrows(ResourceNotFoundException.class,
                 () -> securityService.getCurrentFreelancerProfileId());
+        assertTrue(ex.getMessage().contains("Профиль фрилансера для пользователя"));
+    }
 
-        String expected = "Профиль фрилансера для пользователя " + TEST_EMAIL + " не найден";
-        assertEquals(expected, exception.getMessage());
+    @Test
+    void getCurrentProfileId_ShouldReturnClient_WhenRoleClient() {
+        com.example.jobsyserver.features.user.model.User u =
+                com.example.jobsyserver.features.user.model.User.builder()
+                        .role(com.example.jobsyserver.features.common.enums.UserRole.CLIENT)
+                        .build();
+        when(userProv.getUser()).thenReturn(u);
+        when(userProv.getClientProfileId()).thenReturn(CLIENT_PROFILE_ID);
+        Long id = securityService.getCurrentProfileId();
+        assertEquals(CLIENT_PROFILE_ID, id);
+    }
+
+    @Test
+    void getCurrentProfileId_ShouldReturnFreelancer_WhenRoleFreelancer() {
+        com.example.jobsyserver.features.user.model.User u =
+                com.example.jobsyserver.features.user.model.User.builder()
+                        .role(com.example.jobsyserver.features.common.enums.UserRole.FREELANCER)
+                        .build();
+        when(userProv.getUser()).thenReturn(u);
+        when(userProv.getFreelancerProfileId()).thenReturn(FREELANCER_PROFILE_ID);
+        Long id = securityService.getCurrentProfileId();
+        assertEquals(FREELANCER_PROFILE_ID, id);
+    }
+
+    @Test
+    void getCurrentProfileId_ShouldThrow_WhenNoRole() {
+        com.example.jobsyserver.features.user.model.User u =
+                com.example.jobsyserver.features.user.model.User.builder()
+                        .role(null)
+                        .build();
+        when(userProv.getUser()).thenReturn(u);
+        assertThrows(AccessDeniedException.class,
+                () -> securityService.getCurrentProfileId());
     }
 }
