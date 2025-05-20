@@ -15,6 +15,7 @@ import org.mapstruct.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Mapper(
@@ -82,7 +83,7 @@ public interface ProjectMapper {
     ProjectDto toDto(Project project);
 
     @Named("mapProjectSkills")
-    default List<SkillDto> mapProjectSkills(List<ProjectSkill> projectSkills) {
+    default List<SkillDto> mapProjectSkills(Set<ProjectSkill> projectSkills) {
         if (projectSkills == null) {
             return Collections.emptyList();
         }

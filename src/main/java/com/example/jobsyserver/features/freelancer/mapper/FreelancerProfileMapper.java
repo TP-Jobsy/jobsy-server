@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Primary;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Primary
@@ -42,7 +43,7 @@ public interface FreelancerProfileMapper {
     FreelancerProfileDto toDto(FreelancerProfile profile);
 
     @Named("mapFreelancerSkills")
-    default List<SkillDto> mapFreelancerSkills(List<FreelancerSkill> freelancerSkills) {
+    default List<SkillDto> mapFreelancerSkills(Set<FreelancerSkill> freelancerSkills) {
         if (freelancerSkills == null) {
             return Collections.emptyList();
         }

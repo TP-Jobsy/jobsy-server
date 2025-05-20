@@ -16,6 +16,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Entity
+@EqualsAndHashCode(exclude = "freelancerSkills")
 @Table(name = "freelancer_profiles")
 public class FreelancerProfile {
 
