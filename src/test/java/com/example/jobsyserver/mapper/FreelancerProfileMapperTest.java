@@ -57,8 +57,24 @@ class FreelancerProfileMapperTest {
                 .contactLink("http://portfolio.example.com")
                 .createdAt(createdAt)
                 .updatedAt(updatedAt)
+                .freelancerSkills(new java.util.HashSet<>())
                 .build();
 
+        Skill skill1 = Skill.builder().id(10L).name("Java").build();
+        Skill skill2 = Skill.builder().id(11L).name("Spring").build();
+        FreelancerSkill fs1 = FreelancerSkill.builder()
+                .id(new FreelancerSkillId(profile.getId(), skill1.getId()))
+                .freelancerProfile(profile)
+                .skill(skill1)
+                .build();
+        FreelancerSkill fs2 = FreelancerSkill.builder()
+                .id(new FreelancerSkillId(profile.getId(), skill2.getId()))
+                .freelancerProfile(profile)
+                .skill(skill2)
+                .build();
+
+        profile.getFreelancerSkills().add(fs1);
+        profile.getFreelancerSkills().add(fs2);
         FreelancerProfileDto dto = mapper.toDto(profile);
         assertNotNull(dto, "Полученный dto не должен быть null");
         assertEquals(1L, dto.getId(), "Неверный идентификатор профиля");
@@ -87,23 +103,6 @@ class FreelancerProfileMapperTest {
         assertEquals("Иванов", userDto.getLastName(), "Неверная фамилия пользователя");
         assertEquals("+7999999999", userDto.getPhone(), "Неверный номер телефона");
         assertEquals("freelancer@example.com", userDto.getEmail(), "Неверный email пользователя");
-        Skill skill1 = Skill.builder().id(10L).name("Java").build();
-        Skill skill2 = Skill.builder().id(11L).name("Spring").build();
-        FreelancerSkill fs1 = FreelancerSkill.builder()
-                .id(new FreelancerSkillId(profile.getId(), skill1.getId()))
-                .freelancerProfile(profile)
-                .skill(skill1)
-                .build();
-        FreelancerSkill fs2 = FreelancerSkill.builder()
-                .id(new FreelancerSkillId(profile.getId(), skill2.getId()))
-                .freelancerProfile(profile)
-                .skill(skill2)
-                .build();
-
-        profile.getFreelancerSkills().add(fs1);
-        profile.getFreelancerSkills().add(fs2);
-        dto = mapper.toDto(profile);
-        aboutDto = dto.getAbout();
         List<SkillDto> skillsList = aboutDto.getSkills();
         assertNotNull(skillsList, "Список навыков не должен быть null");
         assertEquals(2, skillsList.size(), "Количество навыков не совпадает");

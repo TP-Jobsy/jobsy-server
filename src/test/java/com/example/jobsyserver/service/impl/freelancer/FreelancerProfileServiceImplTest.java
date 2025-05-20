@@ -35,10 +35,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -92,7 +89,7 @@ class FreelancerProfileServiceImplTest {
                 .city("Москва")
                 .aboutMe("Фрилансер с опытом в разработке ПО")
                 .contactLink("http://portfolio.example.com")
-                .freelancerSkills(new ArrayList<>())
+                .freelancerSkills(new HashSet<>())
                 .createdAt(sampleCreatedAt)
                 .updatedAt(sampleUpdatedAt)
                 .build();

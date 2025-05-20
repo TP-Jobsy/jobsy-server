@@ -9,6 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
+@EqualsAndHashCode(exclude = "freelancerProfile")
 @Table(name = "freelancer_skills")
 public class FreelancerSkill {
 

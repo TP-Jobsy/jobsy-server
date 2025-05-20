@@ -2,20 +2,19 @@ package com.example.jobsyserver.features.project.model;
 
 import com.example.jobsyserver.features.skill.model.Skill;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "project_skills")
 public class ProjectSkill {
 
     @EmbeddedId
+    @EqualsAndHashCode.Include
     private ProjectSkillId id;
 
     @ManyToOne(fetch = FetchType.LAZY)

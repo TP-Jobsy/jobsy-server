@@ -7,13 +7,16 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
+@EqualsAndHashCode(exclude = "freelancerSkills")
 @Table(name = "freelancer_profiles")
 public class FreelancerProfile {
 
@@ -57,7 +60,7 @@ public class FreelancerProfile {
 
     @OneToMany(mappedBy = "freelancerProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<FreelancerSkill> freelancerSkills = new ArrayList<>();
+    private Set<FreelancerSkill> freelancerSkills = new HashSet<>();
 
     @Column(name="avatar_url")
     private String avatarUrl;
