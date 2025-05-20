@@ -1,8 +1,10 @@
 package com.example.jobsyserver.features.portfolio.model;
 
 import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
+import com.example.jobsyserver.features.skill.model.Skill;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -38,9 +40,15 @@ public class FreelancerPortfolio {
     @Column(name = "project_link", length = 500)
     private String projectLink;
 
-    @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToMany
+    @JoinTable(
+            name = "portfolio_skills",
+            joinColumns        = @JoinColumn(name = "portfolio_id"),
+            inverseJoinColumns = @JoinColumn(name = "skill_id")
+    )
+    @BatchSize(size = 20)
     @Builder.Default
-    private Set<PortfolioSkill> portfolioSkills = new HashSet<>();
+    private Set<Skill> skills = new HashSet<>();
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

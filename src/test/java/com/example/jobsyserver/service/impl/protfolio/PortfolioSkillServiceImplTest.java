@@ -1,16 +1,13 @@
 package com.example.jobsyserver.service.impl.protfolio;
 
 import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
+import com.example.jobsyserver.features.portfolio.service.impl.PortfolioSkillServiceImpl;
 import com.example.jobsyserver.features.skill.dto.SkillDto;
 import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
 import com.example.jobsyserver.features.portfolio.model.FreelancerPortfolio;
-import com.example.jobsyserver.features.portfolio.service.impl.PortfolioSkillServiceImpl;
-import com.example.jobsyserver.features.portfolio.model.PortfolioSkill;
-import com.example.jobsyserver.features.portfolio.model.PortfolioSkillId;
 import com.example.jobsyserver.features.skill.model.Skill;
 import com.example.jobsyserver.features.skill.mapper.SkillMapper;
 import com.example.jobsyserver.features.portfolio.repository.FreelancerPortfolioRepository;
-import com.example.jobsyserver.features.portfolio.repository.PortfolioSkillRepository;
 import com.example.jobsyserver.features.skill.repository.SkillRepository;
 import com.example.jobsyserver.features.auth.service.SecurityService;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,20 +16,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class PortfolioSkillServiceImplTest {
+class PortfolioSkillServiceImplTest {
 
     @InjectMocks
-    private PortfolioSkillServiceImpl portfolioSkillService;
-
-    @Mock
-    private PortfolioSkillRepository skillLinkRepo;
+    private PortfolioSkillServiceImpl service;
 
     @Mock
     private FreelancerPortfolioRepository portfolioRepo;
@@ -49,19 +43,18 @@ public class PortfolioSkillServiceImplTest {
     private FreelancerPortfolio portfolio;
     private Skill skill;
     private SkillDto skillDto;
-    private PortfolioSkill portfolioSkill;
     private Long portfolioId = 1L;
     private Long skillId = 1L;
+    private Long currentFr = 1L;
 
     @BeforeEach
     void setUp() {
-        FreelancerProfile freelancer = new FreelancerProfile();
-        freelancer.setId(1L);
-
+        FreelancerProfile fr = new FreelancerProfile();
+        fr.setId(currentFr);
         portfolio = new FreelancerPortfolio();
         portfolio.setId(portfolioId);
-        portfolio.setFreelancer(freelancer);
-
+        portfolio.setFreelancer(fr);
+        portfolio.setSkills(new java.util.HashSet<>());
         skill = new Skill();
         skill.setId(skillId);
         skill.setName("Java");
@@ -69,79 +62,96 @@ public class PortfolioSkillServiceImplTest {
         skillDto = new SkillDto();
         skillDto.setId(skillId);
         skillDto.setName("Java");
-
-        portfolioSkill = new PortfolioSkill();
-        portfolioSkill.setId(new PortfolioSkillId(portfolioId, skillId));
-        portfolioSkill.setPortfolio(portfolio);
-        portfolioSkill.setSkill(skill);
     }
-
 
     @Test
     void addSkillToPortfolio_ShouldAddSkill_WhenValidData() {
-        when(security.getCurrentFreelancerProfileId()).thenReturn(1L);
-        when(portfolioRepo.findById(portfolioId)).thenReturn(java.util.Optional.of(portfolio));
-        when(skillRepo.findById(skillId)).thenReturn(java.util.Optional.of(skill));
-        portfolioSkillService.addSkillToPortfolio(portfolioId, skillId);
-        verify(skillLinkRepo, times(1)).save(any(PortfolioSkill.class));
+        when(security.getCurrentFreelancerProfileId()).thenReturn(currentFr);
+        when(portfolioRepo.findByIdAndFreelancerId(portfolioId, currentFr))
+                .thenReturn(Optional.of(portfolio));
+        when(skillRepo.findById(skillId)).thenReturn(Optional.of(skill));
+        service.addSkillToPortfolio(portfolioId, skillId);
+        assertTrue(portfolio.getSkills().contains(skill));
+        verify(portfolioRepo, times(1)).save(portfolio);
     }
 
     @Test
-    void addSkillToPortfolio_ShouldThrowResourceNotFoundException_WhenPortfolioNotFound() {
-        when(security.getCurrentFreelancerProfileId()).thenReturn(1L);
-        when(portfolioRepo.findById(portfolioId)).thenReturn(java.util.Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> portfolioSkillService.addSkillToPortfolio(portfolioId, skillId));
+    void addSkillToPortfolio_ShouldNotSaveAgain_WhenSkillAlreadyPresent() {
+        portfolio.getSkills().add(skill);
+        when(security.getCurrentFreelancerProfileId()).thenReturn(currentFr);
+        when(portfolioRepo.findByIdAndFreelancerId(portfolioId, currentFr))
+                .thenReturn(Optional.of(portfolio));
+        when(skillRepo.findById(skillId)).thenReturn(Optional.of(skill));
+        service.addSkillToPortfolio(portfolioId, skillId);
+        verify(portfolioRepo, never()).save(portfolio);
     }
 
     @Test
-    void addSkillToPortfolio_ShouldThrowResourceNotFoundException_WhenSkillNotFound() {
-        when(security.getCurrentFreelancerProfileId()).thenReturn(1L);
-        when(portfolioRepo.findById(portfolioId)).thenReturn(java.util.Optional.of(portfolio));
-        when(skillRepo.findById(skillId)).thenReturn(java.util.Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> portfolioSkillService.addSkillToPortfolio(portfolioId, skillId));
+    void addSkillToPortfolio_ShouldThrow_WhenPortfolioNotFound() {
+        when(security.getCurrentFreelancerProfileId()).thenReturn(currentFr);
+        when(portfolioRepo.findByIdAndFreelancerId(portfolioId, currentFr))
+                .thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class,
+                () -> service.addSkillToPortfolio(portfolioId, skillId));
+    }
+
+    @Test
+    void addSkillToPortfolio_ShouldThrow_WhenSkillNotFound() {
+        when(security.getCurrentFreelancerProfileId()).thenReturn(currentFr);
+        when(portfolioRepo.findByIdAndFreelancerId(portfolioId, currentFr))
+                .thenReturn(Optional.of(portfolio));
+        when(skillRepo.findById(skillId)).thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class,
+                () -> service.addSkillToPortfolio(portfolioId, skillId));
     }
 
     @Test
     void removeSkillFromPortfolio_ShouldRemoveSkill_WhenValidData() {
-        when(security.getCurrentFreelancerProfileId()).thenReturn(1L);
-        when(portfolioRepo.findById(portfolioId)).thenReturn(java.util.Optional.of(portfolio));
-        when(skillLinkRepo.findById(new PortfolioSkillId(portfolioId, skillId)))
-                .thenReturn(java.util.Optional.of(portfolioSkill));
-        portfolioSkillService.removeSkillFromPortfolio(portfolioId, skillId);
-        verify(skillLinkRepo, times(1)).deleteById(any(PortfolioSkillId.class));
+        portfolio.getSkills().add(skill);
+        when(security.getCurrentFreelancerProfileId()).thenReturn(currentFr);
+        when(portfolioRepo.findByIdAndFreelancerId(portfolioId, currentFr))
+                .thenReturn(Optional.of(portfolio));
+        service.removeSkillFromPortfolio(portfolioId, skillId);
+        assertFalse(portfolio.getSkills().contains(skill));
+        verify(portfolioRepo, times(1)).save(portfolio);
     }
 
     @Test
-    void removeSkillFromPortfolio_ShouldThrowResourceNotFoundException_WhenPortfolioNotFound() {
-        when(security.getCurrentFreelancerProfileId()).thenReturn(1L);
-        when(portfolioRepo.findById(portfolioId)).thenReturn(java.util.Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> portfolioSkillService.removeSkillFromPortfolio(portfolioId, skillId));
+    void removeSkillFromPortfolio_ShouldThrow_WhenPortfolioNotFound() {
+        when(security.getCurrentFreelancerProfileId()).thenReturn(currentFr);
+        when(portfolioRepo.findByIdAndFreelancerId(portfolioId, currentFr))
+                .thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class,
+                () -> service.removeSkillFromPortfolio(portfolioId, skillId));
     }
 
     @Test
-    void removeSkillFromPortfolio_ShouldThrowResourceNotFoundException_WhenSkillLinkNotFound() {
-        when(security.getCurrentFreelancerProfileId()).thenReturn(1L);
-        when(portfolioRepo.findById(portfolioId)).thenReturn(java.util.Optional.of(portfolio));
-        when(skillLinkRepo.findById(new PortfolioSkillId(portfolioId, skillId))).thenReturn(java.util.Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> portfolioSkillService.removeSkillFromPortfolio(portfolioId, skillId));
+    void removeSkillFromPortfolio_ShouldThrow_WhenSkillNotInPortfolio() {
+        when(security.getCurrentFreelancerProfileId()).thenReturn(currentFr);
+        when(portfolioRepo.findByIdAndFreelancerId(portfolioId, currentFr))
+                .thenReturn(Optional.of(portfolio));
+        assertThrows(ResourceNotFoundException.class,
+                () -> service.removeSkillFromPortfolio(portfolioId, skillId));
     }
 
     @Test
     void getSkillsForPortfolio_ShouldReturnSkills_WhenValidPortfolioId() {
-        when(security.getCurrentFreelancerProfileId()).thenReturn(1L);
-        when(portfolioRepo.findById(portfolioId)).thenReturn(java.util.Optional.of(portfolio));
-        when(skillLinkRepo.findAll()).thenReturn(Collections.singletonList(portfolioSkill));
+        portfolio.getSkills().add(skill);
+        when(security.getCurrentFreelancerProfileId()).thenReturn(currentFr);
+        when(portfolioRepo.findByIdAndFreelancerId(portfolioId, currentFr))
+                .thenReturn(Optional.of(portfolio));
         when(skillMapper.toDto(skill)).thenReturn(skillDto);
-        List<SkillDto> skills = portfolioSkillService.getSkillsForPortfolio(portfolioId);
-        assertNotNull(skills);
-        assertEquals(1, skills.size());
-        assertEquals("Java", skills.get(0).getName());
+        List<SkillDto> dtos = service.getSkillsForPortfolio(portfolioId);
+        assertEquals(1, dtos.size());
+        assertEquals(skillDto, dtos.get(0));
     }
 
     @Test
-    void getSkillsForPortfolio_ShouldThrowResourceNotFoundException_WhenPortfolioNotFound() {
-        when(security.getCurrentFreelancerProfileId()).thenReturn(1L);
-        when(portfolioRepo.findById(portfolioId)).thenReturn(java.util.Optional.empty());
-        assertThrows(ResourceNotFoundException.class, () -> portfolioSkillService.getSkillsForPortfolio(portfolioId));
+    void getSkillsForPortfolio_ShouldThrow_WhenPortfolioNotFound() {
+        when(security.getCurrentFreelancerProfileId()).thenReturn(currentFr);
+        when(portfolioRepo.findByIdAndFreelancerId(portfolioId, currentFr))
+                .thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class,
+                () -> service.getSkillsForPortfolio(portfolioId));
     }
 }
