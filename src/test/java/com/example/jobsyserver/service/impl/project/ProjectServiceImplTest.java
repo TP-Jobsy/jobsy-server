@@ -62,17 +62,16 @@ class ProjectServiceImplTest {
 
     @Test
     void getAllProjects_withAndWithoutStatus() {
-        when(projectRepository.findAllWithCoreData(null))
-                .thenReturn(List.of(openProj));
-        when(projectRepository.findAllWithCoreData(ProjectStatus.OPEN))
+        when(projectRepository.findAllWithEverything()).thenReturn(List.of(openProj));
+        when(projectRepository.findAllWithEverythingByStatus(ProjectStatus.OPEN))
                 .thenReturn(List.of(openProj));
         when(projectMapper.toDto(openProj)).thenReturn(new ProjectDto());
         var all = service.getAllProjects(null);
         assertEquals(1, all.size());
         var filtered = service.getAllProjects(ProjectStatus.OPEN);
         assertEquals(1, filtered.size());
-        verify(projectRepository).findAllWithCoreData(null);
-        verify(projectRepository).findAllWithCoreData(ProjectStatus.OPEN);
+        verify(projectRepository).findAllWithEverything();
+        verify(projectRepository).findAllWithEverythingByStatus(ProjectStatus.OPEN);
     }
 
     @Test
