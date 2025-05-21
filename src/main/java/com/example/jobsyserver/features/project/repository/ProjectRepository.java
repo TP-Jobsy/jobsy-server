@@ -51,7 +51,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
                   p.projectComplexity     AS projectComplexity,
                   p.projectDuration       AS projectDuration,
                   p.status                AS status,
-                  p.createdAt             AS updatedAt,
+                  p.createdAt             AS createdAt,
                   c.companyName           AS clientCompanyName,
                   c.city                  AS clientCity,
                   c.country               AS clientCountry,
