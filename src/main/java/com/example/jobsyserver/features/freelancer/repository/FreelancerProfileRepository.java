@@ -56,7 +56,7 @@ public interface FreelancerProfileRepository extends JpaRepository<FreelancerPro
             FROM FreelancerProfile f
               JOIN f.user u
               LEFT JOIN f.skills s
-            WHERE (:skillIds IS NULL OR s.id IN :skillIds)
+            WHERE (:skillIds IS EMPTY OR s.id IN :skillIds)
               AND (
                    :textTerm IS NULL
                    OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :textTerm, '%'))

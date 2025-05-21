@@ -82,34 +82,34 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
             @Param("status") ProjectStatus status,
             Pageable pageable
     );
+
     @Query("""
-        SELECT
-          p.id               AS id,
-          p.title            AS title,
-          p.fixedPrice       AS fixedPrice,
-          c.companyName      AS clientCompanyName,
-          c.city             AS clientCity,
-          c.country          AS clientCountry,
-          u.firstName        AS assignedFreelancerFirstName,
-          u.lastName         AS assignedFreelancerLastName
-        FROM Project p
-          JOIN p.client c
-          JOIN c.user cu
-          LEFT JOIN p.assignedFreelancer af
-          LEFT JOIN af.user u
-          LEFT JOIN p.skills s
-        WHERE
-          ( :#{#skillIds == null} = true OR s.id IN :skillIds )
-          AND ( :term IS NULL
-                OR LOWER(p.title) LIKE LOWER(CONCAT('%', :term, '%'))
-                OR LOWER(p.description) LIKE LOWER(CONCAT('%', :term, '%')) )
-        GROUP BY
-          p.id, c.companyName, c.city, c.country,
-          u.firstName, u.lastName
-        """)
+            SELECT
+              p.id               AS id,
+              p.title            AS title,
+              p.fixedPrice       AS fixedPrice,
+              c.companyName      AS clientCompanyName,
+              c.city             AS clientCity,
+              c.country          AS clientCountry,
+              u.firstName        AS assignedFreelancerFirstName,
+              u.lastName         AS assignedFreelancerLastName
+            FROM Project p
+              JOIN p.client c
+              JOIN c.user cu
+              LEFT JOIN p.assignedFreelancer af
+              LEFT JOIN af.user u
+              LEFT JOIN p.skills s
+             WHERE (:skillIds IS EMPTY OR s.id IN :skillIds)
+              AND ( :term IS NULL
+                    OR LOWER(p.title) LIKE LOWER(CONCAT('%', :term, '%'))
+                    OR LOWER(p.description) LIKE LOWER(CONCAT('%', :term, '%')) )
+            GROUP BY
+              p.id, c.companyName, c.city, c.country,
+              u.firstName, u.lastName
+            """)
     Page<ProjectListItem> searchProjected(
             @Param("skillIds") List<Long> skillIds,
-            @Param("term")      String      term,
+            @Param("term") String term,
             Pageable pageable
     );
 }
