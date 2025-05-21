@@ -4,6 +4,7 @@ import com.example.jobsyserver.features.project.dto.ProjectCreateDto;
 import com.example.jobsyserver.features.project.dto.ProjectDto;
 import com.example.jobsyserver.features.project.dto.ProjectUpdateDto;
 import com.example.jobsyserver.features.common.enums.ProjectStatus;
+import com.example.jobsyserver.features.project.projection.ProjectListItem;
 import com.example.jobsyserver.features.project.service.ProjectService;
 import com.example.jobsyserver.features.auth.service.SecurityService;
 import com.example.jobsyserver.features.common.validation.group.Draft;
@@ -13,6 +14,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,16 +34,25 @@ public class ClientProjectController {
     private final ProjectService projectService;
     private final SecurityService securityService;
 
-    @Operation(summary = "Получить список всех проектов", description = "Доступно всем аутентифицированным")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Проекты успешно получены"),
-            @ApiResponse(responseCode = "401", description = "Не аутентифицирован"),
-            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
-    })
+//    @Operation(summary = "Получить список всех проектов", description = "Доступно всем аутентифицированным")
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "200", description = "Проекты успешно получены"),
+//            @ApiResponse(responseCode = "401", description = "Не аутентифицирован"),
+//            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
+//    })
+//    @GetMapping
+//    public ResponseEntity<List<ProjectDto>> getAllProjects(
+//            @RequestParam(required = false) ProjectStatus status) {
+//        return ResponseEntity.ok(projectService.getAllProjects(status));
+//    }
+
     @GetMapping
-    public ResponseEntity<List<ProjectDto>> getAllProjects(
-            @RequestParam(required = false) ProjectStatus status) {
-        return ResponseEntity.ok(projectService.getAllProjects(status));
+    @Operation(summary = "Получить список всех проектов (с пагинацией)")
+    public ResponseEntity<Page<ProjectListItem>> getAllProjects(
+            @RequestParam(value = "status", required = false) ProjectStatus status,
+            @PageableDefault(size = 20) Pageable pageable
+    ) {
+        return ResponseEntity.ok(projectService.listProjects(status, pageable));
     }
 
     @Operation(summary = "Получить проект по ID", description = "Возвращает данные одного проекта")

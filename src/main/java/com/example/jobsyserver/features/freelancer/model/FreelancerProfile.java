@@ -1,13 +1,15 @@
 package com.example.jobsyserver.features.freelancer.model;
 
 import com.example.jobsyserver.features.common.enums.Experience;
+import com.example.jobsyserver.features.skill.model.Skill;
 import com.example.jobsyserver.features.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -55,18 +57,22 @@ public class FreelancerProfile {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt = LocalDateTime.now();
 
-    @OneToMany(mappedBy = "freelancerProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToMany
+    @JoinTable(name = "freelancer_skills",
+            joinColumns        = @JoinColumn(name = "freelancer_id"),
+            inverseJoinColumns = @JoinColumn(name = "skill_id"))
+    @BatchSize(size = 20)
     @Builder.Default
-    private List<FreelancerSkill> freelancerSkills = new ArrayList<>();
+    private Set<Skill> skills = new HashSet<>();
 
-    @Column(name="avatar_url")
+    @Column(name = "avatar_url")
     private String avatarUrl;
 
     @Column(name = "average_rating", nullable = false)
     @Builder.Default
     private Double averageRating = 0.0;
 
-    @Column(name = "rating_count",   nullable = false)
+    @Column(name = "rating_count", nullable = false)
     @Builder.Default
-    private Integer ratingCount   = 0;
+    private Integer ratingCount = 0;
 }

@@ -12,7 +12,6 @@ import com.example.jobsyserver.features.project.service.impl.ProjectServiceImpl;
 import com.example.jobsyserver.features.user.model.User;
 import com.example.jobsyserver.features.client.repository.ClientProfileRepository;
 import com.example.jobsyserver.features.project.repository.ProjectRepository;
-import com.example.jobsyserver.features.project.service.ProjectSkillService;
 import com.example.jobsyserver.features.auth.service.SecurityService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +20,7 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,11 +33,14 @@ class ProjectServiceImplTest {
     @InjectMocks
     private ProjectServiceImpl service;
 
-    @Mock private ProjectRepository projectRepository;
-    @Mock private ClientProfileRepository clientProfileRepository;
-    @Mock private ProjectMapper projectMapper;
-    @Mock private SecurityService securityService;
-    @Mock private ProjectSkillService projectSkillService;
+    @Mock
+    private ProjectRepository projectRepository;
+    @Mock
+    private ClientProfileRepository clientProfileRepository;
+    @Mock
+    private ProjectMapper projectMapper;
+    @Mock
+    private SecurityService securityService;
 
     private User user;
     private ClientProfile profile;
@@ -48,28 +51,47 @@ class ProjectServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        user      = User.builder().id(1L).build();
-        profile   = ClientProfile.builder().id(1L).user(user).build();
-        draft     = Project.builder().id(10L).client(profile).status(ProjectStatus.DRAFT).build();
-        openProj  = Project.builder().id(20L).client(profile).status(ProjectStatus.OPEN).build();
+        user = User.builder().id(1L).build();
+        profile = ClientProfile.builder().id(1L).user(user).build();
+        draft = Project.builder()
+                .id(10L)
+                .client(profile)
+                .status(ProjectStatus.DRAFT)
+                .build();
+        draft.setSkills(new HashSet<>());
+        openProj = Project.builder()
+                .id(20L)
+                .client(profile)
+                .status(ProjectStatus.OPEN)
+                .build();
+        openProj.setSkills(new HashSet<>());
         createDto = new ProjectCreateDto();
         updateDto = new ProjectUpdateDto();
         lenient().when(securityService.getCurrentUser())
                 .thenReturn(user);
-        lenient().when(projectSkillService.getSkillsByProject(anyLong()))
-                .thenReturn(List.of());
+        lenient().when(projectMapper.toDtoList(anyList()))
+                .thenAnswer(inv -> {
+                    @SuppressWarnings("unchecked")
+                    List<Project> projects = (List<Project>) inv.getArgument(0);
+                    return projects.stream().map(p -> new ProjectDto()).toList();
+                });
     }
 
     @Test
     void getAllProjects_withAndWithoutStatus() {
-        when(projectRepository.findAll()).thenReturn(List.of(openProj));
-        when(projectRepository.findByStatus(ProjectStatus.OPEN)).thenReturn(List.of(openProj));
-        when(projectMapper.toDto(openProj)).thenReturn(new ProjectDto());
+        when(projectRepository.findAllWithGraph())
+                .thenReturn(List.of(openProj));
+        when(projectRepository.findAllWithGraphByStatus(ProjectStatus.OPEN))
+                .thenReturn(List.of(openProj));
         var all = service.getAllProjects(null);
-        assertEquals(1, all.size());
+        assertEquals(1, all.size(), "без фильтра должен быть один проект");
         var filtered = service.getAllProjects(ProjectStatus.OPEN);
-        assertEquals(1, filtered.size());
+        assertEquals(1, filtered.size(), "с фильтром OPEN тоже один проект");
+        verify(projectRepository).findAllWithGraph();
+        verify(projectRepository).findAllWithGraphByStatus(ProjectStatus.OPEN);
+        verify(projectMapper, times(2)).toDtoList(anyList());
     }
+
 
     @Test
     void getProjectById_foundAndNotFound() {
@@ -96,7 +118,7 @@ class ProjectServiceImplTest {
         when(projectRepository.findByAssignedFreelancerIdAndStatus(profile.getId(), ProjectStatus.OPEN))
                 .thenReturn(List.of(openProj));
         when(projectMapper.toDto(openProj)).thenReturn(new ProjectDto());
-        var byClient     = service.getProjectsByClient(profile.getId(), ProjectStatus.OPEN);
+        var byClient = service.getProjectsByClient(profile.getId(), ProjectStatus.OPEN);
         var byFreelancer = service.getProjectsForFreelancer(profile.getId(), ProjectStatus.OPEN);
         assertEquals(1, byClient.size());
         assertEquals(1, byFreelancer.size());

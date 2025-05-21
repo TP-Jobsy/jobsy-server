@@ -10,6 +10,7 @@ import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
 import com.example.jobsyserver.features.project.mapper.ProjectApplicationMapperImpl;
 import com.example.jobsyserver.features.project.model.Project;
 import com.example.jobsyserver.features.project.model.ProjectApplication;
+import com.example.jobsyserver.features.skill.mapper.SkillMapperImpl;
 import com.example.jobsyserver.features.user.mapper.UserMapperImpl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +24,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @Import({
         ProjectApplicationMapperImpl.class,
         FreelancerProfileMapperImpl.class,
+        SkillMapperImpl.class,
         UserMapperImpl.class
 })
 @SpringBootTest(classes = {
         ProjectApplicationMapperImpl.class,
         FreelancerProfileMapperImpl.class,
+        SkillMapperImpl.class,
         UserMapperImpl.class
 })
 class ProjectApplicationMapperTest {

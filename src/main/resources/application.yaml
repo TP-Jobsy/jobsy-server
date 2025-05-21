@@ -14,14 +14,16 @@ spring:
       validation-timeout: 5000
 
   jpa:
-    show-sql: true
+    show-sql: false
     hibernate:
       ddl-auto: create-drop
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
         format_sql: true
+        use_sql_comments: true
         globally_quoted_identifiers: true
+      hibernate.generate_statistics: true
 
   flyway:
     enabled: false
@@ -115,3 +117,20 @@ validation:
       base-url: https://restcountries.com/v3.1
     countries-now:
       base-url: https://countriesnow.space/api/v0.1
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    net.ttddyy.dsproxy.listener: TRACE
+    net.ttddyy.dsproxy.proxy: TRACE
+
+datasource-proxy:
+  enabled: true
+  p6spy:
+    enable-logging: true
+    multiline: true
+  query:
+    log-parameters: true
+    multiline: true
+    single-line: false

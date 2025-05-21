@@ -1,24 +1,45 @@
 package com.example.jobsyserver.features.project.model;
 
-import com.example.jobsyserver.features.common.enums.Complexity;
-import com.example.jobsyserver.features.common.enums.PaymentType;
-import com.example.jobsyserver.features.common.enums.ProjectDuration;
-import com.example.jobsyserver.features.common.enums.ProjectStatus;
+import com.example.jobsyserver.features.common.enums.*;
 import com.example.jobsyserver.features.category.model.Category;
 import com.example.jobsyserver.features.client.model.ClientProfile;
 import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
+import com.example.jobsyserver.features.skill.model.Skill;
 import com.example.jobsyserver.features.specialization.model.Specialization;
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
+@NamedEntityGraph(
+        name = "Project.full",
+        attributeNodes = {
+                @NamedAttributeNode("category"),
+                @NamedAttributeNode("specialization"),
+                @NamedAttributeNode(value = "client", subgraph = "client-user"),
+                @NamedAttributeNode(value = "assignedFreelancer", subgraph = "freelancer-user"),
+                @NamedAttributeNode("skills")
+        },
+        subgraphs = {
+                @NamedSubgraph(
+                        name = "client-user",
+                        attributeNodes = @NamedAttributeNode("user")
+                ),
+                @NamedSubgraph(
+                        name = "freelancer-user",
+                        attributeNodes = {
+                                @NamedAttributeNode("user"),
+                                @NamedAttributeNode("skills")
+                        }
+                )
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -81,9 +102,13 @@ public class Project {
     @JoinColumn(name = "assigned_freelancer_id")
     private FreelancerProfile assignedFreelancer;
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToMany
+    @JoinTable(name = "project_skills",
+            joinColumns = @JoinColumn(name = "project_id"),
+            inverseJoinColumns = @JoinColumn(name = "skill_id"))
+    @BatchSize(size = 20)
     @Builder.Default
-    private List<ProjectSkill> projectSkills = new ArrayList<>();
+    private Set<Skill> skills = new HashSet<>();
 
     @Column(name = "client_completed", nullable = false)
     @Builder.Default

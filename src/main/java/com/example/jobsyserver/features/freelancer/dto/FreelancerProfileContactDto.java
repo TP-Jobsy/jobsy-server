@@ -8,7 +8,7 @@ import org.hibernate.validator.constraints.URL;
 @Schema(description = "Контактные данные фрилансера")
 public class FreelancerProfileContactDto {
 
-    @URL(protocol = "http", regexp = "^(http|https)://.*$", message = "Должен быть корректный HTTP/HTTPS URL")
+    @URL(protocol = "https", message  = "Ссылка должна быть HTTPS")
     @Schema(description = "Ссылка для связи или портфолио", example = "https://linkedin.com/in/username")
     private String contactLink;
 }
