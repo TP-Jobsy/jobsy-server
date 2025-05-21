@@ -33,7 +33,10 @@ import java.util.Set;
                 ),
                 @NamedSubgraph(
                         name = "freelancer-user",
-                        attributeNodes = @NamedAttributeNode("user")
+                        attributeNodes = {
+                                @NamedAttributeNode("user"),
+                                @NamedAttributeNode("skills")
+                        }
                 )
         }
 )
