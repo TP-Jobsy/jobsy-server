@@ -10,6 +10,9 @@ public interface ProjectListItem {
     BigDecimal getFixedPrice();
 
     String getClientCompanyName();
+    String getClientCity();
+
+    String getClientCountry();
 
     String getAssignedFreelancerFirstName();
 
