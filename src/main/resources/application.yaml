@@ -124,3 +124,6 @@ logging:
     org.hibernate.stat: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.hibernate.loader.hql.QueryLoader: TRACE
+    org.hibernate.loader.criteria.CriteriaLoader: TRACE
+    org.hibernate.loader.collection.internal.CollectionLoader: TRACE
