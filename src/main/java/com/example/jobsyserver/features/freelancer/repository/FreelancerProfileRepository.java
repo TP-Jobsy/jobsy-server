@@ -45,19 +45,20 @@ public interface FreelancerProfileRepository extends JpaRepository<FreelancerPro
     Page<FreelancerListItem> findAllProjected(Pageable pageable);
 
     @Query("""
-              SELECT f.id            AS id,
-                     u.firstName     AS firstName,
-                     u.lastName      AS lastName,
-                     f.country       AS country,
-                     f.city          AS city,
-                     f.avatarUrl     AS avatarUrl,
-                     f.averageRating AS averageRating
-              FROM FreelancerProfile f
-              JOIN f.user u
-              WHERE :term IS NULL
-                 OR LOWER(u.firstName)  LIKE LOWER(CONCAT('%', :term, '%'))
-                 OR LOWER(u.lastName)   LIKE LOWER(CONCAT('%', :term, '%'))
-                 OR LOWER(f.aboutMe)    LIKE LOWER(CONCAT('%', :term, '%'))
+                SELECT
+                  f.id              AS id,
+                  u.firstName       AS firstName,
+                  u.lastName        AS lastName,
+                  f.country         AS country,
+                  f.city            AS city,
+                  f.avatarUrl       AS avatarUrl,
+                  f.averageRating   AS averageRating
+                FROM FreelancerProfile f
+                JOIN f.user u
+                WHERE
+                  LOWER(u.firstName) LIKE LOWER(CONCAT('%', :term, '%'))
+                  OR LOWER(u.lastName)  LIKE LOWER(CONCAT('%', :term, '%'))
+                  OR LOWER(f.aboutMe)   LIKE LOWER(CONCAT('%', :term, '%'))
             """)
     Page<FreelancerListItem> findByTextTerm(
             @Param("term") String term,
@@ -65,23 +66,26 @@ public interface FreelancerProfileRepository extends JpaRepository<FreelancerPro
     );
 
     @Query("""
-              SELECT f.id            AS id,
-                     u.firstName     AS firstName,
-                     u.lastName      AS lastName,
-                     f.country       AS country,
-                     f.city          AS city,
-                     f.avatarUrl     AS avatarUrl,
-                     f.averageRating AS averageRating
-              FROM FreelancerProfile f
-              JOIN f.user u
-              JOIN f.skills s
-              WHERE s.id IN :skillIds
-                AND ( :term IS NULL
-                   OR LOWER(u.firstName)  LIKE LOWER(CONCAT('%', :term, '%'))
-                   OR LOWER(u.lastName)   LIKE LOWER(CONCAT('%', :term, '%'))
-                   OR LOWER(f.aboutMe)    LIKE LOWER(CONCAT('%', :term, '%'))
-                )
-              GROUP BY f.id, u.firstName, u.lastName, f.country, f.city, f.avatarUrl, f.averageRating
+                SELECT
+                  f.id              AS id,
+                  u.firstName       AS firstName,
+                  u.lastName        AS lastName,
+                  f.country         AS country,
+                  f.city            AS city,
+                  f.avatarUrl       AS avatarUrl,
+                  f.averageRating   AS averageRating
+                FROM FreelancerProfile f
+                JOIN f.user u
+                JOIN f.skills s
+                WHERE s.id IN :skillIds
+                  AND (
+                    LOWER(u.firstName) LIKE LOWER(CONCAT('%', :term, '%'))
+                    OR LOWER(u.lastName)  LIKE LOWER(CONCAT('%', :term, '%'))
+                    OR LOWER(f.aboutMe)   LIKE LOWER(CONCAT('%', :term, '%'))
+                  )
+                GROUP BY
+                  f.id, u.firstName, u.lastName,
+                  f.country, f.city, f.avatarUrl, f.averageRating
             """)
     Page<FreelancerListItem> findBySkillsAndTerm(
             @Param("skillIds") List<Long> skillIds,
