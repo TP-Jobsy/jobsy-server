@@ -2,6 +2,7 @@ package com.example.jobsyserver.features.freelancer.controller;
 
 import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileDto;
 import com.example.jobsyserver.features.freelancer.service.FreelancerProfileService;
+import com.example.jobsyserver.features.skill.dto.SkillDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -13,6 +14,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Tag(name = "Freelancer Skills", description = "Операции управления навыками фрилансера")
 @RestController
 @RequestMapping("/profile/freelancer/skills")
@@ -21,6 +24,17 @@ import org.springframework.web.bind.annotation.*;
 public class FreelancerSkillsController {
 
     private final FreelancerProfileService freelancerProfileService;
+
+    @Operation(summary = "Просмотр навыков", description = "Возвращает все навыки текущего фрилансера")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Список навыков успешно получен"),
+            @ApiResponse(responseCode = "401", description = "Не аутентифицирован"),
+            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
+    })
+    @GetMapping
+    public ResponseEntity<List<SkillDto>> getMySkills() {
+        return ResponseEntity.ok(freelancerProfileService.getSkills());
+    }
 
     @Operation(summary = "Добавить навык", description = "Добавляет указанный навык к профилю фрилансера"
     )
