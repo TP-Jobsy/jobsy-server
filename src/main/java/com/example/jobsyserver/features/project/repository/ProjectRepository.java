@@ -40,22 +40,8 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
     @EntityGraph(value = "Project.full", type = LOAD)
     Optional<Project> findById(Long id);
 
-    @Query("""
-        SELECT p.id       AS id,
-               p.title    AS title,
-               p.fixedPrice AS fixedPrice,
-               c.companyName AS client_companyName,
-               u.firstName AS assignedFreelancer_firstName,
-               u.lastName  AS assignedFreelancer_lastName
-        FROM Project p
-          JOIN p.client c
-          JOIN c.user
-          LEFT JOIN p.assignedFreelancer f
-          LEFT JOIN f.user u
-        WHERE (:status IS NULL OR p.status = :status)
-        """)
-    Page<ProjectListItem> findAllProjectedBy(
-            @Param("status") ProjectStatus status,
-            Pageable pageable
-    );
+    Page<ProjectListItem> findAllProjectedBy(Pageable pageable);
+
+    Page<ProjectListItem> findAllProjectedByStatus(ProjectStatus status, Pageable pageable);
+
 }

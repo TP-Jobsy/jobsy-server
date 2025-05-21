@@ -52,8 +52,7 @@ public class ClientProjectController {
             @RequestParam(value = "status", required = false) ProjectStatus status,
             @PageableDefault(size = 20) Pageable pageable
     ) {
-        Page<ProjectListItem> page = projectService.listProjects(status, pageable);
-        return ResponseEntity.ok(page);
+        return ResponseEntity.ok(projectService.listProjects(status, pageable));
     }
 
     @Operation(summary = "Получить проект по ID", description = "Возвращает данные одного проекта")

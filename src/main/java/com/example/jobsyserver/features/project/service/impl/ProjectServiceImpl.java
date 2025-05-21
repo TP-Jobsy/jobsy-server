@@ -54,8 +54,13 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Page<ProjectListItem> listProjects(ProjectStatus status, Pageable pageable) {
-        return projectRepository.findAllProjectedBy(status, pageable);
+        if (status != null) {
+            return projectRepository.findAllProjectedByStatus(status, pageable);
+        } else {
+            return projectRepository.findAllProjectedBy(pageable);
+        }
     }
+
 
     @Override
     public ProjectDto getProjectById(Long projectId) {
