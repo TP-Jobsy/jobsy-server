@@ -22,6 +22,8 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
         format_sql: true
         globally_quoted_identifiers: true
+      hibernate.generate_statistics: true
+
 
   flyway:
     enabled: false
@@ -115,3 +117,9 @@ validation:
       base-url: https://restcountries.com/v3.1
     countries-now:
       base-url: https://countriesnow.space/api/v0.1
+
+logging:
+  level:
+    org.hibernate.stat: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
