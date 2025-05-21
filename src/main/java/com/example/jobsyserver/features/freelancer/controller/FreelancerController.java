@@ -1,17 +1,19 @@
 package com.example.jobsyserver.features.freelancer.controller;
 
 import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileDto;
+import com.example.jobsyserver.features.freelancer.projection.FreelancerListItem;
 import com.example.jobsyserver.features.freelancer.service.FreelancerProfileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,12 +30,11 @@ public class FreelancerController {
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
     @GetMapping
-    public ResponseEntity<List<FreelancerProfileDto>> getAllFreelancers() {
-        List<FreelancerProfileDto> freelancers = freelancerProfileService.getAllFreelancers();
-        if (freelancers.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        return ResponseEntity.ok(freelancers);
+    public ResponseEntity<Page<FreelancerListItem>> getAllFreelancers(
+            @PageableDefault(size = 20) Pageable pageable
+    ) {
+        Page<FreelancerListItem> page = freelancerProfileService.listFreelancers(pageable);
+        return ResponseEntity.ok(page);
     }
 
     @Operation(summary = "Получить детальную информацию о фрилансере", description = "Возвращает детальную информацию о фрилансере по его ID")

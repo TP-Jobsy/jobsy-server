@@ -7,6 +7,9 @@ import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileAboutDto
 import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
 import com.example.jobsyserver.features.freelancer.mapper.FreelancerProfileMapper;
 import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
+import com.example.jobsyserver.features.freelancer.projection.FreelancerListItem;
+import com.example.jobsyserver.features.skill.dto.SkillDto;
+import com.example.jobsyserver.features.skill.mapper.SkillMapper;
 import com.example.jobsyserver.features.skill.model.Skill;
 import com.example.jobsyserver.features.user.model.User;
 import com.example.jobsyserver.features.freelancer.repository.FreelancerProfileRepository;
@@ -18,10 +21,13 @@ import com.example.jobsyserver.features.auth.service.SecurityService;
 import com.example.jobsyserver.features.specialization.service.SpecializationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -32,6 +38,7 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
     private final FreelancerProfileMapper freelancerProfileMapper;
     private final SkillRepository skillRepository;
     private final SecurityService securityService;
+    private final SkillMapper skillMapper;
     private final CategoryService categoryService;
     private final SpecializationService specializationService;
 
@@ -132,6 +139,20 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
         return profiles.stream()
                 .map(this::mapWithNames)
                 .toList();
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public Page<FreelancerListItem> listFreelancers(Pageable pageable) {
+        return freelancerProfileRepository.findAllProjected(pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<SkillDto> getSkills() {
+        FreelancerProfile profile = getCurrentFreelancerProfile();
+        return profile.getSkills().stream()
+                .map(skillMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
