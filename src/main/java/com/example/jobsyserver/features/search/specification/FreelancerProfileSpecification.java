@@ -1,7 +1,7 @@
 package com.example.jobsyserver.features.search.specification;
 
 import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
-import com.example.jobsyserver.features.freelancer.model.FreelancerSkill;
+import com.example.jobsyserver.features.skill.model.Skill;
 import com.example.jobsyserver.features.user.model.User;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -26,8 +26,8 @@ public final class FreelancerProfileSpecification {
             if (resultType != null && !Long.class.equals(resultType)) {
                 query.distinct(true);
             }
-            Join<FreelancerProfile, FreelancerSkill> skills =
-                    root.join("freelancerSkills", JoinType.INNER);
+            Join<FreelancerProfile, Skill> skills =
+                    root.join("skills", JoinType.INNER);
             return skills.get("skill").get("id").in(skillIds);
         };
     }

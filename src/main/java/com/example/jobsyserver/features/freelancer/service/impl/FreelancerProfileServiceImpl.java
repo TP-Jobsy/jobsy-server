@@ -4,12 +4,9 @@ import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileBasicDto
 import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileContactDto;
 import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileDto;
 import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileAboutDto;
-import com.example.jobsyserver.features.common.exception.BadRequestException;
 import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
 import com.example.jobsyserver.features.freelancer.mapper.FreelancerProfileMapper;
 import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
-import com.example.jobsyserver.features.freelancer.model.FreelancerSkill;
-import com.example.jobsyserver.features.freelancer.model.FreelancerSkillId;
 import com.example.jobsyserver.features.skill.model.Skill;
 import com.example.jobsyserver.features.user.model.User;
 import com.example.jobsyserver.features.freelancer.repository.FreelancerProfileRepository;
@@ -30,7 +27,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class FreelancerProfileServiceImpl implements FreelancerProfileService {
-
     private final FreelancerProfileRepository freelancerProfileRepository;
     private final UserRepository userRepository;
     private final FreelancerProfileMapper freelancerProfileMapper;
@@ -43,9 +39,7 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
     @Transactional(readOnly = true)
     public FreelancerProfileDto getProfile() {
         FreelancerProfile profile = getCurrentFreelancerProfile();
-        FreelancerProfileDto dto = mapWithNames(profile);
-        log.info("Получение профиля фрилансера для пользователя с email: {}", securityService.getCurrentUserEmail());
-        return dto;
+        return mapWithNames(profile);
     }
 
     @Override
@@ -144,41 +138,32 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
     @Transactional
     public FreelancerProfileDto addSkill(Long skillId) {
         FreelancerProfile profile = getCurrentFreelancerProfile();
-        int MAX_SKILLS = 5;
-        int current = profile.getFreelancerSkills().size();
-        if (current >= MAX_SKILLS) {
-            log.warn("Попытка добавить {}-й навык, но лимит {} достигнут для профиля id={}",
-                    current + 1, MAX_SKILLS, profile.getId());
-            throw new BadRequestException("Нельзя добавить более " + MAX_SKILLS + " навыков");
-        }
-        boolean exists = profile.getFreelancerSkills().stream()
-                .anyMatch(fs -> fs.getSkill().getId().equals(skillId));
+        boolean exists = profile.getSkills().stream()
+                .anyMatch(s -> s.getId().equals(skillId));
         if (exists) {
-            log.info("Навык с id={} уже есть в профиле id={}", skillId, profile.getId());
+            log.info("Навык {} уже присутствует в профиле {}", skillId, profile.getId());
             return mapWithNames(profile);
         }
         Skill skill = skillRepository.findById(skillId)
-                .orElseThrow(() -> new ResourceNotFoundException("Навык" + skillId));
-        FreelancerSkill fs = FreelancerSkill.builder()
-                .id(new FreelancerSkillId(profile.getId(), skill.getId()))
-                .freelancerProfile(profile)
-                .skill(skill)
-                .build();
-        profile.getFreelancerSkills().add(fs);
-        log.info("Навык с id={} добавлен в профиль id={}", skillId, profile.getId());
-        return mapWithNames(freelancerProfileRepository.save(profile));
+                .orElseThrow(() -> new ResourceNotFoundException("Навык", skillId));
+        profile.getSkills().add(skill);
+        FreelancerProfile saved = freelancerProfileRepository.save(profile);
+        log.info("Навык {} добавлен в профиль {}", skillId, profile.getId());
+        return mapWithNames(saved);
     }
 
     @Override
     @Transactional
     public FreelancerProfileDto removeSkill(Long skillId) {
         FreelancerProfile profile = getCurrentFreelancerProfile();
-        boolean removed = profile.getFreelancerSkills().removeIf(fs -> fs.getSkill().getId().equals(skillId));
+        boolean removed = profile.getSkills().removeIf(s -> s.getId().equals(skillId));
         if (!removed) {
-            throw new ResourceNotFoundException("Навык" + skillId);
+            log.warn("Навык {} не найден в профиле {}", skillId, profile.getId());
+            throw new ResourceNotFoundException("Навык " + skillId + " не найден");
         }
-        log.info("Навык с id {} успешно удалён", skillId);
-        return mapWithNames(freelancerProfileRepository.save(profile));
+        FreelancerProfile saved = freelancerProfileRepository.save(profile);
+        log.info("Навык {} удалён из профиля {}", skillId, profile.getId());
+        return mapWithNames(saved);
     }
 
     @Override

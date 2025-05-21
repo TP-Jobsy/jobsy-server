@@ -1,6 +1,5 @@
 package com.example.jobsyserver.features.project.mapper;
 
-import com.example.jobsyserver.features.skill.dto.SkillDto;
 import com.example.jobsyserver.features.project.dto.ProjectCreateDto;
 import com.example.jobsyserver.features.project.dto.ProjectDto;
 import com.example.jobsyserver.features.project.dto.ProjectUpdateDto;
@@ -10,13 +9,9 @@ import com.example.jobsyserver.features.project.model.Project;
 import com.example.jobsyserver.features.freelancer.mapper.FreelancerProfileMapper;
 import com.example.jobsyserver.features.skill.mapper.SkillMapper;
 import com.example.jobsyserver.features.specialization.mapper.SpecializationMapper;
-import com.example.jobsyserver.features.project.model.ProjectSkill;
 import org.mapstruct.*;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Mapper(
         componentModel = "spring",
@@ -39,9 +34,9 @@ public interface ProjectMapper {
             @Mapping(target = "updatedAt", ignore = true),
             @Mapping(target = "client", ignore = true),
             @Mapping(target = "assignedFreelancer", ignore = true),
-            @Mapping(target = "projectSkills", ignore = true),
             @Mapping(target = "clientCompleted", ignore = true),
-            @Mapping(target = "freelancerCompleted", ignore = true)
+            @Mapping(target = "freelancerCompleted", ignore = true),
+            @Mapping(target = "skills", ignore = true)
     })
     Project toEntity(ProjectCreateDto dto);
 
@@ -55,9 +50,9 @@ public interface ProjectMapper {
             @Mapping(target = "updatedAt", ignore = true),
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "status", ignore = true),
-            @Mapping(target = "projectSkills", ignore = true),
             @Mapping(target = "clientCompleted", ignore = true),
-            @Mapping(target = "freelancerCompleted", ignore = true)
+            @Mapping(target = "freelancerCompleted", ignore = true),
+            @Mapping(target = "skills", ignore = true)
     })
     Project toEntity(ProjectUpdateDto dto, @MappingTarget Project project);
 
@@ -76,24 +71,11 @@ public interface ProjectMapper {
             @Mapping(source = "specialization", target = "specialization"),
             @Mapping(source = "client", target = "client"),
             @Mapping(source = "assignedFreelancer", target = "assignedFreelancer"),
-            @Mapping(source = "projectSkills", target = "skills", qualifiedByName = "mapProjectSkills"),
             @Mapping(target = "clientCompleted", ignore = true),
-            @Mapping(target = "freelancerCompleted", ignore = true)
+            @Mapping(target = "freelancerCompleted", ignore = true),
+            @Mapping(source = "skills", target = "skills")
     })
     ProjectDto toDto(Project project);
 
-    @Named("mapProjectSkills")
-    default List<SkillDto> mapProjectSkills(Set<ProjectSkill> projectSkills) {
-        if (projectSkills == null) {
-            return Collections.emptyList();
-        }
-        return projectSkills.stream()
-                .map(fs -> {
-                    SkillDto dto = new SkillDto();
-                    dto.setId(fs.getSkill().getId());
-                    dto.setName(fs.getSkill().getName());
-                    return dto;
-                })
-                .collect(Collectors.toList());
-    }
+    List<ProjectDto> toDtoList(List<Project> projects);
 }
