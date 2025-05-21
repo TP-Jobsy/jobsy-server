@@ -1,6 +1,6 @@
 package com.example.jobsyserver.features.project.service.impl;
 
-import com.example.jobsyserver.features.common.exception.BadRequestException;
+import com.example.jobsyserver.features.project.projection.ProjectListItem;
 import com.example.jobsyserver.features.skill.dto.SkillDto;
 import com.example.jobsyserver.features.project.dto.ProjectBasicDto;
 import com.example.jobsyserver.features.project.dto.ProjectCreateDto;
@@ -23,6 +23,8 @@ import com.example.jobsyserver.features.specialization.repository.Specialization
 import com.example.jobsyserver.features.project.service.ProjectService;
 import com.example.jobsyserver.features.auth.service.SecurityService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,6 +52,10 @@ public class ProjectServiceImpl implements ProjectService {
         return projectMapper.toDtoList(projects);
     }
 
+    @Override
+    public Page<ProjectListItem> listProjects(ProjectStatus status, Pageable pageable) {
+        return projectRepository.findAllProjectedBy(status, pageable);
+    }
 
     @Override
     public ProjectDto getProjectById(Long projectId) {

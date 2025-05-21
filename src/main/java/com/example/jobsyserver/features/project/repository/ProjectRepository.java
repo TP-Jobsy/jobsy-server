@@ -2,6 +2,9 @@ package com.example.jobsyserver.features.project.repository;
 
 import com.example.jobsyserver.features.common.enums.ProjectStatus;
 import com.example.jobsyserver.features.project.model.Project;
+import com.example.jobsyserver.features.project.projection.ProjectListItem;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -36,4 +39,23 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
     @Override
     @EntityGraph(value = "Project.full", type = LOAD)
     Optional<Project> findById(Long id);
+
+    @Query("""
+        SELECT p.id       AS id,
+               p.title    AS title,
+               p.fixedPrice AS fixedPrice,
+               c.companyName AS client_companyName,
+               u.firstName AS assignedFreelancer_firstName,
+               u.lastName  AS assignedFreelancer_lastName
+        FROM Project p
+          JOIN p.client c
+          JOIN c.user
+          LEFT JOIN p.assignedFreelancer f
+          LEFT JOIN f.user u
+        WHERE (:status IS NULL OR p.status = :status)
+        """)
+    Page<ProjectListItem> findAllProjectedBy(
+            @Param("status") ProjectStatus status,
+            Pageable pageable
+    );
 }
