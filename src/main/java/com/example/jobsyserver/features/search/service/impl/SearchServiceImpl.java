@@ -27,16 +27,28 @@ public class SearchServiceImpl implements SearchService {
             String     textTerm,
             Pageable   pageable
     ) {
-        return freelancerRepo.searchProjectedFreelancers(skillIds, textTerm, pageable);
+        if (skillIds != null && !skillIds.isEmpty()) {
+            return freelancerRepo.findBySkillsAndTerm(skillIds, textTerm, pageable);
+        } else if (textTerm != null && !textTerm.isBlank()) {
+            return freelancerRepo.findByTextTerm(textTerm, pageable);
+        } else {
+            return freelancerRepo.findAllProjected(pageable);
+        }
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<ProjectListItem> searchProjects(
             List<Long> skillIds,
-            String term,
-            Pageable pageable
+            String     term,
+            Pageable   pageable
     ) {
-        return projectRepo.searchProjected(skillIds, term, pageable);
+        if (skillIds != null && !skillIds.isEmpty()) {
+            return projectRepo.findBySkillsAndTerm(skillIds, term, pageable);
+        } else if (term != null && !term.isBlank()) {
+            return projectRepo.findByTerm(term, pageable);
+        } else {
+            return projectRepo.findAllProjectedBy(pageable);
+        }
     }
 }

@@ -53,8 +53,10 @@ class SearchServiceImplTest {
         when(pli.getAvatarUrl()).thenReturn("https://avatar.url");
         when(pli.getAverageRating()).thenReturn(4.5);
         Page<FreelancerListItem> page = new PageImpl<>(List.of(pli), pageable, 1);
-        when(freelancerRepo.searchProjectedFreelancers(skillIds, term, pageable)).thenReturn(page);
-        Page<FreelancerListItem> result = searchService.searchFreelancers(skillIds, term, pageable);
+        when(freelancerRepo.findBySkillsAndTerm(skillIds, term, pageable))
+                .thenReturn(page);
+        Page<FreelancerListItem> result =
+                searchService.searchFreelancers(skillIds, term, pageable);
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
         FreelancerListItem first = result.getContent().get(0);
@@ -65,18 +67,23 @@ class SearchServiceImplTest {
         assertEquals("NYC", first.getCity());
         assertEquals("https://avatar.url", first.getAvatarUrl());
         assertEquals(4.5, first.getAverageRating());
-        verify(freelancerRepo, times(1)).searchProjectedFreelancers(skillIds, term, pageable);
+        verify(freelancerRepo, times(1))
+                .findBySkillsAndTerm(skillIds, term, pageable);
     }
-
 
     @Test
     void searchFreelancers_ShouldReturnEmptyPage_WhenNoMatches() {
-        Page<FreelancerListItem> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
-        when(freelancerRepo.searchProjectedFreelancers(skillIds, term, pageable)).thenReturn(emptyPage);
-        Page<FreelancerListItem> result = searchService.searchFreelancers(skillIds, term, pageable);
+        Page<FreelancerListItem> emptyPage =
+                new PageImpl<>(Collections.emptyList(), pageable, 0);
+        when(freelancerRepo.findBySkillsAndTerm(skillIds, term, pageable))
+                .thenReturn(emptyPage);
+        Page<FreelancerListItem> result =
+                searchService.searchFreelancers(skillIds, term, pageable);
         assertNotNull(result);
         assertTrue(result.getContent().isEmpty());
         assertEquals(0, result.getTotalElements());
+        verify(freelancerRepo, times(1))
+                .findBySkillsAndTerm(skillIds, term, pageable);
     }
 
     @Test
@@ -91,8 +98,10 @@ class SearchServiceImplTest {
         when(pli.getAssignedFreelancerFirstName()).thenReturn("John");
         when(pli.getAssignedFreelancerLastName()).thenReturn("Doe");
         Page<ProjectListItem> page = new PageImpl<>(List.of(pli), pageable, 1);
-        when(projectRepo.searchProjected(skillIds, term, pageable)).thenReturn(page);
-        Page<ProjectListItem> result = searchService.searchProjects(skillIds, term, pageable);
+        when(projectRepo.findBySkillsAndTerm(skillIds, term, pageable))
+                .thenReturn(page);
+        Page<ProjectListItem> result =
+                searchService.searchProjects(skillIds, term, pageable);
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
         ProjectListItem first = result.getContent().get(0);
@@ -104,16 +113,23 @@ class SearchServiceImplTest {
         assertEquals("USA", first.getClientCountry());
         assertEquals("John", first.getAssignedFreelancerFirstName());
         assertEquals("Doe", first.getAssignedFreelancerLastName());
-        verify(projectRepo, times(1)).searchProjected(skillIds, term, pageable);
+        verify(projectRepo, times(1))
+                .findBySkillsAndTerm(skillIds, term, pageable);
     }
 
     @Test
     void searchProjects_ShouldReturnEmptyPage_WhenNoMatches() {
-        Page<ProjectListItem> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
-        when(projectRepo.searchProjected(skillIds, term, pageable)).thenReturn(emptyPage);
-        Page<ProjectListItem> result = searchService.searchProjects(skillIds, term, pageable);
+        Page<ProjectListItem> emptyPage =
+                new PageImpl<>(Collections.emptyList(), pageable, 0);
+        when(projectRepo.findBySkillsAndTerm(skillIds, term, pageable))
+                .thenReturn(emptyPage);
+
+        Page<ProjectListItem> result =
+                searchService.searchProjects(skillIds, term, pageable);
         assertNotNull(result);
         assertTrue(result.getContent().isEmpty());
         assertEquals(0, result.getTotalElements());
+        verify(projectRepo, times(1))
+                .findBySkillsAndTerm(skillIds, term, pageable);
     }
 }
