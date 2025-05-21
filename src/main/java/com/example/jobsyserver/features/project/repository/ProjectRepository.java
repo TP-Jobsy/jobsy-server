@@ -99,10 +99,15 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
               LEFT JOIN p.assignedFreelancer af
               LEFT JOIN af.user u
               LEFT JOIN p.skills s
-             WHERE (:skillIds IS EMPTY OR s.id IN :skillIds)
-              AND ( :term IS NULL
-                    OR LOWER(p.title) LIKE LOWER(CONCAT('%', :term, '%'))
-                    OR LOWER(p.description) LIKE LOWER(CONCAT('%', :term, '%')) )
+            WHERE
+              ( :#{#skillIds == null or #skillIds.isEmpty()} = true
+                OR s.id IN :skillIds
+              )
+              AND (
+                :term IS NULL
+                OR LOWER(p.title)       LIKE LOWER(CONCAT('%', :term, '%'))
+                OR LOWER(p.description) LIKE LOWER(CONCAT('%', :term, '%'))
+              )
             GROUP BY
               p.id, c.companyName, c.city, c.country,
               u.firstName, u.lastName

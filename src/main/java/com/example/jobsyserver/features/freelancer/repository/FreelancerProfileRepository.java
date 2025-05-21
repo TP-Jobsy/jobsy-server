@@ -56,12 +56,15 @@ public interface FreelancerProfileRepository extends JpaRepository<FreelancerPro
             FROM FreelancerProfile f
               JOIN f.user u
               LEFT JOIN f.skills s
-            WHERE (:skillIds IS EMPTY OR s.id IN :skillIds)
+            WHERE
+              ( :#{#skillIds == null or #skillIds.isEmpty()} = true
+                OR s.id IN :skillIds
+              )
               AND (
-                   :textTerm IS NULL
-                   OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :textTerm, '%'))
-                   OR LOWER(u.lastName)  LIKE LOWER(CONCAT('%', :textTerm, '%'))
-                   OR LOWER(f.aboutMe)   LIKE LOWER(CONCAT('%', :textTerm, '%'))
+                :textTerm IS NULL
+                OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :textTerm, '%'))
+                OR LOWER(u.lastName)  LIKE LOWER(CONCAT('%', :textTerm, '%'))
+                OR LOWER(f.aboutMe)   LIKE LOWER(CONCAT('%', :textTerm, '%'))
               )
             GROUP BY
               f.id, u.firstName, u.lastName, u.email, u.phone,
