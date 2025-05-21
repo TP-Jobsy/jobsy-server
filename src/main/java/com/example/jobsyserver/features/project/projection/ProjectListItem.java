@@ -20,7 +20,7 @@ public interface ProjectListItem {
 
     ProjectStatus getStatus();
 
-    LocalDateTime getUpdatedAt();
+    LocalDateTime getCreateAt();
 
     String getClientCompanyName();
 

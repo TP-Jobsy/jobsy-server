@@ -51,7 +51,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
                   p.projectComplexity     AS projectComplexity,
                   p.projectDuration       AS projectDuration,
                   p.status                AS status,
-                  p.updatedAt             AS updatedAt,
+                  p.createdAt             AS updatedAt,
                   c.companyName           AS clientCompanyName,
                   c.city                  AS clientCity,
                   c.country               AS clientCountry,
@@ -68,7 +68,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
     @Query("""
                 SELECT
                   p.id, p.title, p.fixedPrice,
-                  p.projectComplexity, p.projectDuration, p.status, p.updatedAt,
+                  p.projectComplexity, p.projectDuration, p.status, p.createdAt,
                   c.companyName, c.city, c.country,
                   u.firstName, u.lastName
                 FROM Project p
@@ -86,7 +86,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
     @Query("""
                 SELECT
                   p.id, p.title, p.fixedPrice,
-                  p.projectComplexity, p.projectDuration, p.status, p.updatedAt,
+                  p.projectComplexity, p.projectDuration, p.status, p.createdAt,
                   c.companyName, c.city, c.country,
                   u.firstName, u.lastName
                 FROM Project p
@@ -106,7 +106,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
     @Query("""
                 SELECT
                   p.id, p.title, p.fixedPrice,
-                  p.projectComplexity, p.projectDuration, p.status, p.updatedAt,
+                  p.projectComplexity, p.projectDuration, p.status, p.createdAt,
                   c.companyName, c.city, c.country,
                   u.firstName, u.lastName
                 FROM Project p
@@ -122,7 +122,7 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
                   )
                 GROUP BY
                   p.id, p.title, p.fixedPrice,
-                  p.projectComplexity, p.projectDuration, p.status, p.updatedAt,
+                  p.projectComplexity, p.projectDuration, p.status, p.createdAt,
                   c.companyName, c.city, c.country,
                   u.firstName, u.lastName
             """)
