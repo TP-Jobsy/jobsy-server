@@ -31,61 +31,84 @@ public interface FreelancerProfileRepository extends JpaRepository<FreelancerPro
     List<FreelancerProfile> findAll();
 
     @Query("""
-            SELECT
-              f.id              AS id,
-              u.firstName       AS firstName,
-              u.lastName        AS lastName,
-              f.country         AS country,
-              f.city            AS city,
-              f.avatarUrl       AS avatarUrl,
-              f.averageRating   AS averageRating
-            FROM FreelancerProfile f
-              JOIN f.user u
+                SELECT
+                  f.id                   AS id,
+                  u.firstName            AS firstName,
+                  u.lastName             AS lastName,
+                  f.country              AS country,
+                  f.city                 AS city,
+                  f.avatarUrl            AS avatarUrl,
+                  f.averageRating        AS averageRating,
+                  f.experienceLevel      AS experienceLevel,
+                  f.categoryId           AS categoryId,
+                  f.specializationId     AS specializationId,
+                  cat.name               AS categoryName,
+                  spec.name              AS specializationName
+                FROM FreelancerProfile f
+                JOIN f.user u
+                LEFT JOIN f.category cat
+                LEFT JOIN f.specialization spec
             """)
     Page<FreelancerListItem> findAllProjected(Pageable pageable);
 
     @Query("""
                 SELECT
-                  f.id              AS id,
-                  u.firstName       AS firstName,
-                  u.lastName        AS lastName,
-                  f.country         AS country,
-                  f.city            AS city,
-                  f.avatarUrl       AS avatarUrl,
-                  f.averageRating   AS averageRating
+                  f.id                   AS id,
+                  u.firstName            AS firstName,
+                  u.lastName             AS lastName,
+                  f.country              AS country,
+                  f.city                 AS city,
+                  f.avatarUrl            AS avatarUrl,
+                  f.averageRating        AS averageRating,
+                  f.experienceLevel      AS experienceLevel,
+                  f.categoryId           AS categoryId,
+                  f.specializationId     AS specializationId,
+                  cat.name               AS categoryName,
+                  spec.name              AS specializationName
                 FROM FreelancerProfile f
                 JOIN f.user u
-                WHERE
-                  LOWER(u.firstName) LIKE LOWER(CONCAT('%', :term, '%'))
-                  OR LOWER(u.lastName)  LIKE LOWER(CONCAT('%', :term, '%'))
-                  OR LOWER(f.aboutMe)   LIKE LOWER(CONCAT('%', :term, '%'))
+                LEFT JOIN f.category cat
+                LEFT JOIN f.specialization spec
+                WHERE LOWER(u.firstName) LIKE LOWER(CONCAT('%', :term, '%'))
+                   OR LOWER(u.lastName ) LIKE LOWER(CONCAT('%', :term, '%'))
+                   OR LOWER(f.aboutMe ) LIKE LOWER(CONCAT('%', :term, '%'))
             """)
     Page<FreelancerListItem> findByTextTerm(
             @Param("term") String term,
             Pageable pageable
     );
 
+
     @Query("""
                 SELECT
-                  f.id              AS id,
-                  u.firstName       AS firstName,
-                  u.lastName        AS lastName,
-                  f.country         AS country,
-                  f.city            AS city,
-                  f.avatarUrl       AS avatarUrl,
-                  f.averageRating   AS averageRating
+                  f.id                   AS id,
+                  u.firstName            AS firstName,
+                  u.lastName             AS lastName,
+                  f.country              AS country,
+                  f.city                 AS city,
+                  f.avatarUrl            AS avatarUrl,
+                  f.averageRating        AS averageRating,
+                  f.experienceLevel      AS experienceLevel,
+                  f.categoryId           AS categoryId,
+                  f.specializationId     AS specializationId,
+                  cat.name               AS categoryName,
+                  spec.name              AS specializationName
                 FROM FreelancerProfile f
                 JOIN f.user u
+                LEFT JOIN f.category cat
+                LEFT JOIN f.specialization spec
                 JOIN f.skills s
                 WHERE s.id IN :skillIds
                   AND (
-                    LOWER(u.firstName) LIKE LOWER(CONCAT('%', :term, '%'))
-                    OR LOWER(u.lastName)  LIKE LOWER(CONCAT('%', :term, '%'))
-                    OR LOWER(f.aboutMe)   LIKE LOWER(CONCAT('%', :term, '%'))
+                       LOWER(u.firstName) LIKE LOWER(CONCAT('%', :term, '%'))
+                    OR LOWER(u.lastName ) LIKE LOWER(CONCAT('%', :term, '%'))
+                    OR LOWER(f.aboutMe ) LIKE LOWER(CONCAT('%', :term, '%'))
                   )
                 GROUP BY
                   f.id, u.firstName, u.lastName,
-                  f.country, f.city, f.avatarUrl, f.averageRating
+                  f.country, f.city, f.avatarUrl, f.averageRating,
+                  f.experienceLevel, f.categoryId, f.specializationId,
+                  cat.name, spec.name
             """)
     Page<FreelancerListItem> findBySkillsAndTerm(
             @Param("skillIds") List<Long> skillIds,

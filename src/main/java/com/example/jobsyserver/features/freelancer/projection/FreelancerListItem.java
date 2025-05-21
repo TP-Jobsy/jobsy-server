@@ -15,4 +15,10 @@ public interface FreelancerListItem {
 
     Double getAverageRating();
 
+    String getExperienceLevel();
+
+    String getCategoryName();
+
+    String getSpecializationName();
+
 }
