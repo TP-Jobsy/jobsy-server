@@ -7,6 +7,7 @@ import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileAboutDto
 import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
 import com.example.jobsyserver.features.freelancer.mapper.FreelancerProfileMapper;
 import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
+import com.example.jobsyserver.features.freelancer.projection.FreelancerListItem;
 import com.example.jobsyserver.features.skill.dto.SkillDto;
 import com.example.jobsyserver.features.skill.mapper.SkillMapper;
 import com.example.jobsyserver.features.skill.model.Skill;
@@ -20,6 +21,8 @@ import com.example.jobsyserver.features.auth.service.SecurityService;
 import com.example.jobsyserver.features.specialization.service.SpecializationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -136,6 +139,11 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
         return profiles.stream()
                 .map(this::mapWithNames)
                 .toList();
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public Page<FreelancerListItem> listFreelancers(Pageable pageable) {
+        return freelancerProfileRepository.findAllProjected(pageable);
     }
 
     @Override
