@@ -14,7 +14,7 @@ spring:
       validation-timeout: 5000
 
   jpa:
-    show-sql: true
+    show-sql: false
     hibernate:
       ddl-auto: create-drop
     properties:
@@ -24,7 +24,6 @@ spring:
         use_sql_comments: true
         globally_quoted_identifiers: true
       hibernate.generate_statistics: true
-
 
   flyway:
     enabled: false
@@ -121,9 +120,17 @@ validation:
 
 logging:
   level:
-    org.hibernate.stat: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    org.hibernate.loader.hql.QueryLoader: TRACE
-    org.hibernate.loader.criteria.CriteriaLoader: TRACE
-    org.hibernate.loader.collection.internal.CollectionLoader: TRACE
+    net.ttddyy.dsproxy.listener: TRACE
+    net.ttddyy.dsproxy.proxy: TRACE
+
+datasource-proxy:
+  enabled: true
+  p6spy:
+    enable-logging: true
+    multiline: true
+  query:
+    log-parameters: true
+    multiline: true
+    single-line: false
