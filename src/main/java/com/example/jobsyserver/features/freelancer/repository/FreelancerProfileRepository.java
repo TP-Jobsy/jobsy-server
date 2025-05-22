@@ -78,6 +78,36 @@ public interface FreelancerProfileRepository extends JpaRepository<FreelancerPro
             Pageable pageable
     );
 
+    @Query("""
+                SELECT
+                  f.id                   AS id,
+                  u.firstName            AS firstName,
+                  u.lastName             AS lastName,
+                  f.country              AS country,
+                  f.city                 AS city,
+                  f.avatarUrl            AS avatarUrl,
+                  f.averageRating        AS averageRating,
+                  f.experienceLevel      AS experienceLevel,
+                  f.categoryId           AS categoryId,
+                  f.specializationId     AS specializationId,
+                  cat.name               AS categoryName,
+                  spec.name              AS specializationName
+                FROM FreelancerProfile f
+                JOIN f.user u
+                LEFT JOIN f.category cat
+                LEFT JOIN f.specialization spec
+                JOIN f.skills s
+                WHERE s.id IN :skillIds
+                GROUP BY
+                  f.id, u.firstName, u.lastName,
+                  f.country, f.city, f.avatarUrl, f.averageRating,
+                  f.experienceLevel, f.categoryId, f.specializationId,
+                  cat.name, spec.name
+            """)
+    Page<FreelancerListItem> findBySkills(
+            @Param("skillIds") List<Long> skillIds,
+            Pageable pageable
+    );
 
     @Query("""
                 SELECT

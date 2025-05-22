@@ -105,6 +105,38 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
 
     @Query("""
                 SELECT
+                   p.id                AS id,
+                   p.title             AS title,
+                   p.fixedPrice        AS fixedPrice,
+                   p.projectComplexity AS projectComplexity,
+                   p.projectDuration   AS projectDuration,
+                   p.status            AS status,
+                   p.createdAt         AS createdAt,
+                   c.companyName       AS clientCompanyName,
+                   c.city              AS clientCity,
+                   c.country           AS clientCountry,
+                   u.firstName         AS assignedFreelancerFirstName,
+                   u.lastName          AS assignedFreelancerLastName
+                FROM Project p
+                JOIN p.client c
+                JOIN c.user cu
+                LEFT JOIN p.assignedFreelancer af
+                LEFT JOIN af.user u
+                JOIN p.skills s
+                WHERE s.id IN :skillIds
+                GROUP BY
+                  p.id, p.title, p.fixedPrice,
+                  p.projectComplexity, p.projectDuration, p.status, p.createdAt,
+                  c.companyName, c.city, c.country,
+                  u.firstName, u.lastName
+            """)
+    Page<ProjectListItem> findBySkills(
+            @Param("skillIds") List<Long> skillIds,
+            Pageable pageable
+    );
+
+    @Query("""
+                SELECT
                   p.id, p.title, p.fixedPrice,
                   p.projectComplexity, p.projectDuration, p.status, p.createdAt,
                   c.companyName, c.city, c.country,
