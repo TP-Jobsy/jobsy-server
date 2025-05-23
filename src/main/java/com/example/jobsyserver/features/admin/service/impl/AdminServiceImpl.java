@@ -11,6 +11,7 @@ import com.example.jobsyserver.features.freelancer.mapper.FreelancerProfileMappe
 import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
 import com.example.jobsyserver.features.freelancer.repository.FreelancerProfileRepository;
 import com.example.jobsyserver.features.portfolio.model.FreelancerPortfolio;
+import com.example.jobsyserver.features.portfolio.projection.PortfolioAdminListItem;
 import com.example.jobsyserver.features.project.model.Project;
 import com.example.jobsyserver.features.project.projection.ProjectAdminListItem;
 import com.example.jobsyserver.features.user.model.User;
@@ -163,5 +164,19 @@ public class AdminServiceImpl implements AdminService {
     public Page<ProjectAdminListItem> getAllProjectsPageable(Pageable pageable) {
         log.info("Получение страницы проектов для админ-панели: {}", pageable);
         return projectRepository.findAllProjectedByAdmin(pageable);
+    }
+
+    @Override
+    public Page<PortfolioAdminListItem> getAllPortfoliosPageable(Pageable pageable) {
+        log.info("Получение страницы портфолио для админ-панели: {}", pageable);
+        return portfolioRepository.findAllProjectedByAdmin(pageable);
+    }
+
+    @Override
+    public FreelancerPortfolioDto getPortfolioById(Long portfolioId) {
+        log.info("Получение полного портфолио с id: {}", portfolioId);
+        FreelancerPortfolio portfolio = portfolioRepository.findById(portfolioId)
+                .orElseThrow(() -> new ResourceNotFoundException("Портфолио", portfolioId));
+        return portfolioMapper.toDto(portfolio);
     }
 }
