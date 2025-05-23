@@ -36,7 +36,8 @@ public class SecurityConfig {
             "/freelancers",
             "/actuator/health",
             "/actuator/info",
-            "/actuator/prometheus"
+            "/actuator/prometheus",
+            "/admin/auth/**"
     };
 
     @Bean

@@ -57,7 +57,7 @@ public class ConfirmEmailServiceImpl implements ConfirmEmailService {
         Confirmation newConfirmation = confirmationService.createConfirmationFor(user, ConfirmationAction.REGISTRATION);
         log.info("Сгенерирован новый код {}, публикуем событие", newConfirmation.getConfirmationCode());
         eventPublisher.publishEvent(
-                new ConfirmationCodeResentEvent(user, newConfirmation.getConfirmationCode())
+                new ConfirmationCodeResentEvent(user, newConfirmation.getConfirmationCode(), ConfirmationAction.REGISTRATION)
         );
     }
 }

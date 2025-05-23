@@ -39,4 +39,16 @@ public class EmailServiceImpl implements EmailService {
         message.setText(text);
         mailSender.send(message);
     }
+
+    @Override
+    public void sendAdminLoginEmail(String email, String loginCode) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Код для входа в админ-панель");
+        message.setText(String.format(
+                "Здравствуйте!\n\nВаш код для входа в админ-панель: %s\n\nС уважением,\nКоманда Jobsy",
+                loginCode
+        ));
+        mailSender.send(message);
+    }
 }

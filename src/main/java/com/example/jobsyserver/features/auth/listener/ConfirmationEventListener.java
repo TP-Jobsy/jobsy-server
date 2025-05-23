@@ -18,7 +18,20 @@ public class ConfirmationEventListener {
     public void onCodeResent(ConfirmationCodeResentEvent event) {
         String email = event.user().getEmail();
         String code  = event.confirmationCode();
-        log.info("Отправляем повторный код подтверждения {} → {}", email, code);
-        emailService.sendConfirmationEmail(email, code);
+
+        switch (event.action()) {
+            case REGISTRATION -> {
+                log.info("Отправляем код для регистрации {} → {}", email, code);
+                emailService.sendConfirmationEmail(email, code);
+            }
+            case PASSWORD_RESET -> {
+                log.info("Отправляем код для сброса пароля {} → {}", email, code);
+                emailService.sendPasswordResetEmail(email, code);
+            }
+            case ADMIN_LOGIN -> {
+                log.info("Отправляем код для входа в админ-панель {} → {}", email, code);
+                emailService.sendAdminLoginEmail(email, code);
+            }
+        }
     }
 }
