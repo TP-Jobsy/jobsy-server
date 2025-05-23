@@ -12,6 +12,7 @@ import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
 import com.example.jobsyserver.features.freelancer.repository.FreelancerProfileRepository;
 import com.example.jobsyserver.features.portfolio.model.FreelancerPortfolio;
 import com.example.jobsyserver.features.project.model.Project;
+import com.example.jobsyserver.features.project.projection.ProjectAdminListItem;
 import com.example.jobsyserver.features.user.model.User;
 import com.example.jobsyserver.features.common.enums.UserRole;
 import com.example.jobsyserver.features.user.repository.UserRepository;
@@ -23,6 +24,8 @@ import com.example.jobsyserver.features.project.dto.ProjectDto;
 import com.example.jobsyserver.features.portfolio.dto.FreelancerPortfolioDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -154,5 +157,11 @@ public class AdminServiceImpl implements AdminService {
         FreelancerPortfolio portfolio = portfolioRepository.findByIdAndFreelancerId(portfolioId, freelancerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Портфолио", portfolioId));
         portfolioRepository.delete(portfolio);
+    }
+
+    @Override
+    public Page<ProjectAdminListItem> getAllProjectsPageable(Pageable pageable) {
+        log.info("Получение страницы проектов для админ-панели: {}", pageable);
+        return projectRepository.findAllProjectedByAdmin(pageable);
     }
 }
