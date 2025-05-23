@@ -8,5 +8,7 @@ public enum ConfirmationAction {
     REGISTRATION,
 
     @Schema(description = "Сброс пароля")
-    PASSWORD_RESET
+    PASSWORD_RESET,
+    @Schema(description = "Подтверждение входа в админ-панель")
+    ADMIN_LOGIN
 }
