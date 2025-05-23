@@ -56,7 +56,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         log.info("Создана запись Confirmation(id={}), код={}",
                 confirmation.getId(), confirmation.getConfirmationCode());
         eventPublisher.publishEvent(new ConfirmationCodeResentEvent(
-                user, confirmation.getConfirmationCode()
+                user, confirmation.getConfirmationCode(), ConfirmationAction.REGISTRATION
         ));
         log.info("Опубликовано событие ConfirmationCodeResentEvent для {}", user.getEmail());
         log.info("JWT сформирован для {}", user.getEmail());
