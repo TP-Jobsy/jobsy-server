@@ -2,6 +2,7 @@ package com.example.jobsyserver.features.project.repository;
 
 import com.example.jobsyserver.features.common.enums.ProjectStatus;
 import com.example.jobsyserver.features.project.model.Project;
+import com.example.jobsyserver.features.project.projection.ProjectAdminListItem;
 import com.example.jobsyserver.features.project.projection.ProjectListItem;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -64,6 +65,16 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
                   LEFT JOIN af.user u
             """)
     Page<ProjectListItem> findAllProjectedBy(Pageable pageable);
+
+    @Query("SELECT p.id AS id, p.title AS title, p.createdAt AS createdAt, p.status AS status, " +
+            "c.companyName AS clientCompanyName, c.city AS clientCity, c.country AS clientCountry, " +
+            "u.firstName AS assignedFreelancerFirstName, u.lastName AS assignedFreelancerLastName " +
+            "FROM Project p " +
+            "JOIN p.client c " +
+            "JOIN c.user cu " +
+            "LEFT JOIN p.assignedFreelancer af " +
+            "LEFT JOIN af.user u")
+    Page<ProjectAdminListItem> findAllProjectedByAdmin(Pageable pageable);
 
     @Query("""
                 SELECT
