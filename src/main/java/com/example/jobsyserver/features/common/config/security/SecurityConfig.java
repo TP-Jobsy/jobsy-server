@@ -42,7 +42,8 @@ public class SecurityConfig {
             "/actuator/health",
             "/actuator/info",
             "/actuator/prometheus",
-            "/admin/auth/**"
+            "/admin/auth/**",
+            "/auth/refresh"
     };
 
     @Bean
