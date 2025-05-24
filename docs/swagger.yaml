@@ -1818,12 +1818,37 @@ components:
           type: string
           format: date
           example: "2000-01-01"
+        phone:
+          type: string
+          example: "79991234567"
         role:
           type: string
+          enum: [client, freelancer]
           example: "client"
         is_verified:
           type: boolean
           example: true
+        is_active:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+    PublicUser:
+      type: object
+      properties:
+        email:
+          type: string
+          example: "user@example.com"
+        first_name:
+          type: string
+          example: "Иван"
+        last_name:
+          type: string
+          example: "Иванов"
+        phone:
+          type: string
+          example: "79991234567"
     RegistrationRequest:
       type: object
       properties:
@@ -1924,64 +1949,126 @@ components:
         message:
           type: string
           example: "Операция выполнена успешно"
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 404
+        message:
+          type: string
+          example: "Ресурс не найден"
     FreelancerProfile:
       type: object
+      description: Полные данные профиля фрилансера для отображения
       properties:
         id:
           type: integer
+          description: Идентификатор профиля фрилансера
           example: 1
-        user_id:
-          type: integer
-          example: 1
-        birth_date:
+        about:
+          $ref: '#/components/schemas/FreelancerProfileAbout'
+        basic:
+          $ref: '#/components/schemas/FreelancerProfileBasic'
+        contact:
+          $ref: '#/components/schemas/FreelancerProfileContact'
+        user:
+          $ref: '#/components/schemas/User'
+        createdAt:
           type: string
-          format: date
-          example: "2000-01-01"
-        hourly_rate:
+          format: date-time
+          description: Дата создания профиля
+          example: "2024-03-30T12:00:00"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Дата последнего обновления профиля
+          example: "2024-03-30T12:00:00"
+        avatarUrl:
+          type: string
+          description: url аватарки фрилансера
+        averageRating:
           type: number
-          example: 50.0
-        category_id:
+          format: double
+          description: Средний рейтинг фрилансера
+          example: 4.5
+        ratingCount:
           type: integer
-          example: 2
-        specialization_id:
-          type: integer
-          example: 5
-        experience_level:
-          type: string
-          enum: [beginner, middle, expert]
-          example: "middle"
-        about_me:
-          type: string
-          example: "Опытный фронтендер с 5-летним стажем"
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-    FreelancerProfileUpdate:
+          description: Количество полученных оценок
+          example: 12
+      required:
+        - id
+        - createdAt
+    FreelancerProfileAbout:
       type: object
+      description: Данные раздела «О себе» профиля фрилансера
       properties:
-        birth_date:
-          type: string
-          format: date
-          example: "2000-01-01"
-        hourly_rate:
-          type: number
-          example: 50.0
-        category_id:
+        categoryId:
           type: integer
-          example: 2
-        specialization_id:
+          description: Идентификатор категории
+          example: 1
+        categoryName:
+          type: string
+          description: Название категории
+          example: "Веб-разработка"
+        specializationId:
           type: integer
-          example: 5
-        experience_level:
+          description: Идентификатор специализации
+          example: 1
+        specializationName:
           type: string
-          enum: [beginner, middle, expert]
-          example: "middle"
-        about_me:
+          description: Название специализации
+          example: "Front-end"
+        experienceLevel:
           type: string
-          example: "Опытный фронтендер с 5-летним стажем"
+          description: Уровень опыта работы
+          example: "MIDDLE"
+          enum: [BEGINNER, MIDDLE, EXPERT]
+        aboutMe:
+          type: string
+          description: Текст о себе
+          example: "Опытный разработчик с 5-летним стажем..."
+          maxLength: 1000
+        skills:
+          type: array
+          description: Список навыков фрилансера
+          items:
+            $ref: '#/components/schemas/Skill'
+          maxItems: 5
+    FreelancerProfileBasic:
+      type: object
+      description: Основные данные профиля фрилансера
+      properties:
+        country:
+          type: string
+          description: Страна
+          example: "Россия"
+        city:
+          type: string
+          description: Город
+          example: "Москва"
+        firstName:
+          type: string
+          example: "Иван"
+        lastName:
+          type: string
+          example: "Иванов"
+        email:
+          type: string
+          example: "ivan.ivanov@example.com"
+        phone:
+          type: string
+          example: "79991234567"
+    FreelancerProfileContact:
+      type: object
+      description: Контактные данные фрилансера
+      properties:
+        contactLink:
+          type: string
+          format: url
+          description: Ссылка для связи или портфолио (только HTTPS)
+          example: "https://linkedin.com/in/username"
+          pattern: "^https://.*"
     FreelancerPortfolio:
       type: object
       properties:
@@ -2038,46 +2125,98 @@ components:
           example: "https://github.com/example/projectA"
     ClientProfile:
       type: object
+      description: Полные данные профиля заказчика для отображения
       properties:
         id:
           type: integer
+          description: Идентификатор профиля заказчика
           example: 1
-        user_id:
+        basic:
+          $ref: '#/components/schemas/ClientProfileBasic'
+        contact:
+          $ref: '#/components/schemas/ClientProfileContact'
+        field:
+          $ref: '#/components/schemas/ClientProfileField'
+        user:
+          $ref: '#/components/schemas/User'
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата создания профиля
+          example: "2024-03-30T12:00:00"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Дата последнего обновления профиля
+          example: "2024-03-30T12:00:00"
+        avatarUrl:
+          type: string
+          description: url аватарки клиента
+        averageRating:
+          type: number
+          format: double
+          description: Средний рейтинг клиента
+          example: 4.2
+        ratingCount:
           type: integer
-          example: 1
-        company_name:
-          type: string
-          example: "ООО Рога и Копыта"
-        country:
-          type: string
-          example: "Россия"
-        city:
-          type: string
-          example: "Москва"
-        position_in_company:
-          type: string
-          example: "Директор"
-        field_description:
-          type: string
-          example: "Разработка IT-решений"
-    ClientProfileUpdate:
+          description: Количество полученных оценок
+          example: 5
+      required:
+        - id
+        - createdAt
+    ClientProfileBasic:
       type: object
+      description: Основные данные профиля заказчика
       properties:
-        company_name:
+        companyName:
           type: string
-          example: "ООО Рога и Копыта"
+          description: Название компании
+          example: "ООО Ромашка"
+          maxLength: 100
+        position:
+          type: string
+          description: Должность
+          example: "Менеджер проектов"
+          maxLength: 100
         country:
           type: string
+          description: Страна
           example: "Россия"
         city:
           type: string
+          description: Город
           example: "Москва"
-        position_in_company:
+        email:
           type: string
-          example: "Директор"
-        field_description:
+          example: "user@example.com"
+        first_name:
           type: string
-          example: "Разработка IT-решений"
+          example: "Иван"
+        last_name:
+          type: string
+          example: "Иванов"
+        phone:
+          type: string
+          example: "79991234567"
+    ClientProfileContact:
+      type: object
+      description: Контактные данные профиля заказчика
+      properties:
+        contactLink:
+          type: string
+          format: url
+          description: Ссылка для связи или на сайт компании (только HTTPS)
+          example: "https://acme-corp.example.com"
+          pattern: "^https://.*"
+    ClientProfileField:
+      type: object
+      description: Информация о сфере деятельности заказчика
+      properties:
+        fieldDescription:
+          type: string
+          description: Описание сферы деятельности компании
+          example: "Информационные технологии"
+          maxLength: 800
     Project:
       type: object
       properties:
@@ -2231,22 +2370,40 @@ components:
           type: string
           enum: [pending, approved, declined]
           example: "pending"
-    ProjectDetail:
+    ProjectApplicationRequest:
       type: object
       properties:
+        id:
+          type: integer
+          example: 1
         projectId:
           type: integer
           example: 1
+        applicationType:
+          type: string
+          enum: [response, invitation]
+          example: "response"
+        projectApplicationStatus:
+          type: string
+          enum: [pending, approved, declined]
+          example: "pending"
+    ProjectDetail:
+      type: object
+      properties:
+        project:
+          $ref: '#/components/schemas/Project'
         responses:
           type: array
           items:
-            type: integer
-            example: [1, 2, 3]
+            $ref: '#/components/schemas/ProjectApplication'
         invitations:
           type: array
           items:
-            type: integer
-            example: [1, 2, 3]
+            $ref: '#/components/schemas/ProjectApplication'
+        clientCompleted:
+          type: boolean
+        freelancerCompleted:
+          type: boolean
     Category:
       type: object
       properties:
@@ -2277,3 +2434,59 @@ components:
         name:
           type: string
           example: "JavaScript"
+    RatingRequest:
+      type: object
+      properties:
+        score:
+          type: integer
+          example: 4
+    RatingResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 42
+        projectId:
+          type: integer
+          example: 1001
+        raterFreelancerId:
+          type: integer
+          example: 7
+          nullable: true
+        raterClientId:
+          type: integer
+          example: 3
+          nullable: true
+        targetFreelancerId:
+          type: integer
+          example: 7
+          nullable: true
+        targetClientId:
+          type: integer
+          example: 3
+          nullable: true
+        score:
+          type: integer
+          example: 4
+          minimum: 1
+          maximum: 5
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - projectId
+        - score
+        - createdAt
+    GenerateDescriptionRequest:
+      type: object
+      properties:
+        systemPrompt:
+          type: string
+        userPrompt:
+          type: string
+    GenerateDescriptionResponse:
+      type: object
+      properties:
+        generatedDescription:
+          type: string
