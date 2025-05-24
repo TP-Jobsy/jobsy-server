@@ -31,7 +31,9 @@ public interface FreelancerProfileMapper {
             @Mapping(source = "createdAt", target = "createdAt"),
             @Mapping(source = "updatedAt", target = "updatedAt"),
             @Mapping(source = "skills", target = "about.skills"),
-            @Mapping(source = "avatarUrl", target = "avatarUrl")
+            @Mapping(source = "avatarUrl", target = "avatarUrl"),
+            @Mapping(source = "category.name", target = "about.categoryName"),
+            @Mapping(source = "specialization.name", target = "about.specializationName")
 
     })
     FreelancerProfileDto toDto(FreelancerProfile profile);

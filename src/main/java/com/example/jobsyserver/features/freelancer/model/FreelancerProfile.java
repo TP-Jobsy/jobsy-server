@@ -1,7 +1,9 @@
 package com.example.jobsyserver.features.freelancer.model;
 
+import com.example.jobsyserver.features.category.model.Category;
 import com.example.jobsyserver.features.common.enums.Experience;
 import com.example.jobsyserver.features.skill.model.Skill;
+import com.example.jobsyserver.features.specialization.model.Specialization;
 import com.example.jobsyserver.features.user.model.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -36,6 +38,14 @@ public class FreelancerProfile {
 
     @Column(name = "specialization_id")
     private Long specializationId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", insertable = false, updatable = false)
+    private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "specialization_id", insertable = false, updatable = false)
+    private Specialization specialization;
 
     @Column(name = "about_me")
     private String aboutMe;

@@ -24,31 +24,45 @@ public class SearchServiceImpl implements SearchService {
     @Transactional(readOnly = true)
     public Page<FreelancerListItem> searchFreelancers(
             List<Long> skillIds,
-            String     textTerm,
-            Pageable   pageable
+            String textTerm,
+            Pageable pageable
     ) {
-        if (skillIds != null && !skillIds.isEmpty()) {
+        boolean hasTerm = textTerm != null && !textTerm.isBlank();
+        boolean hasSkills = skillIds != null && !skillIds.isEmpty();
+
+        if (hasTerm && hasSkills) {
             return freelancerRepo.findBySkillsAndTerm(skillIds, textTerm, pageable);
-        } else if (textTerm != null && !textTerm.isBlank()) {
-            return freelancerRepo.findByTextTerm(textTerm, pageable);
-        } else {
-            return freelancerRepo.findAllProjected(pageable);
         }
+        if (hasTerm) {
+            return freelancerRepo.findByTextTerm(textTerm, pageable);
+        }
+        if (hasSkills) {
+            return freelancerRepo.findBySkills(skillIds, pageable);
+        }
+        return freelancerRepo.findAllProjected(pageable);
     }
+
 
     @Override
     @Transactional(readOnly = true)
     public Page<ProjectListItem> searchProjects(
             List<Long> skillIds,
-            String     term,
-            Pageable   pageable
+            String term,
+            Pageable pageable
     ) {
-        if (skillIds != null && !skillIds.isEmpty()) {
+        boolean hasTerm = term != null && !term.isBlank();
+        boolean hasSkills = skillIds != null && !skillIds.isEmpty();
+
+        if (hasTerm && hasSkills) {
             return projectRepo.findBySkillsAndTerm(skillIds, term, pageable);
-        } else if (term != null && !term.isBlank()) {
-            return projectRepo.findByTerm(term, pageable);
-        } else {
-            return projectRepo.findAllProjectedBy(pageable);
         }
+        if (hasTerm) {
+            return projectRepo.findByTerm(term, pageable);
+        }
+        if (hasSkills) {
+            return projectRepo.findBySkills(skillIds, pageable);
+        }
+        return projectRepo.findAllProjectedBy(pageable);
     }
+
 }

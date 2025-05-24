@@ -34,18 +34,12 @@ public class RegistrationController {
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody RegistrationRequest request) {
+    public ResponseEntity<RegistrationResponse> register(
+            @Valid @RequestBody RegistrationRequest request
+    ) {
         log.info("Начало регистрации пользователя с email: {}", request.getEmail());
-        try {
-            RegistrationResponse response = registrationService.register(request);
-            log.info("Пользователь с email {} успешно зарегистрирован", request.getEmail());
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
-        } catch (IllegalArgumentException e) {
-            log.error("Ошибка при регистрации пользователя с email {}: {}", request.getEmail(), e.getMessage(), e);
-            return new ResponseEntity<>(new DefaultResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
-        } catch (Exception ex) {
-            log.error("Ошибка при регистрации пользователя с email {}: {}", request.getEmail(), ex.getMessage(), ex);
-            return new ResponseEntity<>(new DefaultResponse("Внутренняя ошибка сервера"), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        RegistrationResponse response = registrationService.register(request);
+        log.info("Пользователь с email {} успешно зарегистрирован", request.getEmail());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

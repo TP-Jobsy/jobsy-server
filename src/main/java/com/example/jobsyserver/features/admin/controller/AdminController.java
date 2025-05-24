@@ -4,13 +4,19 @@ import com.example.jobsyserver.features.admin.service.AdminService;
 import com.example.jobsyserver.features.client.dto.ClientProfileDto;
 import com.example.jobsyserver.features.common.dto.response.DefaultResponse;
 import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileDto;
+import com.example.jobsyserver.features.portfolio.projection.PortfolioAdminListItem;
 import com.example.jobsyserver.features.project.dto.ProjectDto;
 import com.example.jobsyserver.features.portfolio.dto.FreelancerPortfolioDto;
+import com.example.jobsyserver.features.project.projection.ProjectAdminListItem;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -160,5 +166,54 @@ public class AdminController {
             @PathVariable Long portfolioId) {
         adminService.deletePortfolio(id, portfolioId);
         return ResponseEntity.ok(new DefaultResponse("Портфолио успешно удалено"));
+    }
+
+    @Operation(
+            summary = "Получить список всех проектов",
+            description = "Возвращает список всех проектов в системе"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Список проектов получен успешно"),
+            @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован или не имеет прав"),
+            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
+    })
+
+    @GetMapping("/projects")
+    public ResponseEntity<Page<ProjectAdminListItem>> getProjectsPage(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable) {
+        Page<ProjectAdminListItem> page = adminService.getAllProjectsPageable(pageable);
+        return ResponseEntity.ok(page);
+    }
+
+    @Operation(
+            summary = "Список портфолио (минимальная проекция) с пагинацией",
+            description = "Возвращает ID, заголовок, имя/фамилию фрилансера и дату создания"
+    )
+    @GetMapping("/portfolios")
+    public ResponseEntity<Page<PortfolioAdminListItem>> getPortfoliosPage(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable
+    ) {
+        Page<PortfolioAdminListItem> page = adminService.getAllPortfoliosPageable(pageable);
+        return ResponseEntity.ok(page);
+    }
+
+    @Operation(
+            summary = "Получить полное портфолио по id",
+            description = "Возвращает все поля портфолио (включая описание, роли, ссылки и навыки)"
+    )
+
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Портфолио получено успешно"),
+            @ApiResponse(responseCode = "401", description = "Не аутентифицирован или нет прав"),
+            @ApiResponse(responseCode = "404", description = "Портфолио не найден"),
+            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
+    })
+    @GetMapping("/portfolios/{portfolioId}")
+    public ResponseEntity<FreelancerPortfolioDto> getPortfolioById(
+            @PathVariable Long portfolioId) {
+        FreelancerPortfolioDto dto = adminService.getPortfolioById(portfolioId);
+        return ResponseEntity.ok(dto);
     }
 }
