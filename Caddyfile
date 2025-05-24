@@ -17,12 +17,15 @@ jobsyapp.ru {
         redir @graf_no_slash /grafana/ 308
 
         handle /grafana/* {
-            reverse_proxy grafana:3000 {
-                header_up Host {http.request.host}
+                reverse_proxy grafana:3000 {
+                    header_up Host {http.request.host}
             }
         }
          handle /avatars/* {
                 reverse_proxy http://minio:9000 {
                 }
+         }
+         handle {
+                 reverse_proxy flutter-admin:80
          }
 }
