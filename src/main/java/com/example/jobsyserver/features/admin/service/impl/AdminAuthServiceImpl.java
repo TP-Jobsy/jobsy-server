@@ -19,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class AdminAuthServiceImpl implements AdminAuthService {
@@ -31,8 +33,8 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 
     @Override
     public DefaultResponse requestLoginCode(AdminLoginRequest request) {
-        User user = userRepository.findByEmail(request.email())
-                .filter(u -> u.getRole() == UserRole.ADMIN)
+        User user = userRepository
+                .findByEmailAndRole(request.email(), UserRole.ADMIN)
                 .orElseThrow(() -> new BadRequestException("Администратор не найден"));
 
         var confirmation = confirmationService.createConfirmationFor(user, ConfirmationAction.ADMIN_LOGIN);
@@ -59,5 +61,10 @@ public class AdminAuthServiceImpl implements AdminAuthService {
                 .orElseThrow(() -> new ResourceNotFoundException("Пользователь"));
 
         return new AuthenticationResponse(token, userDto);
+    }
+
+    @Override
+    public Optional<User> findByEmailAndRole(String email, UserRole role) {
+        return userRepository.findByEmailAndRole(email, role);
     }
 }
