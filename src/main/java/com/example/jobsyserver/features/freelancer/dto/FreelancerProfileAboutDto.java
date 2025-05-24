@@ -24,7 +24,7 @@ public class FreelancerProfileAboutDto {
     @Schema(description = "Название специализации", example = "Front-end")
     private String specializationName;
 
-    @Schema(description = "Уровень опыта работы", example = "Senior")
+    @Schema(description = "Уровень опыта работы", example = "Middle")
     private Experience experienceLevel;
 
     @Size(max = 1000, message = "Поле \"О себе\" не должно превышать 1000 символов")
