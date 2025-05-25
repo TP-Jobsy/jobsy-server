@@ -106,7 +106,7 @@ public class AdminController {
 
     @Operation(summary = "Получить список проектов пользователя", description = "Возвращает список проектов по id заказчика")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Профиль получен успешно"),
+            @ApiResponse(responseCode = "200", description = "Проекты успешно получены"),
             @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован или не имеет прав"),
             @ApiResponse(responseCode = "404", description = "Профиль не найден"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
