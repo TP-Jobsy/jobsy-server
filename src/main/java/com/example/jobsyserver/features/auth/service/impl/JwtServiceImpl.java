@@ -14,7 +14,7 @@ import java.security.Key;
 import java.util.Date;
 
 @Service
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class JwtServiceImpl implements JwtService {
 
