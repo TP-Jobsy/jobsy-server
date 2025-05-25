@@ -213,4 +213,26 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
             @Param("term") String term,
             Pageable pageable
     );
+
+    @Query("""
+                SELECT
+                    p.id AS id,
+                    p.title AS title,
+                    p.createdAt AS createdAt,
+                    p.status AS status,
+                    u.firstName AS firstName,
+                    u.lastName AS lastName
+                FROM Project p
+                JOIN p.client c
+                JOIN c.user u
+                WHERE (:term IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :term, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :term, '%')))
+                  AND (:status IS NULL OR p.status = :status)
+                  AND (:clientName IS NULL OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :clientName, '%')) OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :clientName, '%')))
+            """)
+    Page<ProjectAdminListItem> searchProjectsAdmin(
+            @Param("term") String term,
+            @Param("status") String status,
+            @Param("clientName") String clientName,
+            Pageable pageable
+    );
 }
