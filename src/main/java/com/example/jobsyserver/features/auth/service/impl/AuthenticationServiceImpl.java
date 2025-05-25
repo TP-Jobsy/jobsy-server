@@ -1,8 +1,12 @@
 package com.example.jobsyserver.features.auth.service.impl;
 
 import com.example.jobsyserver.features.auth.dto.request.AuthenticationRequest;
+import com.example.jobsyserver.features.auth.dto.request.TokenRefreshRequest;
 import com.example.jobsyserver.features.auth.dto.response.AuthenticationResponse;
+import com.example.jobsyserver.features.auth.dto.response.TokenRefreshResponse;
+import com.example.jobsyserver.features.auth.service.AuthenticationService;
 import com.example.jobsyserver.features.auth.service.JwtService;
+import com.example.jobsyserver.features.common.dto.response.DefaultResponse;
 import com.example.jobsyserver.features.common.exception.BadRequestException;
 import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
 import com.example.jobsyserver.features.refresh.model.RefreshToken;
@@ -11,7 +15,7 @@ import com.example.jobsyserver.features.user.dto.UserDto;
 import com.example.jobsyserver.features.user.mapper.UserMapper;
 import com.example.jobsyserver.features.user.model.User;
 import com.example.jobsyserver.features.user.repository.UserRepository;
-import com.example.jobsyserver.features.auth.service.AuthenticationService;
+import com.example.jobsyserver.features.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,6 +32,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final RefreshTokenService refreshTokenService;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final UserService userService;
 
     @Override
     public AuthenticationResponse login(AuthenticationRequest request) {
@@ -42,9 +47,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         } catch (Exception ex) {
             throw new BadRequestException("Неверные учётные данные или пользователь не найден");
         }
-        String accessToken = jwtService.generateToken(request.getEmail());
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("Пользователь"));
+        String accessToken = jwtService.generateToken(user.getEmail());
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
         UserDto userDto = userMapper.toDto(user);
         return new AuthenticationResponse(
@@ -53,5 +58,26 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 refreshToken.getExpiryDate(),
                 userDto
         );
+    }
+
+    @Override
+    public TokenRefreshResponse refresh(TokenRefreshRequest request) {
+        RefreshToken existing = refreshTokenService.verifyAndGet(request.getRefreshToken());
+
+        String newAccessToken = jwtService.generateToken(existing.getUser().getEmail());
+        RefreshToken rotated = refreshTokenService.rotateRefreshToken(existing);
+
+        return new TokenRefreshResponse(
+                newAccessToken,
+                rotated.getToken(),
+                rotated.getExpiryDate()
+        );
+    }
+
+    @Override
+    public DefaultResponse logout() {
+        User currentUser = userService.getCurrentUser();
+        refreshTokenService.revokeAllForUser(currentUser);
+        return new DefaultResponse("Вы успешно вышли из системы");
     }
 }
