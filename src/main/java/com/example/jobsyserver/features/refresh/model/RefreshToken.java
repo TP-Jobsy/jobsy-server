@@ -14,6 +14,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @Builder
 public class RefreshToken {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,7 +25,7 @@ public class RefreshToken {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private User user;
 
-    @Column(nullable = false)
+    @Column(name = "expires_at", nullable = false)
     private Instant expiryDate;
 
     @Column(nullable = false)
