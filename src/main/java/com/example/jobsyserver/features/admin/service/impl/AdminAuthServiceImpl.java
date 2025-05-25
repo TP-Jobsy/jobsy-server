@@ -3,7 +3,9 @@ package com.example.jobsyserver.features.admin.service.impl;
 import com.example.jobsyserver.features.admin.dto.AdminLoginRequest;
 import com.example.jobsyserver.features.admin.dto.ConfirmAdminLoginRequest;
 import com.example.jobsyserver.features.admin.service.AdminAuthService;
+import com.example.jobsyserver.features.auth.dto.request.TokenRefreshRequest;
 import com.example.jobsyserver.features.auth.dto.response.AuthenticationResponse;
+import com.example.jobsyserver.features.auth.dto.response.TokenRefreshResponse;
 import com.example.jobsyserver.features.auth.event.ConfirmationCodeResentEvent;
 import com.example.jobsyserver.features.auth.service.ConfirmationService;
 import com.example.jobsyserver.features.auth.service.impl.JwtServiceImpl;
@@ -69,6 +71,21 @@ public class AdminAuthServiceImpl implements AdminAuthService {
                 refreshToken.getToken(),
                 refreshToken.getExpiryDate(),
                 userDto
+        );
+    }
+
+    @Override
+    public TokenRefreshResponse refresh(TokenRefreshRequest request) {
+        RefreshToken existing = refreshTokenService.verifyAndGet(request.getRefreshToken());
+        if (!existing.getUser().getRole().equals(UserRole.ADMIN)) {
+            throw new BadRequestException("Недопустимый токен для администратора");
+        }
+        String newAccessToken = jwtService.generateToken(existing.getUser().getEmail());
+        RefreshToken rotated = refreshTokenService.rotateRefreshToken(existing);
+        return new TokenRefreshResponse(
+                newAccessToken,
+                rotated.getToken(),
+                rotated.getExpiryDate()
         );
     }
 

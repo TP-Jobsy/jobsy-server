@@ -6,7 +6,6 @@ import com.example.jobsyserver.features.auth.dto.response.AuthenticationResponse
 import com.example.jobsyserver.features.auth.dto.response.TokenRefreshResponse;
 import com.example.jobsyserver.features.auth.service.JwtService;
 import com.example.jobsyserver.features.common.dto.response.DefaultResponse;
-import com.example.jobsyserver.features.refresh.model.RefreshToken;
 import com.example.jobsyserver.features.refresh.service.RefreshTokenService;
 import com.example.jobsyserver.features.user.model.User;
 import com.example.jobsyserver.features.auth.service.AuthenticationService;
@@ -65,24 +64,14 @@ public class AuthController {
     })
     @PostMapping("/logout")
     public ResponseEntity<DefaultResponse> logout() {
-        User currentUser = userService.getCurrentUser();
-        refreshTokenService.revokeAllForUser(currentUser);
-        return ResponseEntity.ok(new DefaultResponse("Вы успешно вышли из системы"));
+        return ResponseEntity.ok(authenticationService.logout());
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<TokenRefreshResponse> refreshToken(
             @RequestBody TokenRefreshRequest request
     ) {
-        RefreshToken existing = refreshTokenService.verifyAndGet(request.getRefreshToken());
-
-        String newAccessToken = jwtService.generateToken(existing.getUser().getEmail());
-        RefreshToken rotated = refreshTokenService.rotateRefreshToken(existing);
-        TokenRefreshResponse resp = new TokenRefreshResponse(
-                newAccessToken,
-                rotated.getToken(),
-                rotated.getExpiryDate()
-        );
-        return ResponseEntity.ok(resp);
+        TokenRefreshResponse response = authenticationService.refresh(request);
+        return ResponseEntity.ok(response);
     }
 }
