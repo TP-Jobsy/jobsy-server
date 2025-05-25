@@ -14,6 +14,8 @@ import com.example.jobsyserver.features.portfolio.model.FreelancerPortfolio;
 import com.example.jobsyserver.features.portfolio.projection.PortfolioAdminListItem;
 import com.example.jobsyserver.features.project.model.Project;
 import com.example.jobsyserver.features.project.projection.ProjectAdminListItem;
+import com.example.jobsyserver.features.user.dto.UserDto;
+import com.example.jobsyserver.features.user.mapper.UserMapper;
 import com.example.jobsyserver.features.user.model.User;
 import com.example.jobsyserver.features.common.enums.UserRole;
 import com.example.jobsyserver.features.user.repository.UserRepository;
@@ -27,12 +29,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.example.jobsyserver.features.user.specification.UserSpecifications.*;
 
 @Slf4j
 @Service
@@ -49,6 +54,7 @@ public class AdminServiceImpl implements AdminService {
     private final FreelancerProfileMapper freelancerProfileMapper;
     private final ClientProfileRepository clientProfileRepository;
     private final ClientProfileMapper clientProfileMapper;
+    private final UserMapper userMapper;
 
     @Override
     public List<FreelancerProfileDto> getAllFreelancers() {
@@ -158,6 +164,49 @@ public class AdminServiceImpl implements AdminService {
         FreelancerPortfolio portfolio = portfolioRepository.findByIdAndFreelancerId(portfolioId, freelancerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Портфолио", portfolioId));
         portfolioRepository.delete(portfolio);
+    }
+
+    @Override
+    public Page<ProjectAdminListItem> searchProjects(String term, String status, String clientName, Pageable pageable) {
+        log.info("Поиск проектов в админке: term='{}', status='{}', clientName='{}'", term, status, clientName);
+        boolean isFilterEmpty = (term == null || term.isBlank())
+                && (status == null || status.isBlank())
+                && (clientName == null || clientName.isBlank());
+        if (isFilterEmpty) {
+            return projectRepository.findAllProjectedByAdmin(pageable);
+        }
+        String safeTerm = term != null ? term : "";
+        String safeStatus = status != null ? status : "OPEN";
+        String safeClientName = clientName != null ? clientName : "";
+        return projectRepository.searchProjectsAdmin(safeTerm, safeStatus, safeClientName, pageable);
+    }
+
+    @Override
+    public Page<PortfolioAdminListItem> searchPortfolios(String term, String freelancerName, Pageable pageable) {
+        log.info("Поиск портфолио в админке: term='{}', freelancerName='{}'", term, freelancerName);
+        boolean isFilterEmpty = (term == null || term.isBlank()) &&
+                (freelancerName == null || freelancerName.isBlank());
+        if (isFilterEmpty) {
+            return portfolioRepository.findAllProjectedByAdmin(pageable);
+        }
+        String safeTerm = term != null ? term : "";
+        String safeFreelancerName = freelancerName != null ? freelancerName : "";
+        return portfolioRepository.searchPortfoliosAdmin(safeTerm, safeFreelancerName, pageable);
+    }
+
+    @Override
+    public Page<UserDto> searchUsers(String email, String firstName, String lastName, String phone, UserRole role, Pageable pageable) {
+        log.info("Поиск пользователей в админке: email='{}', firstName='{}', lastName='{}', phone='{}', role='{}'",
+                email, firstName, lastName, phone, role);
+
+        var spec = Specification.where(emailContains(email))
+                .and(firstNameContains(firstName))
+                .and(lastNameContains(lastName))
+                .and(phoneContains(phone))
+                .and(hasRole(role));
+
+        return userRepository.findAll(spec, pageable)
+                .map(userMapper::toDto);
     }
 
     @Override

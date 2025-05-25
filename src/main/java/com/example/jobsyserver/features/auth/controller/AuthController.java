@@ -1,8 +1,12 @@
 package com.example.jobsyserver.features.auth.controller;
 
 import com.example.jobsyserver.features.auth.dto.request.AuthenticationRequest;
+import com.example.jobsyserver.features.auth.dto.request.TokenRefreshRequest;
 import com.example.jobsyserver.features.auth.dto.response.AuthenticationResponse;
+import com.example.jobsyserver.features.auth.dto.response.TokenRefreshResponse;
+import com.example.jobsyserver.features.auth.service.JwtService;
 import com.example.jobsyserver.features.common.dto.response.DefaultResponse;
+import com.example.jobsyserver.features.refresh.service.RefreshTokenService;
 import com.example.jobsyserver.features.user.model.User;
 import com.example.jobsyserver.features.auth.service.AuthenticationService;
 import com.example.jobsyserver.features.user.service.UserService;
@@ -23,6 +27,8 @@ public class AuthController {
 
     private final UserService userService;
     private final AuthenticationService authenticationService;
+    private final RefreshTokenService refreshTokenService;
+    private final JwtService jwtService;
 
     @Operation(summary = "Получить информацию о текущем пользователе")
     @ApiResponses(value = {
@@ -57,7 +63,15 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
-        return ResponseEntity.ok(new DefaultResponse("Вы успешно вышли из системы"));
+    public ResponseEntity<DefaultResponse> logout() {
+        return ResponseEntity.ok(authenticationService.logout());
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<TokenRefreshResponse> refreshToken(
+            @RequestBody TokenRefreshRequest request
+    ) {
+        TokenRefreshResponse response = authenticationService.refresh(request);
+        return ResponseEntity.ok(response);
     }
 }

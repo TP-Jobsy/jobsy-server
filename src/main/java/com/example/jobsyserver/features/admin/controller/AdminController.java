@@ -3,11 +3,13 @@ package com.example.jobsyserver.features.admin.controller;
 import com.example.jobsyserver.features.admin.service.AdminService;
 import com.example.jobsyserver.features.client.dto.ClientProfileDto;
 import com.example.jobsyserver.features.common.dto.response.DefaultResponse;
+import com.example.jobsyserver.features.common.enums.UserRole;
 import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileDto;
 import com.example.jobsyserver.features.portfolio.projection.PortfolioAdminListItem;
 import com.example.jobsyserver.features.project.dto.ProjectDto;
 import com.example.jobsyserver.features.portfolio.dto.FreelancerPortfolioDto;
 import com.example.jobsyserver.features.project.projection.ProjectAdminListItem;
+import com.example.jobsyserver.features.user.dto.UserDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -215,5 +217,36 @@ public class AdminController {
             @PathVariable Long portfolioId) {
         FreelancerPortfolioDto dto = adminService.getPortfolioById(portfolioId);
         return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/projects/search")
+    public ResponseEntity<Page<ProjectAdminListItem>> searchProjects(
+            @RequestParam(required = false) String term,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String clientName,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return ResponseEntity.ok(adminService.searchProjects(term, status, clientName, pageable));
+    }
+
+    @GetMapping("/portfolios/search")
+    public ResponseEntity<Page<PortfolioAdminListItem>> searchPortfolios(
+            @RequestParam(required = false) String term,
+            @RequestParam(required = false) String freelancerName,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return ResponseEntity.ok(adminService.searchPortfolios(term, freelancerName, pageable));
+    }
+
+    @GetMapping("/users/search")
+    public ResponseEntity<Page<UserDto>> searchUsers(
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) UserRole role,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return ResponseEntity.ok(adminService.searchUsers(email, firstName, lastName, phone, role, pageable));
     }
 }
