@@ -1,8 +1,10 @@
 package com.example.jobsyserver.features.portfolio.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+import org.hibernate.validator.constraints.URL;
 
 import java.util.List;
 
@@ -14,10 +16,16 @@ import java.util.List;
 public class FreelancerPortfolioCreateDto {
     @NotBlank
     private String title;
+
     @NotBlank
     private String description;
+
     private String roleInProject;
+
     @NotBlank
+    @URL(protocol = "https", message  = "Ссылка должна быть HTTPS")
     private String projectLink;
+
+    @Max(value = 5, message = "Нельзя указывать более 5 навыков")
     private List<Long> skillIds;
 }
