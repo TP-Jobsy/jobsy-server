@@ -29,12 +29,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.example.jobsyserver.features.user.specification.UserSpecifications.*;
 
 @Slf4j
 @Service
@@ -166,19 +169,43 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public Page<ProjectAdminListItem> searchProjects(String term, String status, String clientName, Pageable pageable) {
         log.info("Поиск проектов в админке: term='{}', status='{}', clientName='{}'", term, status, clientName);
-        return projectRepository.searchProjectsAdmin(term, status, clientName, pageable);
+        boolean isFilterEmpty = (term == null || term.isBlank())
+                && (status == null || status.isBlank())
+                && (clientName == null || clientName.isBlank());
+        if (isFilterEmpty) {
+            return projectRepository.findAllProjectedByAdmin(pageable);
+        }
+        String safeTerm = term != null ? term : "";
+        String safeStatus = status != null ? status : "OPEN";
+        String safeClientName = clientName != null ? clientName : "";
+        return projectRepository.searchProjectsAdmin(safeTerm, safeStatus, safeClientName, pageable);
     }
 
     @Override
     public Page<PortfolioAdminListItem> searchPortfolios(String term, String freelancerName, Pageable pageable) {
         log.info("Поиск портфолио в админке: term='{}', freelancerName='{}'", term, freelancerName);
-        return portfolioRepository.searchPortfoliosAdmin(term, freelancerName, pageable);
+        boolean isFilterEmpty = (term == null || term.isBlank()) &&
+                (freelancerName == null || freelancerName.isBlank());
+        if (isFilterEmpty) {
+            return portfolioRepository.findAllProjectedByAdmin(pageable);
+        }
+        String safeTerm = term != null ? term : "";
+        String safeFreelancerName = freelancerName != null ? freelancerName : "";
+        return portfolioRepository.searchPortfoliosAdmin(safeTerm, safeFreelancerName, pageable);
     }
 
     @Override
     public Page<UserDto> searchUsers(String email, String firstName, String lastName, String phone, UserRole role, Pageable pageable) {
-        log.info("Поиск пользователей в админке: email='{}', firstName='{}', lastName='{}', phone='{}', role='{}'", email, firstName, lastName, phone, role);
-        return userRepository.searchUsersAdmin(email, firstName, lastName, phone, role, pageable)
+        log.info("Поиск пользователей в админке: email='{}', firstName='{}', lastName='{}', phone='{}', role='{}'",
+                email, firstName, lastName, phone, role);
+
+        var spec = Specification.where(emailContains(email))
+                .and(firstNameContains(firstName))
+                .and(lastNameContains(lastName))
+                .and(phoneContains(phone))
+                .and(hasRole(role));
+
+        return userRepository.findAll(spec, pageable)
                 .map(userMapper::toDto);
     }
 

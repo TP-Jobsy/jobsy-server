@@ -44,8 +44,11 @@ public interface FreelancerPortfolioRepository extends JpaRepository<FreelancerP
                 FROM FreelancerPortfolio p
                 JOIN p.freelancer f
                 JOIN f.user u
-                WHERE (:term IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :term, '%')))
-                  AND (:freelancerName IS NULL OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :freelancerName, '%')) OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :freelancerName, '%')))
+                WHERE LOWER(p.title) LIKE LOWER(CONCAT('%', :term, '%'))
+                  AND (
+                       LOWER(u.firstName) LIKE LOWER(CONCAT('%', :freelancerName, '%'))
+                    OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :freelancerName, '%'))
+                  )
             """)
     Page<PortfolioAdminListItem> searchPortfoliosAdmin(
             @Param("term") String term,
