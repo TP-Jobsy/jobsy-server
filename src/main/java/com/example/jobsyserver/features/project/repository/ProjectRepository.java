@@ -219,9 +219,14 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
                 FROM Project p
                 JOIN p.client c
                 JOIN c.user u
-                WHERE (:term IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :term, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :term, '%')))
-                  AND (:status IS NULL OR p.status = :status)
-                  AND (:clientName IS NULL OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :clientName, '%')) OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :clientName, '%')))
+                WHERE
+                    LOWER(p.title) LIKE LOWER(CONCAT('%', :term, '%'))
+                    OR LOWER(p.description) LIKE LOWER(CONCAT('%', :term, '%'))
+                    AND p.status = :status
+                    AND (
+                        LOWER(u.firstName) LIKE LOWER(CONCAT('%', :clientName, '%'))
+                        OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :clientName, '%'))
+                    )
             """)
     Page<ProjectAdminListItem> searchProjectsAdmin(
             @Param("term") String term,
