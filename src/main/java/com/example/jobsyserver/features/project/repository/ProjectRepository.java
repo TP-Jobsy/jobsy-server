@@ -73,18 +73,12 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
                     p.title                     AS title,
                     p.createdAt                 AS createdAt,
                     p.status                    AS status,
-                    c.companyName               AS clientCompanyName,
-                    c.city                      AS clientCity,
-                    c.country                   AS clientCountry,
-                    u.firstName                 AS assignedFreelancerFirstName,
-                    u.lastName                  AS assignedFreelancerLastName
+                    cu.firstName               AS clientFirstName,
+                    cu.lastName                AS clientLastName
                 FROM Project p
                     JOIN p.client c
                     JOIN c.user cu
-                    LEFT JOIN p.assignedFreelancer af
-                    LEFT JOIN af.user u
-            """
-    )
+            """)
     Page<ProjectAdminListItem> findAllProjectedByAdmin(Pageable pageable);
 
     @Query("""

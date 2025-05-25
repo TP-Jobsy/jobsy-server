@@ -4,13 +4,14 @@ import java.time.LocalDateTime;
 
 public interface ProjectAdminListItem {
     Long getId();
-    String getTitle();
-    LocalDateTime getCreatedAt();
-    String getStatus();
-    ClientInfo getClient();
 
-    interface ClientInfo {
-        String getFirstName();
-        String getLastName();
-    }
+    String getTitle();
+
+    LocalDateTime getCreatedAt();
+
+    String getStatus();
+
+    String getClientFirstName();
+
+    String getClientLastName();
 }
