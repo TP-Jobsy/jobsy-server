@@ -1,11 +1,13 @@
 package com.example.jobsyserver.features.admin.service;
 
 import com.example.jobsyserver.features.client.dto.ClientProfileDto;
+import com.example.jobsyserver.features.common.enums.UserRole;
 import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileDto;
 import com.example.jobsyserver.features.portfolio.dto.FreelancerPortfolioDto;
 import com.example.jobsyserver.features.portfolio.projection.PortfolioAdminListItem;
 import com.example.jobsyserver.features.project.dto.ProjectDto;
 import com.example.jobsyserver.features.project.projection.ProjectAdminListItem;
+import com.example.jobsyserver.features.user.dto.UserDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -43,4 +45,10 @@ public interface AdminService {
     Page<PortfolioAdminListItem> getAllPortfoliosPageable(Pageable pageable);
 
     void deletePortfolio(Long freelancerId, Long portfolioId);
+
+    Page<ProjectAdminListItem> searchProjects(String term, String status, String clientName, Pageable pageable);
+
+    Page<PortfolioAdminListItem> searchPortfolios(String term, String freelancerName, Pageable pageable);
+
+    Page<UserDto> searchUsers(String email, String firstName, String lastName, String phone, UserRole role, Pageable pageable);
 }

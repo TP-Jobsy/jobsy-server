@@ -14,6 +14,8 @@ import com.example.jobsyserver.features.portfolio.model.FreelancerPortfolio;
 import com.example.jobsyserver.features.portfolio.projection.PortfolioAdminListItem;
 import com.example.jobsyserver.features.project.model.Project;
 import com.example.jobsyserver.features.project.projection.ProjectAdminListItem;
+import com.example.jobsyserver.features.user.dto.UserDto;
+import com.example.jobsyserver.features.user.mapper.UserMapper;
 import com.example.jobsyserver.features.user.model.User;
 import com.example.jobsyserver.features.common.enums.UserRole;
 import com.example.jobsyserver.features.user.repository.UserRepository;
@@ -49,6 +51,7 @@ public class AdminServiceImpl implements AdminService {
     private final FreelancerProfileMapper freelancerProfileMapper;
     private final ClientProfileRepository clientProfileRepository;
     private final ClientProfileMapper clientProfileMapper;
+    private final UserMapper userMapper;
 
     @Override
     public List<FreelancerProfileDto> getAllFreelancers() {
@@ -158,6 +161,25 @@ public class AdminServiceImpl implements AdminService {
         FreelancerPortfolio portfolio = portfolioRepository.findByIdAndFreelancerId(portfolioId, freelancerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Портфолио", portfolioId));
         portfolioRepository.delete(portfolio);
+    }
+
+    @Override
+    public Page<ProjectAdminListItem> searchProjects(String term, String status, String clientName, Pageable pageable) {
+        log.info("Поиск проектов в админке: term='{}', status='{}', clientName='{}'", term, status, clientName);
+        return projectRepository.searchProjectsAdmin(term, status, clientName, pageable);
+    }
+
+    @Override
+    public Page<PortfolioAdminListItem> searchPortfolios(String term, String freelancerName, Pageable pageable) {
+        log.info("Поиск портфолио в админке: term='{}', freelancerName='{}'", term, freelancerName);
+        return portfolioRepository.searchPortfoliosAdmin(term, freelancerName, pageable);
+    }
+
+    @Override
+    public Page<UserDto> searchUsers(String email, String firstName, String lastName, String phone, UserRole role, Pageable pageable) {
+        log.info("Поиск пользователей в админке: email='{}', firstName='{}', lastName='{}', phone='{}', role='{}'", email, firstName, lastName, phone, role);
+        return userRepository.searchUsersAdmin(email, firstName, lastName, phone, role, pageable)
+                .map(userMapper::toDto);
     }
 
     @Override
