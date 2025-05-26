@@ -51,4 +51,9 @@ public interface AdminService {
     Page<PortfolioAdminListItem> searchPortfolios(String term, String freelancerName, Pageable pageable);
 
     Page<UserDto> searchUsers(String email, String firstName, String lastName, String phone, UserRole role, Pageable pageable);
+
+    void activateFreelancer(Long userId);
+
+    void activateClient(Long userId);
+
 }

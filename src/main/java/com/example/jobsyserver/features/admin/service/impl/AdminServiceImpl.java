@@ -76,11 +76,8 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public void deactivateFreelancer(Long userId) {
-        User freelancer = userRepository.findByIdAndRole(userId, UserRole.FREELANCER)
-                .orElseThrow(() -> new ResourceNotFoundException("Пользователь", userId));
-        freelancer.setIsActive(false);
-        log.info("Деактивация профиля фрилансера с userId: {}", userId);
-        userRepository.save(freelancer);
+        toggleUserActive(userId, UserRole.FREELANCER, false);
+        log.info("Деактивирован фрилансер userId={}", userId);
     }
 
     @Override
@@ -111,11 +108,8 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public void deactivateClient(Long userId) {
-        User client = userRepository.findByIdAndRole(userId, UserRole.CLIENT)
-                .orElseThrow(() -> new ResourceNotFoundException("Пользователь", userId));
-        client.setIsActive(false);
-        log.info("Деактивация профиля заказчика с userId: {}", userId);
-        userRepository.save(client);
+        toggleUserActive(userId, UserRole.CLIENT, false);
+        log.info("Деактивирован клиент userId={}", userId);
     }
 
     @Override
@@ -227,5 +221,29 @@ public class AdminServiceImpl implements AdminService {
         FreelancerPortfolio portfolio = portfolioRepository.findById(portfolioId)
                 .orElseThrow(() -> new ResourceNotFoundException("Портфолио", portfolioId));
         return portfolioMapper.toDto(portfolio);
+    }
+
+    @Override
+    public void activateFreelancer(Long userId) {
+        toggleUserActive(userId, UserRole.FREELANCER, true);
+        log.info("Активирован фрилансер userId={}", userId);
+    }
+
+    @Override
+    public void activateClient(Long userId) {
+        toggleUserActive(userId, UserRole.CLIENT, true);
+        log.info("Активирован клиент userId={}", userId);
+    }
+
+    private void toggleUserActive(Long userId, UserRole role, boolean active) {
+        User user = userRepository.findByIdAndRole(userId, role)
+                .orElseThrow(() -> new ResourceNotFoundException("Пользователь", userId));
+        if (user.getIsActive().equals(active)) {
+            log.warn("Попытка {} пользователя userId={}, роль={} — уже в таком состоянии",
+                    active ? "активации" : "деактивации", userId, role);
+            return;
+        }
+        user.setIsActive(active);
+        userRepository.save(user);
     }
 }
