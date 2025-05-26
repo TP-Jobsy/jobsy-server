@@ -113,6 +113,15 @@ services:
     networks:
       - app-network
 
+  flutter-admin:
+    image: jonshilin/jobsy_admin:latest
+    container_name: flutter_admin
+    restart: always
+    ports:
+      - "8082:80"
+    networks:
+      - app-network
+
 volumes:
   data:
     name: minio-data

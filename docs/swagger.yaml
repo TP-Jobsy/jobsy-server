@@ -20,6 +20,8 @@ tags:
     description: Управление категориями
   - name: specializations
     description: Управление специализациями
+  - name: rating
+    description: Оценка завершённых проектов
 
 paths:
 
@@ -262,29 +264,6 @@ paths:
                 $ref: '#/components/schemas/FreelancerProfile'
         '404':
           description: Профиль фрилансера не найден
-    put:
-      tags:
-        - freelancer
-      summary: Обновить профиль фрилансера
-      description: Обновляет данные профиля фрилансера
-      security:
-        - bearerAuth: []
-      requestBody:
-        description: Данные для обновления профиля фрилансера
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FreelancerProfileUpdate'
-      responses:
-        '200':
-          description: Профиль фрилансера обновлён успешно
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FreelancerProfile'
-        '400':
-          description: Ошибка обновления профиля
     delete:
       tags:
         - freelancer
@@ -301,7 +280,93 @@ paths:
                 $ref: '#/components/schemas/DefaultResponse'
         '404':
           description: Аккаунт не найден
-
+  /profile/freelancer/basic:
+    put:
+      tags:
+        - freelancer
+      summary: Обновить основные данные профиля фрилансера
+      description: Обновляет основные данные профиля (требуется роль FREELANCER)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FreelancerProfileBasic'
+      responses:
+        '200':
+          description: Основные данные обновлены успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FreelancerProfile'
+        '400':
+          description: Ошибка обновления основных данных
+        '401':
+          description: Пользователь не авторизован
+        '403':
+          description: Нет прав (требуется роль FREELANCER)
+        '500':
+          description: Внутренняя ошибка сервера
+  /profile/freelancer/contact:
+    put:
+      tags:
+        - freelancer
+      summary: Обновить контактные данные профиля фрилансера
+      description: Обновляет контактные данные профиля (требуется роль FREELANCER)
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FreelancerProfileContact'
+      responses:
+        '200':
+          description: Контактные данные обновлены успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FreelancerProfile'
+        '400':
+          description: Ошибка обновления контактных данных
+        '401':
+          description: Пользователь не авторизован
+        '403':
+          description: Нет прав (требуется роль FREELANCER)
+        '500':
+          description: Внутренняя ошибка сервера
+  /profile/freelancer/about:
+    put:
+      tags:
+        - freelancer
+      summary: Обновить информацию о категории, специализации, опыте и описании
+      description: Обновляет информацию о категории, специализации, опыте и описании (требуется роль FREELANCER)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FreelancerProfileAbout'
+      responses:
+        '200':
+          description: Данные о категории, специализации, опыте и описании
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FreelancerProfile'
+        '400':
+          description: Ошибка обновления данных о категории, специализации, опыте и описании
+        '401':
+          description: Пользователь не авторизован
+        '403':
+          description: Нет прав (требуется роль FREELANCER)
+        '500':
+          description: Внутренняя ошибка сервера
   /profile/freelancer/{id}:
     get:
       tags:
@@ -321,7 +386,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FreelancerProfile'
-
   /profile/freelancer/portfolio:
     get:
       tags:
@@ -362,7 +426,6 @@ paths:
                 $ref: '#/components/schemas/FreelancerPortfolio'
         '400':
           description: Ошибка создания элемента портфолио
-
   /profile/freelancer/portfolio/{id}:
     put:
       tags:
@@ -413,7 +476,6 @@ paths:
           description: Элемент портфолио удалён успешно
         '404':
           description: Элемент портфолио не найден
-
   /profile/freelancer/portfolio/{portfolioId}/skills:
     get:
       tags:
@@ -441,7 +503,6 @@ paths:
           description: Элемент портфолио не найден или не принадлежит пользователю
         '500':
           description: Внутренняя ошибка сервера
-
   /profile/freelancer/portfolio/{portfolioId}/skills/{skillId}:
     post:
       tags:
@@ -470,7 +531,6 @@ paths:
           description: Портфолио или навык не найдены
         '500':
           description: Внутренняя ошибка сервера
-
     delete:
       tags:
         - freelancer
@@ -498,7 +558,25 @@ paths:
           description: Портфолио или навык не найдены
         '500':
           description: Внутренняя ошибка сервера
-
+  /profile/freelancer/skills:
+    get:
+      tags:
+        - freelancer
+      summary: Просмотр навыков
+      description: Возвращает все навыки текущего фрилансера
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Навыки успешно получены
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Skill'
+        '500':
+          description: Внутренняя ошибка сервера
   /profile/freelancer/skills/{skillId}:
     post:
       tags:
@@ -626,6 +704,27 @@ paths:
           description: Неверные параметры запроса
         '500':
           description: Внутренняя ошибка сервера
+  /freelancer/search/projects:
+    get:
+      tags:
+        - freelancer
+      summary: Поиск проектов по навыкам и/или тексту
+      description: Возвращает список проектов
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Результаты поиска проектов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+        '400':
+          description: Неверные параметры запроса
+        '500':
+          description: Внутренняя ошибка сервера
 
   /profile/client:
     get:
@@ -646,29 +745,6 @@ paths:
           description: Профиль заказчика не найден
         '500':
           description: Внутренняя ошибка сервера
-    put:
-      tags:
-        - client
-      summary: Обновить профиль заказчика
-      description: Обновляет данные профиля заказчика
-      security:
-        - bearerAuth: []
-      requestBody:
-        description: Данные для обновления профиля заказчика
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ClientProfileUpdate'
-      responses:
-        '200':
-          description: Профиль заказчика обновлён успешно
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ClientProfile'
-        '400':
-          description: Ошибка обновления профиля
     delete:
       tags:
         - client
@@ -687,7 +763,6 @@ paths:
           description: Профиль не найден
         '500':
           description: Внутренняя ошибка сервера
-
   /profile/client/avatar:
     post:
       tags:
@@ -719,7 +794,124 @@ paths:
           description: Профиль клиента не найден
         '500':
           description: Ошибка сохранения аватара
-
+  /profile/freelancer/avatar:
+    post:
+      tags:
+        - freelancer
+      summary: Загрузить аватар фрилансера
+      description: Позволяет фрилансеру загрузить аватар
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Аватар загружен успешно
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+        '404':
+          description: Профиль клиента не найден
+        '500':
+          description: Ошибка сохранения аватара
+  /profile/client/basic:
+    put:
+      tags:
+        - client
+      summary: Обновить основные данные профиля заказчика
+      description: Обновляет основные данные профиля (требуется роль CLIENT)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientProfileBasic'
+      responses:
+        '200':
+          description: Основные данные обновлены успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientProfile'
+        '400':
+          description: Ошибка обновления основных данных
+        '401':
+          description: Пользователь не авторизован
+        '403':
+          description: Нет прав (требуется роль CLIENT)
+        '500':
+          description: Внутренняя ошибка сервера
+  /profile/client/contact:
+    put:
+      tags:
+        - client
+      summary: Обновить контактные данные профиля заказчика
+      description: Обновляет контактные данные профиля (требуется роль CLIENT)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientProfileContact'
+      responses:
+        '200':
+          description: Контактные данные обновлены успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientProfile'
+        '400':
+          description: Ошибка обновления контактных данных
+        '401':
+          description: Пользователь не авторизован
+        '403':
+          description: Нет прав (требуется роль CLIENT)
+        '500':
+          description: Внутренняя ошибка сервера
+  /profile/client/field:
+    put:
+      tags:
+        - client
+      summary: Обновить данные о сфере деятельности
+      description: Обновляет информацию о сфере деятельности (требуется роль CLIENT)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientProfileField'
+      responses:
+        '200':
+          description: Данные о сфере деятельности обновлены успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientProfile'
+        '400':
+          description: Ошибка обновления данных о сфере деятельности
+        '401':
+          description: Пользователь не авторизован
+        '403':
+          description: Нет прав (требуется роль CLIENT)
+        '500':
+          description: Внутренняя ошибка сервера
   /projects:
     get:
       tags:
@@ -770,8 +962,30 @@ paths:
                 $ref: '#/components/schemas/Project'
         '400':
           description: Ошибка создания проекта
-
-  /projects/{id}:
+  /projects/{projectId}:
+    get:
+      tags:
+        - client
+      summary: Получить проект по id
+      description: Возвращает данные одного проекта"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          description: ID проекта
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Проект успешно получен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '500':
+          description: Внутренняя ошибка сервера
     put:
       tags:
         - client
@@ -780,7 +994,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: id
+        - name: projectId
           in: path
           description: ID проекта
           required: true
@@ -810,7 +1024,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: id
+        - name: projectId
           in: path
           description: ID проекта для удаления.
           required: true
@@ -821,7 +1035,34 @@ paths:
           description: Проект успешно удалён.
         '400':
           description: Проект нельзя удалить, так как его статус не "open"
-
+  /projects/client/{clientId}:
+    get:
+      tags:
+        - client
+      summary: Получить свои проекты
+      description: CLIENT -> только свои
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: clientId
+          in: path
+          description: ID клиента
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Проекты успешно получен
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+        '401':
+          description: Не аутентифицирован
+        '500':
+          description: Внутренняя ошибка сервера
   /projects/{projectId}/responses:
     post:
       tags:
@@ -851,6 +1092,91 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProjectApplication'
+  /projects/{projectId}/invitations:
+    post:
+      tags:
+        - client
+      summary: Пригласить фрилансера
+      description: Клиент отправляет приглашение фрилансеру на участие в проекте
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          description: ID проекта
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                freelancerId:
+                  type: integer
+      responses:
+        '201':
+          description: Приглашение отправлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectApplication'
+        '400':
+          description: Неверные данные
+        '401':
+          description: Пользователь не аутентифицирован или не имеет роли CLIENT
+        '404':
+          description: Проект или фрилансер не найдены
+        '500':
+          description: Внутренняя ошибка сервера
+  /projects/{projectId}/invitations/{applicationId}/status:
+    patch:
+      tags:
+        - client
+      summary: Обработать статус приглашения
+      description: Фрилансер принимает или отклоняет приглашение
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          description: ID проекта
+          required: true
+          schema:
+            type: integer
+            example: 123
+        - name: applicationId
+          in: path
+          description: ID приглашения/заявки
+          required: true
+          schema:
+            type: integer
+            example: 789
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                projectApplicationStatus:
+                  type: string
+                  enum: [ pending, approved, declined ]
+      responses:
+        '200':
+          description: Статус приглашения обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectApplication'
+        '400':
+          description: Неверные данные или попытка обработать не‑приглашение
+        '401':
+          description: Пользователь не аутентифицирован или не имеет роли FREELANCER
+        '404':
+          description: Приглашение не найдено
+        '500':
+          description: Внутренняя ошибка сервера
 
   /projects/me:
     get:
@@ -879,7 +1205,158 @@ paths:
           description: Пользователь не аутентифицирован
         '500':
           description: Внутренняя ошибка сервера
-
+  /projects/drafts:
+    post:
+      tags:
+        - Project Drafts
+      summary: Создать черновик проекта
+      description: Создает новый черновик проекта (только для клиентов)
+      operationId: createProjectDraft
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectCreate'
+      responses:
+        '201':
+          description: Черновик проекта успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          description: Неверные данные для создания черновика
+        '401':
+          description: Неавторизованный доступ
+        '403':
+          description: Доступ запрещен (требуется роль CLIENT)
+        '500':
+          description: Внутренняя ошибка сервера
+  /projects/{draftId}/draft:
+    put:
+      tags:
+        - Project Drafts
+      summary: Обновить черновик проекта
+      description: Обновляет существующий черновик проекта (только для клиентов)
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: draftId
+          in: path
+          description: ID черновика проекта
+          required: true
+          schema:
+            type: integer
+            example: 123
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectUpdate'
+      responses:
+        '200':
+          description: Черновик проекта успешно обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          description: Неверные данные для обновления
+        '401':
+          description: Неавторизованный доступ
+        '403':
+          description: Доступ запрещен (требуется роль CLIENT)
+        '404':
+          description: Черновик проекта не найден
+        '500':
+          description: Внутренняя ошибка сервера
+  /projects/{draftId}/publish:
+    post:
+      tags:
+        - Project Drafts
+      summary: Опубликовать черновик
+      description: Публикует черновик проекта (финальное редактирование + статус → OPEN)
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: draftId
+          in: path
+          description: ID черновика проекта
+          required: true
+          schema:
+            type: integer
+            example: 123
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectUpdate'
+      responses:
+        '200':
+          description: Черновик успешно опубликован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          description: Неверные данные для публикации
+        '401':
+          description: Неавторизованный доступ
+        '403':
+          description: Доступ запрещен (требуется роль CLIENT)
+        '404':
+          description: Черновик проекта не найден
+        '500':
+          description: Внутренняя ошибка сервера
+  /admin/auth/login:
+    post:
+      tags:
+        - Admin Authentication
+      summary: Запрос кода для входа админа
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminLoginRequest'
+      responses:
+        '200':
+          description: Код для входа успешно отправлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+        '400':
+          description: Неверные параметры запроса
+        '404':
+          description: Администратор не найден
+  /admin/auth/confirm:
+    post:
+      tags:
+        - Admin Authentication
+      summary: Подтверждение кода и получение токена
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmAdminLoginRequest'
+      responses:
+        '200':
+          description: Успешная аутентификация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+        '400':
+          description: Неверный код подтверждения
+        '401':
+          description: Неверные учетные данные
 
   /admin/freelancers:
     get:
@@ -898,19 +1375,22 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/FreelancerProfile'
+        '401':
+          description: Нет прав
         '404':
           description: Фрилансеры не найдены
-
-  /admin/freelancers/{id}:
+        '500':
+          description: Внутренняя ошибка сервера
+  /admin/freelancers/{userId}:
     get:
       tags:
         - admin
       summary: Получить детальную информацию о фрилансере
-      description: Возвращает детальную информацию о фрилансере по его ID
+      description: Возвращает детальную информацию о фрилансере по его userId
       security:
         - bearerAuth: []
       parameters:
-        - name: id
+        - name: userId
           in: path
           description: ID фрилансера
           required: true
@@ -923,8 +1403,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FreelancerProfile'
+        '401':
+          description: Нет прав
         '404':
           description: Фрилансер не найден
+        '500':
+          description: Внутренняя ошибка сервера
     delete:
       tags:
         - admin
@@ -933,7 +1417,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: id
+        - name: userId
           in: path
           description: ID фрилансера для деактивации
           required: true
@@ -948,7 +1432,6 @@ paths:
                 $ref: '#/components/schemas/DefaultResponse'
         '404':
           description: Фрилансер не найден
-
   /admin/clients:
     get:
       tags:
@@ -966,10 +1449,13 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ClientProfile'
+        '401':
+          description: Нет прав
         '404':
           description: Клиенты не найдены
-
-  /admin/clients/{id}:
+        '500':
+          description: Внутренняя ошибка сервера
+  /admin/clients/{userId}:
     get:
       tags:
         - admin
@@ -978,7 +1464,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: id
+        - name: userId
           in: path
           description: ID клиента
           required: true
@@ -991,8 +1477,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ClientProfile'
+        '401':
+          description: Нет прав
         '404':
           description: Клиент не найден
+        '500':
+          description: Внутренняя ошибка сервера
     delete:
       tags:
         - admin
@@ -1001,7 +1491,7 @@ paths:
       security:
         - bearerAuth: []
       parameters:
-        - name: id
+        - name: userId
           in: path
           description: ID клиента для деактивации
           required: true
@@ -1016,7 +1506,6 @@ paths:
                 $ref: '#/components/schemas/DefaultResponse'
         '404':
           description: Клиент не найден
-
   /admin/clients/{id}/projects:
     get:
       tags:
@@ -1041,9 +1530,33 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Project'
+        '401':
+          description: Нет прав
         '404':
           description: Проекты для данного клиента не найдены
-
+        '500':
+          description: Внутренняя ошибка сервера
+  /admin/projects:
+    get:
+      tags:
+        - admin
+      summary: Получить список всех проектов
+      description: Возвращает список всех проектов в системе
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список проектов получен успешно
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+        '401':
+          description: Нет прав
+        '500':
+          description: Внутренняя ошибка сервера
   /admin/projects/{id}:
     get:
       tags:
@@ -1066,8 +1579,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Project'
+        '401':
+          description: Нет прав
         '404':
           description: Проект не найден
+        '500':
+          description: Внутренняя ошибка сервера
     delete:
       tags:
         - admin
@@ -1091,7 +1608,6 @@ paths:
                 $ref: '#/components/schemas/DefaultResponse'
         '404':
           description: Проект не найден
-
   /admin/freelancers/{id}/portfolio:
     get:
       tags:
@@ -1116,9 +1632,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/FreelancerPortfolio'
+        '401':
+          description: Нет прав
         '404':
-          description: Портфолио не найдено
-
+          description: Портфолио фрилансера не найдено
+        '500':
+          description: Внутренняя ошибка сервера
   /admin/freelancers/{id}/portfolio/{portfolioId}:
     get:
       tags:
@@ -1147,8 +1666,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FreelancerPortfolio'
+        '401':
+          description: Нет прав
         '404':
-          description: Элемент портфолио не найден
+          description: Портфолио не найдено
+        '500':
+          description: Внутренняя ошибка сервера
     delete:
       tags:
         - admin
@@ -1178,7 +1701,55 @@ paths:
                 $ref: '#/components/schemas/DefaultResponse'
         '404':
           description: Элемент портфолио не найден
-
+  /admin/portfolios:
+    get:
+      tags:
+        - admin
+      summary: Список портфолио
+      description: Возвращает список портфолио
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Информация о проекте получена успешно
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FreelancerPortfolio'
+        '401':
+          description: Нет прав
+        '500':
+          description: Внутренняя ошибка сервера
+  /admin/portfolios/{portfolioId}:
+    get:
+      tags:
+        - admin
+      summary: Получить детальную информацию о проекте
+      description: Возвращает детальную информацию о проекте по его ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: portfolioId
+          in: path
+          description: ID портфолио
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Портфолио получено успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FreelancerPortfolio'
+        '401':
+          description: Нет прав
+        '404':
+          description: Портфолио не найдено
+        '500':
+          description: Внутренняя ошибка сервера
   /projects/{projectId}/ai/description:
     post:
       tags:
@@ -1227,6 +1798,173 @@ paths:
                     example: "Сгенерированное подробное описание проекта, включающее функциональные требования, технические детали и рекомендации по дизайну"
         '400':
           description: Ошибка генерации описания проекта
+  /projects/{projectId}/skills:
+    get:
+      tags:
+        - project
+      summary: Получить список навыков проекта
+      description: Возвращает все навыки указанного проекта
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          description: ID проекта
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список навыков успешно получен
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Skill'
+        '401':
+          description: Нет прав
+        '404':
+          description: Проект не найден
+        '500':
+          description: Внутренняя ошибка сервера
+  /projects/{projectId}/skills/{skillId}:
+    post:
+      tags:
+        - skills
+      summary: Добавить навык к проекту
+      description: Добавляет указанный навык к проекту (только для клиентов)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          description: ID проекта
+          required: true
+          schema:
+            type: integer
+            example: 123
+        - name: skillId
+          in: path
+          description: ID добавляемого навыка
+          required: true
+          schema:
+            type: integer
+            example: 456
+      responses:
+        '201':
+          description: Навык успешно добавлен к проекту
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+        '401':
+          description: Пользователь не аутентифицирован
+        '403':
+          description: Недостаточно прав (требуется роль CLIENT)
+        '404':
+          description: Проект или навык не найдены
+        '500':
+          description: Внутренняя ошибка сервера
+    delete:
+      tags:
+        - skills
+      summary: Удалить навык из проекта
+      description: Удаляет указанный навык из проекта (только для клиентов)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          description: ID проекта
+          required: true
+          schema:
+            type: integer
+            example: 123
+        - name: skillId
+          in: path
+          description: ID удаляемого навыка
+          required: true
+          schema:
+            type: integer
+            example: 456
+      responses:
+        '204':
+          description: Навык успешно удалён из проекта
+        '401':
+          description: Пользователь не аутентифицирован
+        '403':
+          description: Недостаточно прав (требуется роль CLIENT)
+        '404':
+          description: Проект или навык не найдены
+        '500':
+          description: Внутренняя ошибка сервера
+  /projects/{projectId}/rating:
+    get:
+      tags:
+        - rating
+      summary: Получить оценки проекта
+      description: Возвращает все оценки по указанному проекту
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          description: ID проекта
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список оценок успешно получен"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RatingResponse'
+        '401':
+          description: Пользователь не авторизован
+        '404':
+          description: Проект не найден
+        '500':
+          description: Внутренняя ошибка сервера
+  /projects/{projectId}/ratings:
+    post:
+      tags:
+        - rating
+      summary: Оценить проект
+      description: Позволяет авторизованному CLIENT или FREELANCER выставить оценку завершённому проекту
+      operationId: rateProject
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: projectId
+          in: path
+          description: ID оцениваемого проекта
+          required: true
+          schema:
+            type: integer
+            example: 123
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RatingRequest'
+      responses:
+        '201':
+          description: Оценка успешно создана
+        '400':
+          description: Неверная оценка или проект не завершён
+        '401':
+          description: Пользователь не авторизован
+        '403':
+          description: Нет роли CLIENT или FREELANCER
+        '404':
+          description: Проект или профиль не найдены
+        '500':
+          description: Внутренняя ошибка сервера
 
   /categories:
     get:
@@ -1245,32 +1983,128 @@ paths:
                   $ref: '#/components/schemas/Category'
         '404':
           description: Категории не найдены
-
-  /categories/{categoryId}/specializations:
+    post:
+      tags:
+        - categories
+      summary: Создать категорию
+      description: Создает новую категорию
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Category'
+      responses:
+        '201':
+          description: Категория создана успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400':
+          description: Неверные данные для создания категории
+        '500':
+          description: Внутренняя ошибка сервера
+  /categories/{id}:
     get:
       tags:
         - categories
-      summary: Получить специализации для категории
-      description: Возвращает список специализаций, принадлежащих указанной категории (общедоступно)
+      summary: Получить категорию по идентификатору
+      description: Возвращает категорию по id
       parameters:
-        - name: categoryId
+        - name: id
           in: path
-          description: ID категории
+          description: Идентификатор категории
           required: true
           schema:
             type: integer
       responses:
         '200':
-          description: Список специализаций получен успешно
+          description: Категория получена успешно
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Specialization'
+                  $ref: '#/components/schemas/Category'
         '404':
-          description: Специализации не найдены для данной категории
-
+          description: Категории не найдены
+        '500':
+          description: Внутренняя ошибка сервера
+    put:
+      tags:
+        - Categories
+      summary: Обновить категорию
+      description: Обновляет данные категории по указанному id
+      parameters:
+        - name: id
+          in: path
+          description: Идентификатор категории
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Category'
+      responses:
+        '200':
+          description: Категория обновлена успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400':
+          description: Неверные данные для обновления категории
+        '404':
+          description: Категория не найдена
+        '500':
+          description: Внутренняя ошибка сервера
+    delete:
+      tags:
+        - categories
+      summary: Удалить категорию
+      description: Удаляет категорию по указанному id
+      parameters:
+        - name: id
+          in: path
+          description: Идентификатор категории
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Категория успешно удалена
+        '404':
+          description: Категория не найдена
+        '500':
+          description: Внутренняя ошибка сервера
+  /categories/{id}/specializations:
+    get:
+      tags:
+        - specialization
+      summary: Получить специализацию по id
+      description: Возвращает специализацию, найденную по уникальному идентификатору
+      parameters:
+        - name: id
+          in: path
+          description: Идентификатор категории
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Специализация успешно получена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Specialization'
+        '404':
+          description: Специализация с указанным id не найдена"
+        '500':
+          description: Внутренняя ошибка сервера
   /skills:
     get:
       tags:
@@ -1324,15 +2158,13 @@ paths:
             type: integer
       responses:
         '200':
-          description: Список навыков получен успешно
+          description: Навык получен успешно
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Skill'
+                $ref: '#/components/schemas/Skill'
         '404':
-          description: Навыки не найдены
+          description: Навык не найден
         '500':
           description: Внутренняя ошибка сервера
     put:
@@ -1360,6 +2192,35 @@ paths:
                 $ref: '#/components/schemas/Skill'
         '400':
           description: Неверные данные для обновления
+        '404':
+          description: Навык не найден
+        '500':
+          description: Внутренняя ошибка сервера
+    post:
+      tags:
+        - skills
+      summary: Добавить навык
+      description: Добавляет новый навык
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Skill'
+      responses:
+        '200':
+          description: Навык успешно добавлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Skill'
+        '400':
+          description: Неверные данные для добавления
         '404':
           description: Навык не найден
         '500':
@@ -1718,7 +2579,6 @@ paths:
           description: Неверные данные для создания
         '500':
           description: Внутренняя ошибка сервера
-
   /specializations/{id}:
     get:
       tags:
@@ -1799,6 +2659,28 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    AdminLoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "admin@example.com"
+      required:
+        - email
+    ConfirmAdminLoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "admin@example.com"
+        code:
+          type: string
+          example: "123456"
+      required:
+        - email
+        - code
     User:
       type: object
       properties:
@@ -1818,12 +2700,37 @@ components:
           type: string
           format: date
           example: "2000-01-01"
+        phone:
+          type: string
+          example: "79991234567"
         role:
           type: string
+          enum: [client, freelancer]
           example: "client"
         is_verified:
           type: boolean
           example: true
+        is_active:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+    PublicUser:
+      type: object
+      properties:
+        email:
+          type: string
+          example: "user@example.com"
+        first_name:
+          type: string
+          example: "Иван"
+        last_name:
+          type: string
+          example: "Иванов"
+        phone:
+          type: string
+          example: "79991234567"
     RegistrationRequest:
       type: object
       properties:
@@ -1924,64 +2831,126 @@ components:
         message:
           type: string
           example: "Операция выполнена успешно"
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 404
+        message:
+          type: string
+          example: "Ресурс не найден"
     FreelancerProfile:
       type: object
+      description: Полные данные профиля фрилансера для отображения
       properties:
         id:
           type: integer
+          description: Идентификатор профиля фрилансера
           example: 1
-        user_id:
-          type: integer
-          example: 1
-        birth_date:
+        about:
+          $ref: '#/components/schemas/FreelancerProfileAbout'
+        basic:
+          $ref: '#/components/schemas/FreelancerProfileBasic'
+        contact:
+          $ref: '#/components/schemas/FreelancerProfileContact'
+        user:
+          $ref: '#/components/schemas/User'
+        createdAt:
           type: string
-          format: date
-          example: "2000-01-01"
-        hourly_rate:
+          format: date-time
+          description: Дата создания профиля
+          example: "2024-03-30T12:00:00"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Дата последнего обновления профиля
+          example: "2024-03-30T12:00:00"
+        avatarUrl:
+          type: string
+          description: url аватарки фрилансера
+        averageRating:
           type: number
-          example: 50.0
-        category_id:
+          format: double
+          description: Средний рейтинг фрилансера
+          example: 4.5
+        ratingCount:
           type: integer
-          example: 2
-        specialization_id:
-          type: integer
-          example: 5
-        experience_level:
-          type: string
-          enum: [beginner, middle, expert]
-          example: "middle"
-        about_me:
-          type: string
-          example: "Опытный фронтендер с 5-летним стажем"
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-    FreelancerProfileUpdate:
+          description: Количество полученных оценок
+          example: 12
+      required:
+        - id
+        - createdAt
+    FreelancerProfileAbout:
       type: object
+      description: Данные раздела «О себе» профиля фрилансера
       properties:
-        birth_date:
-          type: string
-          format: date
-          example: "2000-01-01"
-        hourly_rate:
-          type: number
-          example: 50.0
-        category_id:
+        categoryId:
           type: integer
-          example: 2
-        specialization_id:
+          description: Идентификатор категории
+          example: 1
+        categoryName:
+          type: string
+          description: Название категории
+          example: "Веб-разработка"
+        specializationId:
           type: integer
-          example: 5
-        experience_level:
+          description: Идентификатор специализации
+          example: 1
+        specializationName:
           type: string
-          enum: [beginner, middle, expert]
-          example: "middle"
-        about_me:
+          description: Название специализации
+          example: "Front-end"
+        experienceLevel:
           type: string
-          example: "Опытный фронтендер с 5-летним стажем"
+          description: Уровень опыта работы
+          example: "MIDDLE"
+          enum: [BEGINNER, MIDDLE, EXPERT]
+        aboutMe:
+          type: string
+          description: Текст о себе
+          example: "Опытный разработчик с 5-летним стажем..."
+          maxLength: 1000
+        skills:
+          type: array
+          description: Список навыков фрилансера
+          items:
+            $ref: '#/components/schemas/Skill'
+          maxItems: 5
+    FreelancerProfileBasic:
+      type: object
+      description: Основные данные профиля фрилансера
+      properties:
+        country:
+          type: string
+          description: Страна
+          example: "Россия"
+        city:
+          type: string
+          description: Город
+          example: "Москва"
+        firstName:
+          type: string
+          example: "Иван"
+        lastName:
+          type: string
+          example: "Иванов"
+        email:
+          type: string
+          example: "ivan.ivanov@example.com"
+        phone:
+          type: string
+          example: "79991234567"
+    FreelancerProfileContact:
+      type: object
+      description: Контактные данные фрилансера
+      properties:
+        contactLink:
+          type: string
+          format: url
+          description: Ссылка для связи или портфолио (только HTTPS)
+          example: "https://linkedin.com/in/username"
+          pattern: "^https://.*"
     FreelancerPortfolio:
       type: object
       properties:
@@ -2038,46 +3007,98 @@ components:
           example: "https://github.com/example/projectA"
     ClientProfile:
       type: object
+      description: Полные данные профиля заказчика для отображения
       properties:
         id:
           type: integer
+          description: Идентификатор профиля заказчика
           example: 1
-        user_id:
+        basic:
+          $ref: '#/components/schemas/ClientProfileBasic'
+        contact:
+          $ref: '#/components/schemas/ClientProfileContact'
+        field:
+          $ref: '#/components/schemas/ClientProfileField'
+        user:
+          $ref: '#/components/schemas/User'
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата создания профиля
+          example: "2024-03-30T12:00:00"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Дата последнего обновления профиля
+          example: "2024-03-30T12:00:00"
+        avatarUrl:
+          type: string
+          description: url аватарки клиента
+        averageRating:
+          type: number
+          format: double
+          description: Средний рейтинг клиента
+          example: 4.2
+        ratingCount:
           type: integer
-          example: 1
-        company_name:
-          type: string
-          example: "ООО Рога и Копыта"
-        country:
-          type: string
-          example: "Россия"
-        city:
-          type: string
-          example: "Москва"
-        position_in_company:
-          type: string
-          example: "Директор"
-        field_description:
-          type: string
-          example: "Разработка IT-решений"
-    ClientProfileUpdate:
+          description: Количество полученных оценок
+          example: 5
+      required:
+        - id
+        - createdAt
+    ClientProfileBasic:
       type: object
+      description: Основные данные профиля заказчика
       properties:
-        company_name:
+        companyName:
           type: string
-          example: "ООО Рога и Копыта"
+          description: Название компании
+          example: "ООО Ромашка"
+          maxLength: 100
+        position:
+          type: string
+          description: Должность
+          example: "Менеджер проектов"
+          maxLength: 100
         country:
           type: string
+          description: Страна
           example: "Россия"
         city:
           type: string
+          description: Город
           example: "Москва"
-        position_in_company:
+        email:
           type: string
-          example: "Директор"
-        field_description:
+          example: "user@example.com"
+        first_name:
           type: string
-          example: "Разработка IT-решений"
+          example: "Иван"
+        last_name:
+          type: string
+          example: "Иванов"
+        phone:
+          type: string
+          example: "79991234567"
+    ClientProfileContact:
+      type: object
+      description: Контактные данные профиля заказчика
+      properties:
+        contactLink:
+          type: string
+          format: url
+          description: Ссылка для связи или на сайт компании (только HTTPS)
+          example: "https://acme-corp.example.com"
+          pattern: "^https://.*"
+    ClientProfileField:
+      type: object
+      description: Информация о сфере деятельности заказчика
+      properties:
+        fieldDescription:
+          type: string
+          description: Описание сферы деятельности компании
+          example: "Информационные технологии"
+          maxLength: 800
     Project:
       type: object
       properties:
@@ -2231,22 +3252,40 @@ components:
           type: string
           enum: [pending, approved, declined]
           example: "pending"
-    ProjectDetail:
+    ProjectApplicationRequest:
       type: object
       properties:
+        id:
+          type: integer
+          example: 1
         projectId:
           type: integer
           example: 1
+        applicationType:
+          type: string
+          enum: [response, invitation]
+          example: "response"
+        projectApplicationStatus:
+          type: string
+          enum: [pending, approved, declined]
+          example: "pending"
+    ProjectDetail:
+      type: object
+      properties:
+        project:
+          $ref: '#/components/schemas/Project'
         responses:
           type: array
           items:
-            type: integer
-            example: [1, 2, 3]
+            $ref: '#/components/schemas/ProjectApplication'
         invitations:
           type: array
           items:
-            type: integer
-            example: [1, 2, 3]
+            $ref: '#/components/schemas/ProjectApplication'
+        clientCompleted:
+          type: boolean
+        freelancerCompleted:
+          type: boolean
     Category:
       type: object
       properties:
@@ -2277,3 +3316,59 @@ components:
         name:
           type: string
           example: "JavaScript"
+    RatingRequest:
+      type: object
+      properties:
+        score:
+          type: integer
+          example: 4
+    RatingResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 42
+        projectId:
+          type: integer
+          example: 1001
+        raterFreelancerId:
+          type: integer
+          example: 7
+          nullable: true
+        raterClientId:
+          type: integer
+          example: 3
+          nullable: true
+        targetFreelancerId:
+          type: integer
+          example: 7
+          nullable: true
+        targetClientId:
+          type: integer
+          example: 3
+          nullable: true
+        score:
+          type: integer
+          example: 4
+          minimum: 1
+          maximum: 5
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - projectId
+        - score
+        - createdAt
+    GenerateDescriptionRequest:
+      type: object
+      properties:
+        systemPrompt:
+          type: string
+        userPrompt:
+          type: string
+    GenerateDescriptionResponse:
+      type: object
+      properties:
+        generatedDescription:
+          type: string

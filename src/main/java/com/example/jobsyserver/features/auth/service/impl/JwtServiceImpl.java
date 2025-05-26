@@ -1,35 +1,33 @@
 package com.example.jobsyserver.features.auth.service.impl;
 
 import com.example.jobsyserver.features.auth.service.JwtService;
+import com.example.jobsyserver.features.common.config.jwt.JwtProperties;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
 
 @Service
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequiredArgsConstructor
 public class JwtServiceImpl implements JwtService {
 
-    @Value("${jwt.secret}")
-    String secretKey;
-
-    @Value("${jwt.expiration}")
-    long jwtExpirationMs;
+    JwtProperties props;
 
     private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
+        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(props.secret()));
     }
 
     @Override
     public String generateToken(String email) {
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
+        Date expiryDate = new Date(now.getTime() + props.expiration().toMillis());
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(now)
