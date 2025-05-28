@@ -56,4 +56,5 @@ public interface AdminService {
 
     void activateClient(Long userId);
 
+    List<ProjectDto> getFreelancerProjects(Long freelancerId);
 }

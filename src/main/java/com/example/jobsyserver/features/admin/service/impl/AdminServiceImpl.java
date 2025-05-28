@@ -246,4 +246,11 @@ public class AdminServiceImpl implements AdminService {
         user.setIsActive(active);
         userRepository.save(user);
     }
+
+    @Override
+    public List<ProjectDto> getFreelancerProjects(Long freelancerId) {
+        return projectRepository.findByAssignedFreelancerId(freelancerId).stream()
+                .map(projectMapper::toDto)
+                .collect(Collectors.toList());
+    }
 }

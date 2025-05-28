@@ -313,4 +313,16 @@ public class AdminController {
         adminService.deactivateClient(userId);
         return ResponseEntity.ok(new DefaultResponse("Заказчик успешно деактивирован"));
     }
+
+    @Operation(summary = "Получить проекты, где фрилансер является исполнителем")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Проекты успешно получены"),
+            @ApiResponse(responseCode = "401", description = "Нет прав"),
+            @ApiResponse(responseCode = "404", description = "Фрилансер не найден"),
+            @ApiResponse(responseCode = "500", description = "Ошибка сервера")
+    })
+    @GetMapping("/freelancers/{userId}/projects")
+    public ResponseEntity<List<ProjectDto>> getFreelancerProjects(@PathVariable Long userId) {
+        return ResponseEntity.ok(adminService.getFreelancerProjects(userId));
+    }
 }
