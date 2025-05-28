@@ -80,6 +80,13 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.FORBIDDEN.value(), "Доступ запрещён: недостаточно прав");
     }
 
+    @ExceptionHandler({org.springframework.security.authentication.BadCredentialsException.class,
+            org.springframework.security.core.userdetails.UsernameNotFoundException.class})
+    public ResponseEntity<ErrorResponse> handleBadCredentials(Exception ex) {
+        String msg = "Неверные учётные данные или пользователь не найден";
+        return buildResponse(HttpStatus.BAD_REQUEST.value(), msg);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception ex) {
         ex.printStackTrace();
