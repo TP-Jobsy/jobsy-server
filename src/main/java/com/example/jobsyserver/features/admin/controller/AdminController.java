@@ -249,4 +249,68 @@ public class AdminController {
     ) {
         return ResponseEntity.ok(adminService.searchUsers(email, firstName, lastName, phone, role, pageable));
     }
+
+    @Operation(
+            summary = "Активировать фрилансера",
+            description = "Меняет статус фрилансера на активный (isActive=true)"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Фрилансер успешно активирован"),
+            @ApiResponse(responseCode = "401", description = "Не аутентифицирован или нет прав"),
+            @ApiResponse(responseCode = "404", description = "Фрилансер не найден"),
+            @ApiResponse(responseCode = "500", description = "Ошибка сервера")
+    })
+    @PutMapping("/freelancers/{userId}/activate")
+    public ResponseEntity<DefaultResponse> activateFreelancer(@PathVariable Long userId) {
+        adminService.activateFreelancer(userId);
+        return ResponseEntity.ok(new DefaultResponse("Фрилансер успешно активирован"));
+    }
+
+    @Operation(
+            summary = "Активировать заказчика",
+            description = "Меняет статус заказчика на активный (isActive=true)"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Заказчик успешно активирован"),
+            @ApiResponse(responseCode = "401", description = "Не аутентифицирован или нет прав"),
+            @ApiResponse(responseCode = "404", description = "Заказчик не найден"),
+            @ApiResponse(responseCode = "500", description = "Ошибка сервера")
+    })
+    @PutMapping("/clients/{userId}/activate")
+    public ResponseEntity<DefaultResponse> activateClient(@PathVariable Long userId) {
+        adminService.activateClient(userId);
+        return ResponseEntity.ok(new DefaultResponse("Заказчик успешно активирован"));
+    }
+
+    @Operation(
+            summary = "Деактивировать фрилансера",
+            description = "Меняет статус фрилансера на неактивный (isActive=false)"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Фрилансер успешно деактивирован"),
+            @ApiResponse(responseCode = "401", description = "Не аутентифицирован или нет прав"),
+            @ApiResponse(responseCode = "404", description = "Фрилансер не найден"),
+            @ApiResponse(responseCode = "500", description = "Ошибка сервера")
+    })
+    @PutMapping("/freelancers/{userId}/deactivate")
+    public ResponseEntity<DefaultResponse> deactivateFreelancer(@PathVariable Long userId) {
+        adminService.deactivateFreelancer(userId);
+        return ResponseEntity.ok(new DefaultResponse("Фрилансер успешно деактивирован"));
+    }
+
+    @Operation(
+            summary = "Деактивировать заказчика",
+            description = "Меняет статус заказчика на неактивный (isActive=false)"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Заказчик успешно деактивирован"),
+            @ApiResponse(responseCode = "401", description = "Не аутентифицирован или нет прав"),
+            @ApiResponse(responseCode = "404", description = "Заказчик не найден"),
+            @ApiResponse(responseCode = "500", description = "Ошибка сервера")
+    })
+    @PutMapping("/clients/{userId}/deactivate")
+    public ResponseEntity<DefaultResponse> deactivateClient(@PathVariable Long userId) {
+        adminService.deactivateClient(userId);
+        return ResponseEntity.ok(new DefaultResponse("Заказчик успешно деактивирован"));
+    }
 }
