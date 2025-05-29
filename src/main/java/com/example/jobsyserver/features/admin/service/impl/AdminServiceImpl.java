@@ -150,9 +150,14 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public List<FreelancerPortfolioDto> getFreelancerPortfolio(Long freelancerId) {
-        log.info("Получение портфолио фрилансера с id: {}", freelancerId);
-        return portfolioRepository.findByFreelancerId(freelancerId).stream()
+    public List<FreelancerPortfolioDto> getFreelancerPortfolio(Long userId) {
+        FreelancerProfile freelancerProfile = freelancerProfileRepository
+                .findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Профиль фрилансера", userId));
+        Long profileId = freelancerProfile.getId();
+        return portfolioRepository
+                .findByFreelancerId(profileId)
+                .stream()
                 .map(portfolioMapper::toDto)
                 .collect(Collectors.toList());
     }
