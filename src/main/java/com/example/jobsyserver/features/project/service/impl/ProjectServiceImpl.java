@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -79,20 +80,20 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectDto> getProjectsByClient(Long clientId, ProjectStatus status) {
-        var projects = status != null
-                ? projectRepository.findByClientIdAndStatus(clientId, status)
-                : projectRepository.findByClientId(clientId);
-        return projects.stream()
+        ProjectStatus effectiveStatus = Objects.requireNonNullElse(status, ProjectStatus.OPEN);
+        return projectRepository
+                .findByClientIdAndStatus(clientId, effectiveStatus)
+                .stream()
                 .map(projectMapper::toDto)
                 .toList();
     }
 
     @Override
     public List<ProjectDto> getProjectsForFreelancer(Long freelancerProfileId, ProjectStatus status) {
-        var projects = status != null
-                ? projectRepository.findByAssignedFreelancerIdAndStatus(freelancerProfileId, status)
-                : projectRepository.findByAssignedFreelancerId(freelancerProfileId);
-        return projects.stream()
+        ProjectStatus effectiveStatus = Objects.requireNonNullElse(status, ProjectStatus.OPEN);
+        return projectRepository
+                .findByAssignedFreelancerIdAndStatus(freelancerProfileId, effectiveStatus)
+                .stream()
                 .map(projectMapper::toDto)
                 .toList();
     }
