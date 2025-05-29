@@ -208,6 +208,113 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
             Pageable pageable
     );
 
+
+    @Query("""
+                SELECT
+                    p.id                        AS id,
+                    p.title                     AS title,
+                    p.fixedPrice                AS fixedPrice,
+                    p.projectComplexity         AS projectComplexity,
+                    p.projectDuration           AS projectDuration,
+                    p.status                    AS status,
+                    p.createdAt                 AS createdAt,
+                    c.companyName               AS clientCompanyName,
+                    c.city                      AS clientCity,
+                    c.country                   AS clientCountry,
+                    u.firstName                 AS assignedFreelancerFirstName,
+                    u.lastName                  AS assignedFreelancerLastName
+                FROM Project p
+                    JOIN p.client c
+                    JOIN c.user cu
+                    LEFT JOIN p.assignedFreelancer af
+                    LEFT JOIN af.user u
+                WHERE
+                    LOWER(p.title) LIKE LOWER(CONCAT('%', :term, '%'))
+                    OR LOWER(p.description) LIKE LOWER(CONCAT('%', :term, '%'))
+                    AND p.status = :status
+            """
+    )
+    Page<ProjectListItem> findByTermStatus(
+            @Param("term") String term,
+            Pageable pageable,
+            @Param("status") ProjectStatus status
+
+    );
+
+    @Query("""
+                SELECT
+                    p.id                        AS id,
+                    p.title                     AS title,
+                    p.fixedPrice                AS fixedPrice,
+                    p.projectComplexity         AS projectComplexity,
+                    p.projectDuration           AS projectDuration,
+                    p.status                    AS status,
+                    p.createdAt                 AS createdAt,
+                    c.companyName               AS clientCompanyName,
+                    c.city                      AS clientCity,
+                    c.country                   AS clientCountry,
+                    u.firstName                 AS assignedFreelancerFirstName,
+                    u.lastName                  AS assignedFreelancerLastName
+                FROM Project p
+                    JOIN p.client c
+                    JOIN c.user cu
+                    LEFT JOIN p.assignedFreelancer af
+                    LEFT JOIN af.user u
+                    JOIN p.skills s
+                WHERE s.id IN :skillIds AND p.status = :status
+                GROUP BY
+                    p.id, p.title, p.fixedPrice,
+                    p.projectComplexity, p.projectDuration, p.status, p.createdAt,
+                    c.companyName, c.city, c.country,
+                    u.firstName, u.lastName
+            """
+    )
+    Page<ProjectListItem> findBySkillsStatus(
+            @Param("skillIds") List<Long> skillIds,
+            Pageable pageable,
+            @Param("status") ProjectStatus status
+    );
+
+    @Query("""
+                SELECT
+                    p.id                        AS id,
+                    p.title                     AS title,
+                    p.fixedPrice                AS fixedPrice,
+                    p.projectComplexity         AS projectComplexity,
+                    p.projectDuration           AS projectDuration,
+                    p.status                    AS status,
+                    p.createdAt                 AS createdAt,
+                    c.companyName               AS clientCompanyName,
+                    c.city                      AS clientCity,
+                    c.country                   AS clientCountry,
+                    u.firstName                 AS assignedFreelancerFirstName,
+                    u.lastName                  AS assignedFreelancerLastName
+                FROM Project p
+                    JOIN p.client c
+                    JOIN c.user cu
+                    LEFT JOIN p.assignedFreelancer af
+                    LEFT JOIN af.user u
+                    JOIN p.skills s
+                WHERE s.id IN :skillIds
+                  AND (
+                    LOWER(p.title) LIKE LOWER(CONCAT('%', :term, '%'))
+                    OR LOWER(p.description) LIKE LOWER(CONCAT('%', :term, '%'))
+                  AND p.status = :status
+                  )
+                GROUP BY
+                    p.id, p.title, p.fixedPrice,
+                    p.projectComplexity, p.projectDuration, p.status, p.createdAt,
+                    c.companyName, c.city, c.country,
+                    u.firstName, u.lastName
+            """
+    )
+    Page<ProjectListItem> findBySkillsAndTermStatus(
+            @Param("skillIds") List<Long> skillIds,
+            @Param("term") String term,
+            Pageable pageable,
+            @Param("status") ProjectStatus status
+    );
+
     @Query("""
                 SELECT
                     p.id AS id,
