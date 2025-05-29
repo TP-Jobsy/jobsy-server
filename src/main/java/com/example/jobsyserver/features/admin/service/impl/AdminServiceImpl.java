@@ -121,9 +121,14 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public List<ProjectDto> getClientProjects(Long clientId) {
-        log.info("Получение проектов заказчика с clientId: {}", clientId);
-        return projectRepository.findByClientId(clientId).stream()
+    public List<ProjectDto> getClientProjects(Long userId) {
+        ClientProfile clientProfile = clientProfileRepository
+                .findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Профиль заказчика", userId));
+        Long profileId = clientProfile.getId();
+        return projectRepository
+                .findByClientId(profileId)
+                .stream()
                 .map(projectMapper::toDto)
                 .collect(Collectors.toList());
     }
@@ -248,8 +253,14 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public List<ProjectDto> getFreelancerProjects(Long freelancerId) {
-        return projectRepository.findByAssignedFreelancerId(freelancerId).stream()
+    public List<ProjectDto> getFreelancerProjects(Long userId) {
+        FreelancerProfile freelancerProfile = freelancerProfileRepository
+                .findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Профиль фрилансера", userId));
+        Long profileId = freelancerProfile.getId();
+        return projectRepository
+                .findByAssignedFreelancerId(profileId)
+                .stream()
                 .map(projectMapper::toDto)
                 .collect(Collectors.toList());
     }
