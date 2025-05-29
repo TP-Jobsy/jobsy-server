@@ -186,6 +186,8 @@ class AdminServiceImplTest {
 
     @Test
     void getClientProjects_ShouldReturnProjects() {
+        when(clientProfileRepository.findByUserId(testUserId))
+                .thenReturn(Optional.of(testClientProfile));
         when(projectRepository.findByClientId(testUserId))
                 .thenReturn(List.of(testProject));
         when(projectMapper.toDto(testProject))
@@ -194,6 +196,7 @@ class AdminServiceImplTest {
         List<ProjectDto> result = adminService.getClientProjects(testUserId);
 
         assertFalse(result.isEmpty());
+        verify(clientProfileRepository).findByUserId(testUserId);
         verify(projectRepository).findByClientId(testUserId);
         verify(projectMapper).toDto(testProject);
     }
@@ -224,6 +227,8 @@ class AdminServiceImplTest {
 
     @Test
     void getFreelancerPortfolio_ShouldReturnPortfolioItems() {
+        when(freelancerProfileRepository.findByUserId(testUserId))
+                .thenReturn(Optional.of(testFreelancerProfile));
         when(portfolioRepository.findByFreelancerId(testUserId))
                 .thenReturn(List.of(testPortfolio));
         when(portfolioMapper.toDto(testPortfolio))
@@ -232,6 +237,7 @@ class AdminServiceImplTest {
         List<FreelancerPortfolioDto> result = adminService.getFreelancerPortfolio(testUserId);
 
         assertFalse(result.isEmpty());
+        verify(freelancerProfileRepository).findByUserId(testUserId);
         verify(portfolioRepository).findByFreelancerId(testUserId);
         verify(portfolioMapper).toDto(testPortfolio);
     }
@@ -266,24 +272,30 @@ class AdminServiceImplTest {
 
     @Test
     void getClientProjects_WhenNoProjects_ShouldReturnEmptyList() {
+        when(clientProfileRepository.findByUserId(testUserId))
+                .thenReturn(Optional.of(testClientProfile));
         when(projectRepository.findByClientId(testUserId))
                 .thenReturn(Collections.emptyList());
 
         List<ProjectDto> result = adminService.getClientProjects(testUserId);
 
         assertTrue(result.isEmpty());
+        verify(clientProfileRepository).findByUserId(testUserId);
         verify(projectRepository).findByClientId(testUserId);
         verifyNoInteractions(projectMapper);
     }
 
     @Test
     void getFreelancerPortfolio_WhenNoItems_ShouldReturnEmptyList() {
+        when(freelancerProfileRepository.findByUserId(testUserId))
+                .thenReturn(Optional.of(testFreelancerProfile));
         when(portfolioRepository.findByFreelancerId(testUserId))
                 .thenReturn(Collections.emptyList());
 
         List<FreelancerPortfolioDto> result = adminService.getFreelancerPortfolio(testUserId);
 
         assertTrue(result.isEmpty());
+        verify(freelancerProfileRepository).findByUserId(testUserId);
         verify(portfolioRepository).findByFreelancerId(testUserId);
         verifyNoInteractions(portfolioMapper);
     }
