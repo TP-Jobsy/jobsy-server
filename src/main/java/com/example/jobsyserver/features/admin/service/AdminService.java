@@ -11,6 +11,7 @@ import com.example.jobsyserver.features.user.dto.UserDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AdminService {
@@ -46,9 +47,22 @@ public interface AdminService {
 
     void deletePortfolio(Long freelancerId, Long portfolioId);
 
-    Page<ProjectAdminListItem> searchProjects(String term, String status, String clientName, Pageable pageable);
+    Page<ProjectAdminListItem> searchProjects(
+            String titleTerm,
+            String clientName,
+            String status,
+            LocalDateTime createdFrom,
+            LocalDateTime createdTo,
+            Pageable pageable
+    );
 
-    Page<PortfolioAdminListItem> searchPortfolios(String term, String freelancerName, Pageable pageable);
+    Page<PortfolioAdminListItem> searchPortfolios(
+            String titleTerm,
+            String freelancerName,
+            LocalDateTime createdFrom,
+            LocalDateTime createdTo,
+            Pageable pageable
+    );
 
     Page<UserDto> searchUsers(String email, String firstName, String lastName, String phone, UserRole role, Pageable pageable);
 

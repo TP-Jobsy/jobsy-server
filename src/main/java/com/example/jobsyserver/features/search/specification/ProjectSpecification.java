@@ -9,6 +9,7 @@ import jakarta.persistence.criteria.Predicate;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public final class ProjectSpecification {
@@ -77,6 +78,21 @@ public final class ProjectSpecification {
                     cb.like(cb.lower(join.get("firstName")), pattern),
                     cb.like(cb.lower(join.get("lastName")), pattern)
             );
+        };
+    }
+
+    public static Specification<Project> createdBetween(LocalDateTime from, LocalDateTime to) {
+        return (root, query, cb) -> {
+            if (from == null && to == null) {
+                return cb.conjunction();
+            }
+            if (from != null && to != null) {
+                return cb.between(root.get("createdAt"), from, to);
+            }
+            if (from != null) {
+                return cb.greaterThanOrEqualTo(root.get("createdAt"), from);
+            }
+            return cb.lessThanOrEqualTo(root.get("createdAt"), to);
         };
     }
 }

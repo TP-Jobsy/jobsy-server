@@ -15,6 +15,8 @@ import com.example.jobsyserver.features.portfolio.model.FreelancerPortfolio;
 import com.example.jobsyserver.features.portfolio.projection.PortfolioAdminListItem;
 import com.example.jobsyserver.features.project.model.Project;
 import com.example.jobsyserver.features.project.projection.ProjectAdminListItem;
+import com.example.jobsyserver.features.search.specification.PortfolioSpecification;
+import com.example.jobsyserver.features.search.specification.ProjectSpecification;
 import com.example.jobsyserver.features.search.specification.SearchSpecifications;
 import com.example.jobsyserver.features.user.dto.UserDto;
 import com.example.jobsyserver.features.user.mapper.UserMapper;
@@ -35,6 +37,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -175,15 +178,18 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional(readOnly = true)
     public Page<ProjectAdminListItem> searchProjects(
-            String term,
-            String status,
+            String titleTerm,
             String clientName,
+            String status,
+            LocalDateTime createdFrom,
+            LocalDateTime createdTo,
             Pageable pageable
     ) {
         Specification<Project> spec = Specification
-                .where(SearchSpecifications.textSearchProject(term))
+                .where(SearchSpecifications.textSearchProject(titleTerm))
+                .and(SearchSpecifications.textSearchClient(clientName))
                 .and(SearchSpecifications.hasStatus(status))
-                .and(SearchSpecifications.textSearchClient(clientName));
+                .and(ProjectSpecification.createdBetween(createdFrom, createdTo));
 
         return projectRepository.findAllProjected(spec, pageable);
     }
@@ -194,11 +200,14 @@ public class AdminServiceImpl implements AdminService {
     public Page<PortfolioAdminListItem> searchPortfolios(
             String titleTerm,
             String freelancerName,
+            LocalDateTime createdFrom,
+            LocalDateTime createdTo,
             Pageable pageable
     ) {
         Specification<FreelancerPortfolio> spec = Specification
                 .where(SearchSpecifications.textSearchTitle(titleTerm))
-                .and(SearchSpecifications.textSearchFreelancer(freelancerName));
+                .and(SearchSpecifications.textSearchFreelancer(freelancerName))
+                .and(PortfolioSpecification.createdBetween(createdFrom, createdTo));
 
         return portfolioRepository.findAllProjected(spec, pageable);
     }

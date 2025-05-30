@@ -4,6 +4,8 @@ import com.example.jobsyserver.features.portfolio.model.FreelancerPortfolio;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.LocalDateTime;
+
 public final class PortfolioSpecification {
     private PortfolioSpecification() {}
 
@@ -23,6 +25,21 @@ public final class PortfolioSpecification {
                     cb.like(cb.lower(join.get("firstName")), pattern),
                     cb.like(cb.lower(join.get("lastName")), pattern)
             );
+        };
+    }
+
+    public static Specification<FreelancerPortfolio> createdBetween(LocalDateTime from, LocalDateTime to) {
+        return (root, query, cb) -> {
+            if (from == null && to == null) {
+                return cb.conjunction();
+            }
+            if (from != null && to != null) {
+                return cb.between(root.get("createdAt"), from, to);
+            }
+            if (from != null) {
+                return cb.greaterThanOrEqualTo(root.get("createdAt"), from);
+            }
+            return cb.lessThanOrEqualTo(root.get("createdAt"), to);
         };
     }
 }
