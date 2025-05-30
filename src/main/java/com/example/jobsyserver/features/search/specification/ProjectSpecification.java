@@ -1,5 +1,6 @@
 package com.example.jobsyserver.features.search.specification;
 
+import com.example.jobsyserver.features.common.enums.ProjectStatus;
 import com.example.jobsyserver.features.project.model.Project;
 import com.example.jobsyserver.features.skill.model.Skill;
 import jakarta.persistence.criteria.Join;
@@ -46,6 +47,36 @@ public final class ProjectSpecification {
             Predicate byTitle = cb.like(cb.lower(root.get("title")), pattern);
             Predicate byDesc  = cb.like(cb.lower(root.get("description")), pattern);
             return cb.or(byTitle, byDesc);
+        };
+    }
+
+    public static Specification<Project> textSearchProject(String term) {
+        return (root, query, cb) -> {
+            if (StringUtils.isBlank(term)) return cb.conjunction();
+            String pattern = "%" + term.toLowerCase() + "%";
+            return cb.or(
+                    cb.like(cb.lower(root.get("title")), pattern),
+                    cb.like(cb.lower(root.get("description")), pattern)
+            );
+        };
+    }
+
+    public static Specification<Project> hasStatus(String status) {
+        return (root, query, cb) -> {
+            if (StringUtils.isBlank(status)) return cb.conjunction();
+            return cb.equal(root.get("status"), ProjectStatus.valueOf(status));
+        };
+    }
+
+    public static Specification<Project> textSearchClient(String clientName) {
+        return (root, query, cb) -> {
+            if (StringUtils.isBlank(clientName)) return cb.conjunction();
+            String pattern = "%" + clientName.toLowerCase() + "%";
+            var join = root.join("client").join("user");
+            return cb.or(
+                    cb.like(cb.lower(join.get("firstName")), pattern),
+                    cb.like(cb.lower(join.get("lastName")), pattern)
+            );
         };
     }
 }

@@ -5,6 +5,7 @@ import com.example.jobsyserver.features.client.dto.ClientProfileDto;
 import com.example.jobsyserver.features.client.mapper.ClientProfileMapper;
 import com.example.jobsyserver.features.client.model.ClientProfile;
 import com.example.jobsyserver.features.client.repository.ClientProfileRepository;
+import com.example.jobsyserver.features.common.enums.ProjectStatus;
 import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
 import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileDto;
 import com.example.jobsyserver.features.freelancer.mapper.FreelancerProfileMapper;
@@ -14,6 +15,7 @@ import com.example.jobsyserver.features.portfolio.model.FreelancerPortfolio;
 import com.example.jobsyserver.features.portfolio.projection.PortfolioAdminListItem;
 import com.example.jobsyserver.features.project.model.Project;
 import com.example.jobsyserver.features.project.projection.ProjectAdminListItem;
+import com.example.jobsyserver.features.search.specification.SearchSpecifications;
 import com.example.jobsyserver.features.user.dto.UserDto;
 import com.example.jobsyserver.features.user.mapper.UserMapper;
 import com.example.jobsyserver.features.user.model.User;
@@ -171,32 +173,36 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Page<ProjectAdminListItem> searchProjects(String term, String status, String clientName, Pageable pageable) {
-        log.info("Поиск проектов в админке: term='{}', status='{}', clientName='{}'", term, status, clientName);
-        boolean isFilterEmpty = (term == null || term.isBlank())
-                && (status == null || status.isBlank())
-                && (clientName == null || clientName.isBlank());
-        if (isFilterEmpty) {
-            return projectRepository.findAllProjectedByAdmin(pageable);
-        }
-        String safeTerm = term != null ? term : "";
-        String safeStatus = status != null ? status : "OPEN";
-        String safeClientName = clientName != null ? clientName : "";
-        return projectRepository.searchProjectsAdmin(safeTerm, safeStatus, safeClientName, pageable);
+    @Transactional(readOnly = true)
+    public Page<ProjectAdminListItem> searchProjects(
+            String term,
+            String status,
+            String clientName,
+            Pageable pageable
+    ) {
+        Specification<Project> spec = Specification
+                .where(SearchSpecifications.textSearchProject(term))
+                .and(SearchSpecifications.hasStatus(status))
+                .and(SearchSpecifications.textSearchClient(clientName));
+
+        return projectRepository.findAllProjected(spec, pageable);
     }
 
+
     @Override
-    public Page<PortfolioAdminListItem> searchPortfolios(String term, String freelancerName, Pageable pageable) {
-        log.info("Поиск портфолио в админке: term='{}', freelancerName='{}'", term, freelancerName);
-        boolean isFilterEmpty = (term == null || term.isBlank()) &&
-                (freelancerName == null || freelancerName.isBlank());
-        if (isFilterEmpty) {
-            return portfolioRepository.findAllProjectedByAdmin(pageable);
-        }
-        String safeTerm = term != null ? term : "";
-        String safeFreelancerName = freelancerName != null ? freelancerName : "";
-        return portfolioRepository.searchPortfoliosAdmin(safeTerm, safeFreelancerName, pageable);
+    @Transactional(readOnly = true)
+    public Page<PortfolioAdminListItem> searchPortfolios(
+            String titleTerm,
+            String freelancerName,
+            Pageable pageable
+    ) {
+        Specification<FreelancerPortfolio> spec = Specification
+                .where(SearchSpecifications.textSearchTitle(titleTerm))
+                .and(SearchSpecifications.textSearchFreelancer(freelancerName));
+
+        return portfolioRepository.findAllProjected(spec, pageable);
     }
+
 
     @Override
     public Page<UserDto> searchUsers(String email, String firstName, String lastName, String phone, UserRole role, Pageable pageable) {
@@ -222,7 +228,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public Page<PortfolioAdminListItem> getAllPortfoliosPageable(Pageable pageable) {
         log.info("Получение страницы портфолио для админ-панели: {}", pageable);
-        return portfolioRepository.findAllProjectedByAdmin(pageable);
+        return portfolioRepository.findAllProjected(null, pageable);
     }
 
     @Override

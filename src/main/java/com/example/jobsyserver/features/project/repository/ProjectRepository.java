@@ -6,6 +6,7 @@ import com.example.jobsyserver.features.project.projection.ProjectAdminListItem;
 import com.example.jobsyserver.features.project.projection.ProjectListItem;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -13,6 +14,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -315,30 +317,40 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
             @Param("status") ProjectStatus status
     );
 
-    @Query("""
-                SELECT
-                    p.id AS id,
-                    p.title AS title,
-                    p.createdAt AS createdAt,
-                    p.status AS status,
-                    u.firstName AS firstName,
-                    u.lastName AS lastName
-                FROM Project p
-                JOIN p.client c
-                JOIN c.user u
-                WHERE
-                    LOWER(p.title) LIKE LOWER(CONCAT('%', :term, '%'))
-                    OR LOWER(p.description) LIKE LOWER(CONCAT('%', :term, '%'))
-                    AND p.status = :status
-                    AND (
-                        LOWER(u.firstName) LIKE LOWER(CONCAT('%', :clientName, '%'))
-                        OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :clientName, '%'))
-                    )
-            """)
-    Page<ProjectAdminListItem> searchProjectsAdmin(
-            @Param("term") String term,
-            @Param("status") String status,
-            @Param("clientName") String clientName,
-            Pageable pageable
-    );
+    default Page<ProjectAdminListItem> findAllProjected(
+            Specification<Project> spec, Pageable pg
+    ) {
+        return findAll(spec, pg).map(p -> new ProjectAdminListItem() {
+            @Override
+            public Long getId() {
+                return p.getId();
+            }
+
+            @Override
+            public String getTitle() {
+                return p.getTitle();
+            }
+
+            @Override
+            public LocalDateTime getCreatedAt() {
+                return p.getCreatedAt();
+            }
+
+            @Override
+            public String getStatus() {
+                return p.getStatus().name();
+            }
+
+            @Override
+            public String getClientFirstName() {
+                return p.getClient().getUser().getFirstName();
+            }
+
+            @Override
+            public String getClientLastName() {
+                return p.getClient().getUser().getLastName();
+            }
+        });
+    }
+
 }
