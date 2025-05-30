@@ -269,14 +269,16 @@ public class AdminController {
 
     @GetMapping("/users/search")
     public ResponseEntity<Page<UserDto>> searchUsers(
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) String firstName,
-            @RequestParam(required = false) String lastName,
-            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) String term,
             @RequestParam(required = false) UserRole role,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime registeredFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime registeredTo,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable
     ) {
-        return ResponseEntity.ok(adminService.searchUsers(email, firstName, lastName, phone, role, pageable));
+        return ResponseEntity.ok(adminService.searchUsers(term, role, registeredFrom, registeredTo, pageable));
     }
 
     @Operation(

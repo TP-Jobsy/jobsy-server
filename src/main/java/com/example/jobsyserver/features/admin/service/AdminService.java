@@ -64,7 +64,13 @@ public interface AdminService {
             Pageable pageable
     );
 
-    Page<UserDto> searchUsers(String email, String firstName, String lastName, String phone, UserRole role, Pageable pageable);
+    Page<UserDto> searchUsers(
+            String term,
+            UserRole role,
+            LocalDateTime registeredFrom,
+            LocalDateTime registeredTo,
+            Pageable pageable
+    );
 
     void activateFreelancer(Long userId);
 

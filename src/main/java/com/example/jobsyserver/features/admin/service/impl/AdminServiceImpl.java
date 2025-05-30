@@ -29,6 +29,7 @@ import com.example.jobsyserver.features.portfolio.repository.FreelancerPortfolio
 import com.example.jobsyserver.features.portfolio.mapper.FreelancerPortfolioMapper;
 import com.example.jobsyserver.features.project.dto.ProjectDto;
 import com.example.jobsyserver.features.portfolio.dto.FreelancerPortfolioDto;
+import com.example.jobsyserver.features.user.specification.UserSpecifications;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -216,29 +217,17 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional(readOnly = true)
     public Page<UserDto> searchUsers(
-            String email,
-            String firstName,
-            String lastName,
-            String phone,
+            String term,
             UserRole role,
+            LocalDateTime registeredFrom,
+            LocalDateTime registeredTo,
             Pageable pageable
     ) {
-        Specification<User> spec = Specification.where(null);
-        if (email != null && !email.isBlank()) {
-            spec = spec.and(emailContains(email));
-        }
-        if (firstName != null && !firstName.isBlank()) {
-            spec = spec.and(firstNameContains(firstName));
-        }
-        if (lastName != null && !lastName.isBlank()) {
-            spec = spec.and(lastNameContains(lastName));
-        }
-        if (phone != null && !phone.isBlank()) {
-            spec = spec.and(phoneContains(phone));
-        }
-        if (role != null) {
-            spec = spec.and(hasRole(role));
-        }
+        var spec = Specification
+                .where(UserSpecifications.textSearch(term))
+                .and(UserSpecifications.hasRole(role))
+                .and(UserSpecifications.registeredBetween(registeredFrom, registeredTo));
+
         return userRepository.findAll(spec, pageable)
                 .map(userMapper::toDto);
     }
