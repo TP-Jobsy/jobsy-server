@@ -205,12 +205,13 @@ public class AdminServiceImpl implements AdminService {
             LocalDateTime createdTo,
             Pageable pageable
     ) {
-        Specification<FreelancerPortfolio> spec = Specification
-                .where(SearchSpecifications.textSearchTitle(titleTerm))
-                .and(SearchSpecifications.textSearchFreelancer(freelancerName))
+        Specification<FreelancerPortfolio> textSpec = Specification
+                .where(PortfolioSpecification.textSearchTitle(titleTerm))
+                .or(PortfolioSpecification.textSearchFreelancer(freelancerName));
+        Specification<FreelancerPortfolio> fullSpec = textSpec
                 .and(PortfolioSpecification.createdBetween(createdFrom, createdTo));
 
-        return portfolioRepository.findAllProjected(spec, pageable);
+        return portfolioRepository.findAllProjected(fullSpec, pageable);
     }
 
 
