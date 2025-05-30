@@ -119,6 +119,13 @@ validation:
     countries-now:
       base-url: https://countriesnow.space/api/v0.1
 
+admin:
+  auth:
+    test:
+      enabled: true
+      email: test@gmail.com
+      code: 1234
+
 logging:
   level:
     org.hibernate.SQL: DEBUG

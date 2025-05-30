@@ -6,6 +6,8 @@ import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -69,9 +71,21 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex) {
-        return buildResponse(HttpStatus.FORBIDDEN.value(), "Доступ запрещён: недостаточно прав");
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthException(AuthenticationException ex) {
+        if (ex instanceof DisabledException) {
+            return buildResponse(HttpStatus.UNAUTHORIZED.value(),
+                    "Ваша учётная запись заблокирована");
+        }
+        return buildResponse(HttpStatus.BAD_REQUEST.value(),
+                "Неверные учётные данные или пользователь не найден");
+    }
+
+    @ExceptionHandler({org.springframework.security.authentication.BadCredentialsException.class,
+            org.springframework.security.core.userdetails.UsernameNotFoundException.class})
+    public ResponseEntity<ErrorResponse> handleBadCredentials(Exception ex) {
+        String msg = "Неверные учётные данные или пользователь не найден";
+        return buildResponse(HttpStatus.BAD_REQUEST.value(), msg);
     }
 
     @ExceptionHandler(Exception.class)

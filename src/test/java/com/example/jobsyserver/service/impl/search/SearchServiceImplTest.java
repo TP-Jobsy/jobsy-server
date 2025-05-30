@@ -1,5 +1,6 @@
 package com.example.jobsyserver.service.impl.search;
 
+import com.example.jobsyserver.features.common.enums.ProjectStatus;
 import com.example.jobsyserver.features.freelancer.projection.FreelancerListItem;
 import com.example.jobsyserver.features.freelancer.repository.FreelancerProfileRepository;
 import com.example.jobsyserver.features.project.projection.ProjectListItem;
@@ -98,7 +99,7 @@ class SearchServiceImplTest {
         when(pli.getAssignedFreelancerFirstName()).thenReturn("John");
         when(pli.getAssignedFreelancerLastName()).thenReturn("Doe");
         Page<ProjectListItem> page = new PageImpl<>(List.of(pli), pageable, 1);
-        when(projectRepo.findBySkillsAndTerm(skillIds, term, pageable))
+        when(projectRepo.findBySkillsAndTermStatus(skillIds, term, pageable, ProjectStatus.OPEN))
                 .thenReturn(page);
         Page<ProjectListItem> result =
                 searchService.searchProjects(skillIds, term, pageable);
@@ -114,14 +115,14 @@ class SearchServiceImplTest {
         assertEquals("John", first.getAssignedFreelancerFirstName());
         assertEquals("Doe", first.getAssignedFreelancerLastName());
         verify(projectRepo, times(1))
-                .findBySkillsAndTerm(skillIds, term, pageable);
+                .findBySkillsAndTermStatus(skillIds, term, pageable, ProjectStatus.OPEN);
     }
 
     @Test
     void searchProjects_ShouldReturnEmptyPage_WhenNoMatches() {
         Page<ProjectListItem> emptyPage =
                 new PageImpl<>(Collections.emptyList(), pageable, 0);
-        when(projectRepo.findBySkillsAndTerm(skillIds, term, pageable))
+        when(projectRepo.findBySkillsAndTermStatus(skillIds, term, pageable, ProjectStatus.OPEN))
                 .thenReturn(emptyPage);
 
         Page<ProjectListItem> result =
@@ -130,6 +131,6 @@ class SearchServiceImplTest {
         assertTrue(result.getContent().isEmpty());
         assertEquals(0, result.getTotalElements());
         verify(projectRepo, times(1))
-                .findBySkillsAndTerm(skillIds, term, pageable);
+                .findBySkillsAndTermStatus(skillIds, term, pageable, ProjectStatus.OPEN);
     }
 }

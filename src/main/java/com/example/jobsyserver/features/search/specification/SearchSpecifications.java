@@ -1,6 +1,7 @@
 package com.example.jobsyserver.features.search.specification;
 
 import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
+import com.example.jobsyserver.features.portfolio.model.FreelancerPortfolio;
 import com.example.jobsyserver.features.project.model.Project;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -15,15 +16,27 @@ public final class SearchSpecifications {
         return FreelancerProfileSpecification.hasAnySkill(skillIds);
     }
 
-    public static Specification<FreelancerProfile> textSearchFreelancer(String term) {
-        return FreelancerProfileSpecification.textSearch(term);
-    }
-
     public static Specification<Project> hasAnySkillProject(List<Long> skillIds) {
         return ProjectSpecification.hasAnySkill(skillIds);
     }
 
     public static Specification<Project> textSearchProject(String term) {
-        return ProjectSpecification.textSearch(term);
+        return ProjectSpecification.textSearchProject(term);
+    }
+
+    public static Specification<Project> hasStatus(String status) {
+        return ProjectSpecification.hasStatus(status);
+    }
+
+    public static Specification<Project> textSearchClient(String clientName) {
+        return ProjectSpecification.textSearchClient(clientName);
+    }
+
+    public static Specification<FreelancerPortfolio> textSearchTitle(String term) {
+        return PortfolioSpecification.textSearchTitle(term);
+    }
+
+    public static Specification<FreelancerPortfolio> textSearchFreelancer(String name) {
+        return PortfolioSpecification.textSearchFreelancer(name);
     }
 }

@@ -9,6 +9,7 @@ import com.example.jobsyserver.features.auth.dto.response.TokenRefreshResponse;
 import com.example.jobsyserver.features.auth.event.ConfirmationCodeResentEvent;
 import com.example.jobsyserver.features.auth.service.ConfirmationService;
 import com.example.jobsyserver.features.auth.service.impl.JwtServiceImpl;
+import com.example.jobsyserver.features.common.config.admin.AdminTestAuthProperties;
 import com.example.jobsyserver.features.common.dto.response.DefaultResponse;
 import com.example.jobsyserver.features.common.enums.ConfirmationAction;
 import com.example.jobsyserver.features.common.enums.UserRole;
@@ -36,9 +37,14 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     private final RefreshTokenService refreshTokenService;
     private final UserMapper userMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final AdminTestAuthProperties testProps;
 
     @Override
     public DefaultResponse requestLoginCode(AdminLoginRequest request) {
+        if (testProps.enabled() && testProps.email().equalsIgnoreCase(request.email())) {
+            return new DefaultResponse("Код отправлен (тестовый режим)");
+        }
+
         User user = userRepository
                 .findByEmailAndRole(request.email(), UserRole.ADMIN)
                 .orElseThrow(() -> new BadRequestException("Администратор не найден"));
@@ -55,23 +61,19 @@ public class AdminAuthServiceImpl implements AdminAuthService {
 
     @Override
     public AuthenticationResponse confirmLoginCode(ConfirmAdminLoginRequest request) {
+        if (testProps.enabled() && testProps.email().equalsIgnoreCase(request.email())) {
+            if (!testProps.code().equals(request.confirmationCode())) {
+                throw new BadRequestException("Неверный код подтверждения (тестовый режим)");
+            }
+            return issueTokensFor(request.email());
+        }
+
         confirmationService.validateAndUse(
                 request.email(),
                 request.confirmationCode(),
                 ConfirmationAction.ADMIN_LOGIN
         );
-
-        String accessToken = jwtService.generateToken(request.email());
-        User user = userRepository.findByEmailAndRole(request.email(), UserRole.ADMIN)
-                .orElseThrow(() -> new ResourceNotFoundException("Пользователь"));
-        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
-        UserDto userDto = userMapper.toDto(user);
-        return new AuthenticationResponse(
-                accessToken,
-                refreshToken.getToken(),
-                refreshToken.getExpiryDate(),
-                userDto
-        );
+        return issueTokensFor(request.email());
     }
 
     @Override
@@ -92,5 +94,20 @@ public class AdminAuthServiceImpl implements AdminAuthService {
     @Override
     public Optional<User> findByEmailAndRole(String email, UserRole role) {
         return userRepository.findByEmailAndRole(email, role);
+    }
+
+    private AuthenticationResponse issueTokensFor(String email) {
+        String accessToken = jwtService.generateToken(email);
+        User user = userRepository
+                .findByEmailAndRole(email, UserRole.ADMIN)
+                .orElseThrow(() -> new ResourceNotFoundException("Администратор"));
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+        UserDto dto = userMapper.toDto(user);
+        return new AuthenticationResponse(
+                accessToken,
+                refreshToken.getToken(),
+                refreshToken.getExpiryDate(),
+                dto
+        );
     }
 }
