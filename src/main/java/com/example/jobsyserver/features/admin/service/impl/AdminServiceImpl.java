@@ -1,293 +1,145 @@
 package com.example.jobsyserver.features.admin.service.impl;
 
-import com.example.jobsyserver.features.admin.service.AdminService;
+import com.example.jobsyserver.features.admin.service.*;
 import com.example.jobsyserver.features.client.dto.ClientProfileDto;
-import com.example.jobsyserver.features.client.mapper.ClientProfileMapper;
-import com.example.jobsyserver.features.client.model.ClientProfile;
-import com.example.jobsyserver.features.client.repository.ClientProfileRepository;
-import com.example.jobsyserver.features.common.enums.ProjectStatus;
-import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
 import com.example.jobsyserver.features.freelancer.dto.FreelancerProfileDto;
-import com.example.jobsyserver.features.freelancer.mapper.FreelancerProfileMapper;
-import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
-import com.example.jobsyserver.features.freelancer.repository.FreelancerProfileRepository;
-import com.example.jobsyserver.features.portfolio.model.FreelancerPortfolio;
-import com.example.jobsyserver.features.portfolio.projection.PortfolioAdminListItem;
-import com.example.jobsyserver.features.project.model.Project;
-import com.example.jobsyserver.features.project.projection.ProjectAdminListItem;
-import com.example.jobsyserver.features.search.specification.PortfolioSpecification;
-import com.example.jobsyserver.features.search.specification.ProjectSpecification;
-import com.example.jobsyserver.features.search.specification.SearchSpecifications;
-import com.example.jobsyserver.features.user.dto.UserDto;
-import com.example.jobsyserver.features.user.mapper.UserMapper;
-import com.example.jobsyserver.features.user.model.User;
-import com.example.jobsyserver.features.common.enums.UserRole;
-import com.example.jobsyserver.features.user.repository.UserRepository;
-import com.example.jobsyserver.features.project.repository.ProjectRepository;
-import com.example.jobsyserver.features.project.mapper.ProjectMapper;
-import com.example.jobsyserver.features.portfolio.repository.FreelancerPortfolioRepository;
-import com.example.jobsyserver.features.portfolio.mapper.FreelancerPortfolioMapper;
-import com.example.jobsyserver.features.project.dto.ProjectDto;
 import com.example.jobsyserver.features.portfolio.dto.FreelancerPortfolioDto;
-import com.example.jobsyserver.features.user.specification.UserSpecifications;
+import com.example.jobsyserver.features.portfolio.projection.PortfolioAdminListItem;
+import com.example.jobsyserver.features.project.dto.ProjectDto;
+import com.example.jobsyserver.features.project.projection.ProjectAdminListItem;
+import com.example.jobsyserver.features.user.dto.UserDto;
+import com.example.jobsyserver.features.common.enums.UserRole;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
-import static com.example.jobsyserver.features.user.specification.UserSpecifications.*;
-
-@Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class AdminServiceImpl implements AdminService {
 
-    private final UserRepository userRepository;
-    private final ProjectRepository projectRepository;
-    private final ProjectMapper projectMapper;
-    private final FreelancerPortfolioRepository portfolioRepository;
-    private final FreelancerPortfolioMapper portfolioMapper;
-    private final FreelancerProfileRepository freelancerProfileRepository;
-    private final FreelancerProfileMapper freelancerProfileMapper;
-    private final ClientProfileRepository clientProfileRepository;
-    private final ClientProfileMapper clientProfileMapper;
-    private final UserMapper userMapper;
+    private final FreelancerAdminService freelancerSvc;
+    private final ClientAdminService clientSvc;
+    private final ProjectAdminService projectSvc;
+    private final PortfolioAdminService portfolioSvc;
+    private final UserAdminService userSvc;
 
     @Override
     public List<FreelancerProfileDto> getAllFreelancers() {
-        log.info("Получение всех профилей фрилансеров");
-        return userRepository.findByRole(UserRole.FREELANCER).stream()
-                .map(freelancerProfileRepository::findByUser)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(freelancerProfileMapper::toDto)
-                .collect(Collectors.toList());
+        return freelancerSvc.getAll();
     }
 
     @Override
-    public FreelancerProfileDto getFreelancerById(Long userId) {
-        FreelancerProfile freelancerProfile = freelancerProfileRepository.findByUserId(userId).orElseThrow(() -> new ResourceNotFoundException("Профиль фрилансера", userId));
-        log.info("Получение профиля фрилансера с userId: {}", userId);
-        return freelancerProfileMapper.toDto(freelancerProfile);
+    public FreelancerProfileDto getFreelancerById(Long id) {
+        return freelancerSvc.getById(id);
     }
 
     @Override
-    public void deactivateFreelancer(Long userId) {
-        toggleUserActive(userId, UserRole.FREELANCER, false);
-        log.info("Деактивирован фрилансер userId={}", userId);
+    public void deactivateFreelancer(Long id) {
+        freelancerSvc.deactivate(id);
     }
 
     @Override
-    public void deleteFreelancer(Long userId) {
-        User user = userRepository.findByIdAndRole(userId, UserRole.FREELANCER)
-                .orElseThrow(() -> new ResourceNotFoundException("Фрилансер", "id", userId));
-        userRepository.delete(user);
-        log.info("Аккаунт фрилансера с userId {} успешно удалён", userId);
+    public void deleteFreelancer(Long id) {
+        freelancerSvc.delete(id);
+    }
+
+    @Override
+    public void activateFreelancer(Long id) {
+        freelancerSvc.activate(id);
     }
 
     @Override
     public List<ClientProfileDto> getAllClients() {
-        return userRepository.findByRole(UserRole.CLIENT).stream()
-                .map(clientProfileRepository::findByUser)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(clientProfileMapper::toDto)
-                .collect(Collectors.toList());
+        return clientSvc.getAll();
     }
 
     @Override
-    public ClientProfileDto getClientById(Long userId) {
-        ClientProfile clientProfile = clientProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Профиль заказчика", userId));
-        log.info("Получение профиля заказчика с userId: {}", userId);
-        return clientProfileMapper.toDto(clientProfile);
+    public ClientProfileDto getClientById(Long id) {
+        return clientSvc.getById(id);
     }
 
     @Override
-    public void deactivateClient(Long userId) {
-        toggleUserActive(userId, UserRole.CLIENT, false);
-        log.info("Деактивирован клиент userId={}", userId);
+    public void deactivateClient(Long id) {
+        clientSvc.deactivate(id);
     }
 
     @Override
-    public void deleteClient(Long userId) {
-        User user = userRepository.findByIdAndRole(userId, UserRole.CLIENT)
-                .orElseThrow(() -> new ResourceNotFoundException("Фрилансер", "id", userId));
-        userRepository.delete(user);
-        log.info("Аккаунт заказчика с userId {} успешно удалён", userId);
+    public void deleteClient(Long id) {
+        clientSvc.delete(id);
     }
 
     @Override
-    public List<ProjectDto> getClientProjects(Long userId) {
-        ClientProfile clientProfile = clientProfileRepository
-                .findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Профиль заказчика", userId));
-        Long profileId = clientProfile.getId();
-        return projectRepository
-                .findByClientId(profileId)
-                .stream()
-                .map(projectMapper::toDto)
-                .collect(Collectors.toList());
+    public void activateClient(Long id) {
+        clientSvc.activate(id);
+    }
+
+    @Override
+    public List<ProjectDto> getClientProjects(Long clientId) {
+        return projectSvc.getByClient(clientId);
+    }
+
+    @Override
+    public List<ProjectDto> getFreelancerProjects(Long freelancerId) {
+        return projectSvc.getByFreelancer(freelancerId);
     }
 
     @Override
     public ProjectDto getProjectById(Long id) {
-        log.info("Получение проекта по projectId: {}", id);
-        return projectRepository.findById(id)
-                .map(projectMapper::toDto)
-                .orElseThrow(() -> new ResourceNotFoundException("Проект", id));
+        return projectSvc.getById(id);
     }
 
     @Override
     public void deleteProject(Long id) {
-        Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Проект", id));
-        log.info("Удаление проекта с id: {}", id);
-        projectRepository.delete(project);
-    }
-
-    @Override
-    public List<FreelancerPortfolioDto> getFreelancerPortfolio(Long userId) {
-        FreelancerProfile freelancerProfile = freelancerProfileRepository
-                .findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Профиль фрилансера", userId));
-        Long profileId = freelancerProfile.getId();
-        return portfolioRepository
-                .findByFreelancerId(profileId)
-                .stream()
-                .map(portfolioMapper::toDto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public void deletePortfolio(Long freelancerId, Long portfolioId) {
-        log.info("Удаление портфолио фрилансера с id: {}", portfolioId);
-        FreelancerPortfolio portfolio = portfolioRepository.findByIdAndFreelancerId(portfolioId, freelancerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Портфолио", portfolioId));
-        portfolioRepository.delete(portfolio);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ProjectAdminListItem> searchProjects(
-            String term,
-            String status,
-            LocalDateTime createdFrom,
-            LocalDateTime createdTo,
-            Pageable pageable
-    ) {
-        Specification<Project> textSpec = Specification
-                .where(ProjectSpecification.textSearchProject(term))
-                .or(ProjectSpecification.textSearchClient(term));
-
-        Specification<Project> fullSpec = textSpec
-                .and(ProjectSpecification.hasStatus(status))
-                .and(ProjectSpecification.createdBetween(createdFrom, createdTo));
-
-        return projectRepository.findAllProjected(fullSpec, pageable);
-    }
-
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<PortfolioAdminListItem> searchPortfolios(
-            String titleTerm,
-            String freelancerName,
-            LocalDateTime createdFrom,
-            LocalDateTime createdTo,
-            Pageable pageable
-    ) {
-        Specification<FreelancerPortfolio> textSpec = Specification
-                .where(PortfolioSpecification.textSearchTitle(titleTerm))
-                .or(PortfolioSpecification.textSearchFreelancer(freelancerName));
-        Specification<FreelancerPortfolio> fullSpec = textSpec
-                .and(PortfolioSpecification.createdBetween(createdFrom, createdTo));
-
-        return portfolioRepository.findAllProjected(fullSpec, pageable);
-    }
-
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<UserDto> searchUsers(
-            String term,
-            UserRole role,
-            LocalDateTime registeredFrom,
-            LocalDateTime registeredTo,
-            Pageable pageable
-    ) {
-        var spec = Specification
-                .where(UserSpecifications.textSearch(term))
-                .and(UserSpecifications.hasRole(role))
-                .and(UserSpecifications.registeredBetween(registeredFrom, registeredTo));
-
-        return userRepository.findAll(spec, pageable)
-                .map(userMapper::toDto);
+        projectSvc.delete(id);
     }
 
     @Override
     public Page<ProjectAdminListItem> getAllProjectsPageable(Pageable pageable) {
-        log.info("Получение страницы проектов для админ-панели: {}", pageable);
-        return projectRepository.findAllProjectedByAdmin(pageable);
+        return projectSvc.pageAll(pageable);
     }
 
     @Override
-    public Page<PortfolioAdminListItem> getAllPortfoliosPageable(Pageable pageable) {
-        log.info("Получение страницы портфолио для админ-панели: {}", pageable);
-        return portfolioRepository.findAllProjected(null, pageable);
+    public Page<ProjectAdminListItem> searchProjects(
+            String term, String status, LocalDateTime from, LocalDateTime to, Pageable p
+    ) {
+        return projectSvc.search(term, status, from, to, p);
+    }
+
+    @Override
+    public List<FreelancerPortfolioDto> getFreelancerPortfolio(Long freelancerId) {
+        return portfolioSvc.getByFreelancer(freelancerId);
     }
 
     @Override
     public FreelancerPortfolioDto getPortfolioById(Long portfolioId) {
-        log.info("Получение полного портфолио с id: {}", portfolioId);
-        FreelancerPortfolio portfolio = portfolioRepository.findById(portfolioId)
-                .orElseThrow(() -> new ResourceNotFoundException("Портфолио", portfolioId));
-        return portfolioMapper.toDto(portfolio);
+        return portfolioSvc.getById(portfolioId);
     }
 
     @Override
-    public void activateFreelancer(Long userId) {
-        toggleUserActive(userId, UserRole.FREELANCER, true);
-        log.info("Активирован фрилансер userId={}", userId);
+    public void deletePortfolio(Long freelancerId, Long portfolioId) {
+        portfolioSvc.delete(freelancerId, portfolioId);
     }
 
     @Override
-    public void activateClient(Long userId) {
-        toggleUserActive(userId, UserRole.CLIENT, true);
-        log.info("Активирован клиент userId={}", userId);
-    }
-
-    private void toggleUserActive(Long userId, UserRole role, boolean active) {
-        User user = userRepository.findByIdAndRole(userId, role)
-                .orElseThrow(() -> new ResourceNotFoundException("Пользователь", userId));
-        if (user.getIsActive().equals(active)) {
-            log.warn("Попытка {} пользователя userId={}, роль={} — уже в таком состоянии",
-                    active ? "активации" : "деактивации", userId, role);
-            return;
-        }
-        user.setIsActive(active);
-        userRepository.save(user);
+    public Page<PortfolioAdminListItem> getAllPortfoliosPageable(Pageable pageable) {
+        return portfolioSvc.pageAll(pageable);
     }
 
     @Override
-    public List<ProjectDto> getFreelancerProjects(Long userId) {
-        FreelancerProfile freelancerProfile = freelancerProfileRepository
-                .findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Профиль фрилансера", userId));
-        Long profileId = freelancerProfile.getId();
-        return projectRepository
-                .findByAssignedFreelancerId(profileId)
-                .stream()
-                .map(projectMapper::toDto)
-                .collect(Collectors.toList());
+    public Page<PortfolioAdminListItem> searchPortfolios(
+            String term, String freelancerName, LocalDateTime from, LocalDateTime to, Pageable p
+    ) {
+        return portfolioSvc.search(term, freelancerName, from, to, p);
+    }
+
+    @Override
+    public Page<UserDto> searchUsers(
+            String term, UserRole role, LocalDateTime from, LocalDateTime to, Pageable p
+    ) {
+        return userSvc.search(term, role, from, to, p);
     }
 }

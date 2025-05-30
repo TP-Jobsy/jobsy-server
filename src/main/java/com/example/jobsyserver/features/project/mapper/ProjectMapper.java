@@ -10,6 +10,7 @@ import com.example.jobsyserver.features.freelancer.mapper.FreelancerProfileMappe
 import com.example.jobsyserver.features.skill.mapper.SkillMapper;
 import com.example.jobsyserver.features.specialization.mapper.SpecializationMapper;
 import org.mapstruct.*;
+import org.springframework.context.annotation.Primary;
 
 import java.util.List;
 
@@ -23,6 +24,7 @@ import java.util.List;
                 FreelancerProfileMapper.class
         }
 )
+@Primary
 public interface ProjectMapper {
 
     @Mappings({
