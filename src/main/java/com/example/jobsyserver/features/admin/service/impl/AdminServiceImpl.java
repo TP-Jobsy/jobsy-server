@@ -214,16 +214,31 @@ public class AdminServiceImpl implements AdminService {
 
 
     @Override
-    public Page<UserDto> searchUsers(String email, String firstName, String lastName, String phone, UserRole role, Pageable pageable) {
-        log.info("Поиск пользователей в админке: email='{}', firstName='{}', lastName='{}', phone='{}', role='{}'",
-                email, firstName, lastName, phone, role);
-
-        var spec = Specification.where(emailContains(email))
-                .and(firstNameContains(firstName))
-                .and(lastNameContains(lastName))
-                .and(phoneContains(phone))
-                .and(hasRole(role));
-
+    @Transactional(readOnly = true)
+    public Page<UserDto> searchUsers(
+            String email,
+            String firstName,
+            String lastName,
+            String phone,
+            UserRole role,
+            Pageable pageable
+    ) {
+        Specification<User> spec = Specification.where(null);
+        if (email != null && !email.isBlank()) {
+            spec = spec.and(emailContains(email));
+        }
+        if (firstName != null && !firstName.isBlank()) {
+            spec = spec.and(firstNameContains(firstName));
+        }
+        if (lastName != null && !lastName.isBlank()) {
+            spec = spec.and(lastNameContains(lastName));
+        }
+        if (phone != null && !phone.isBlank()) {
+            spec = spec.and(phoneContains(phone));
+        }
+        if (role != null) {
+            spec = spec.and(hasRole(role));
+        }
         return userRepository.findAll(spec, pageable)
                 .map(userMapper::toDto);
     }
