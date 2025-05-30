@@ -27,8 +27,6 @@ public class AuthController {
 
     private final UserService userService;
     private final AuthenticationService authenticationService;
-    private final RefreshTokenService refreshTokenService;
-    private final JwtService jwtService;
 
     @Operation(summary = "Получить информацию о текущем пользователе")
     @ApiResponses(value = {
