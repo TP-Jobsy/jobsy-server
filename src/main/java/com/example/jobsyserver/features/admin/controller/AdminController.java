@@ -225,7 +225,6 @@ public class AdminController {
     public ResponseEntity<Page<ProjectAdminListItem>> searchProjects(
             @RequestParam(required = false) String term,
             @RequestParam(required = false) String status,
-            @RequestParam(required = false) String clientName,
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             LocalDateTime createdFrom,
@@ -235,14 +234,14 @@ public class AdminController {
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable
     ) {
-        return ResponseEntity.ok(adminService.searchProjects(
+        Page<ProjectAdminListItem> page = adminService.searchProjects(
                 term,
-                clientName,
                 status,
                 createdFrom,
                 createdTo,
                 pageable
-        ));
+        );
+        return ResponseEntity.ok(page);
     }
 
     @GetMapping("/portfolios/search")

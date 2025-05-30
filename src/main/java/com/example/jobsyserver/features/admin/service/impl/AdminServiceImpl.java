@@ -179,20 +179,21 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional(readOnly = true)
     public Page<ProjectAdminListItem> searchProjects(
-            String titleTerm,
-            String clientName,
+            String term,
             String status,
             LocalDateTime createdFrom,
             LocalDateTime createdTo,
             Pageable pageable
     ) {
-        Specification<Project> spec = Specification
-                .where(SearchSpecifications.textSearchProject(titleTerm))
-                .and(SearchSpecifications.textSearchClient(clientName))
-                .and(SearchSpecifications.hasStatus(status))
+        Specification<Project> textSpec = Specification
+                .where(ProjectSpecification.textSearchProject(term))
+                .or(ProjectSpecification.textSearchClient(term));
+
+        Specification<Project> fullSpec = textSpec
+                .and(ProjectSpecification.hasStatus(status))
                 .and(ProjectSpecification.createdBetween(createdFrom, createdTo));
 
-        return projectRepository.findAllProjected(spec, pageable);
+        return projectRepository.findAllProjected(fullSpec, pageable);
     }
 
 

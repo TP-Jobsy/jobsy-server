@@ -48,8 +48,7 @@ public interface AdminService {
     void deletePortfolio(Long freelancerId, Long portfolioId);
 
     Page<ProjectAdminListItem> searchProjects(
-            String titleTerm,
-            String clientName,
+            String term,
             String status,
             LocalDateTime createdFrom,
             LocalDateTime createdTo,
