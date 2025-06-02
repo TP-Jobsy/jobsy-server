@@ -34,6 +34,7 @@ public class FreelancerPortfolioController {
             @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован или не имеет роли FREELANCER"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
+    @PreAuthorize("hasRole('CLIENT')")
     @GetMapping
     public ResponseEntity<List<FreelancerPortfolioDto>> getPortfolio() {
         return ResponseEntity.ok(service.getMyPortfolio());
