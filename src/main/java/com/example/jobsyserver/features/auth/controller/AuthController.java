@@ -4,9 +4,7 @@ import com.example.jobsyserver.features.auth.dto.request.AuthenticationRequest;
 import com.example.jobsyserver.features.auth.dto.request.TokenRefreshRequest;
 import com.example.jobsyserver.features.auth.dto.response.AuthenticationResponse;
 import com.example.jobsyserver.features.auth.dto.response.TokenRefreshResponse;
-import com.example.jobsyserver.features.auth.service.JwtService;
 import com.example.jobsyserver.features.common.dto.response.DefaultResponse;
-import com.example.jobsyserver.features.refresh.service.RefreshTokenService;
 import com.example.jobsyserver.features.user.model.User;
 import com.example.jobsyserver.features.auth.service.AuthenticationService;
 import com.example.jobsyserver.features.user.service.UserService;
@@ -27,8 +25,6 @@ public class AuthController {
 
     private final UserService userService;
     private final AuthenticationService authenticationService;
-    private final RefreshTokenService refreshTokenService;
-    private final JwtService jwtService;
 
     @Operation(summary = "Получить информацию о текущем пользователе")
     @ApiResponses(value = {

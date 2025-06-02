@@ -12,7 +12,8 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.List;
 
 public final class FreelancerProfileSpecification {
-    private FreelancerProfileSpecification() {}
+    private FreelancerProfileSpecification() {
+    }
 
     public static Specification<FreelancerProfile> hasAnySkill(List<Long> skillIds) {
         return (root, query, cb) -> {
@@ -46,11 +47,11 @@ public final class FreelancerProfileSpecification {
             }
             String pattern = "%" + term.toLowerCase() + "%";
             Join<FreelancerProfile, User> user = root.join("user", JoinType.INNER);
-            Predicate byFirst   = cb.like(cb.lower(user.get("firstName")), pattern);
-            Predicate byLast    = cb.like(cb.lower(user.get("lastName")),  pattern);
-            Predicate byAbout   = cb.like(cb.lower(root.get("aboutMe")),   pattern);
-            Predicate byCity    = cb.like(cb.lower(root.get("city")),      pattern);
-            Predicate byCountry = cb.like(cb.lower(root.get("country")),   pattern);
+            Predicate byFirst = cb.like(cb.lower(user.get("firstName")), pattern);
+            Predicate byLast = cb.like(cb.lower(user.get("lastName")), pattern);
+            Predicate byAbout = cb.like(cb.lower(root.get("aboutMe")), pattern);
+            Predicate byCity = cb.like(cb.lower(root.get("city")), pattern);
+            Predicate byCountry = cb.like(cb.lower(root.get("country")), pattern);
             return cb.or(byFirst, byLast, byAbout, byCity, byCountry);
         };
     }

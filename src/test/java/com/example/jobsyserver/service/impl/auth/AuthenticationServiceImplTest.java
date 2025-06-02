@@ -93,19 +93,18 @@ class AuthenticationServiceImplTest {
     }
 
     @Test
-    void login_invalidCredentials_throwsBadRequest() {
+    void login_invalidCredentials_throwsBadCredentials() {
         AuthenticationRequest request = new AuthenticationRequest();
         request.setEmail(testEmail);
         request.setPassword("wrong_password");
         when(authenticationManager.authenticate(any()))
-                .thenThrow(new BadCredentialsException("Invalid credentials"));
-        BadRequestException ex = assertThrows(
-                BadRequestException.class,
+                .thenThrow(new BadCredentialsException("Неверные учётные данные или пользователь не найден"));
+        BadCredentialsException ex = assertThrows(
+                BadCredentialsException.class,
                 () -> service.login(request)
         );
         assertEquals("Неверные учётные данные или пользователь не найден", ex.getMessage());
         verify(authenticationManager).authenticate(any());
-        verifyNoInteractions(jwtService);
-        verifyNoInteractions(refreshTokenService);
+        verifyNoInteractions(jwtService, refreshTokenService);
     }
 }

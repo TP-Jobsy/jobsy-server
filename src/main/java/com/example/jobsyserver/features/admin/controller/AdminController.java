@@ -19,10 +19,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -223,30 +225,134 @@ public class AdminController {
     public ResponseEntity<Page<ProjectAdminListItem>> searchProjects(
             @RequestParam(required = false) String term,
             @RequestParam(required = false) String status,
-            @RequestParam(required = false) String clientName,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime createdFrom,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime createdTo,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable
     ) {
-        return ResponseEntity.ok(adminService.searchProjects(term, status, clientName, pageable));
+        Page<ProjectAdminListItem> page = adminService.searchProjects(
+                term,
+                status,
+                createdFrom,
+                createdTo,
+                pageable
+        );
+        return ResponseEntity.ok(page);
     }
 
     @GetMapping("/portfolios/search")
     public ResponseEntity<Page<PortfolioAdminListItem>> searchPortfolios(
             @RequestParam(required = false) String term,
             @RequestParam(required = false) String freelancerName,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime createdFrom,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime createdTo,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable
     ) {
-        return ResponseEntity.ok(adminService.searchPortfolios(term, freelancerName, pageable));
+        return ResponseEntity.ok(adminService.searchPortfolios(
+                term,
+                freelancerName,
+                createdFrom,
+                createdTo,
+                pageable
+        ));
     }
 
     @GetMapping("/users/search")
     public ResponseEntity<Page<UserDto>> searchUsers(
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) String firstName,
-            @RequestParam(required = false) String lastName,
-            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) String term,
             @RequestParam(required = false) UserRole role,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime registeredFrom,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDateTime registeredTo,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable
     ) {
-        return ResponseEntity.ok(adminService.searchUsers(email, firstName, lastName, phone, role, pageable));
+        return ResponseEntity.ok(adminService.searchUsers(term, role, registeredFrom, registeredTo, pageable));
+    }
+
+    @Operation(
+            summary = "Активировать фрилансера",
+            description = "Меняет статус фрилансера на активный (isActive=true)"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Фрилансер успешно активирован"),
+            @ApiResponse(responseCode = "401", description = "Не аутентифицирован или нет прав"),
+            @ApiResponse(responseCode = "404", description = "Фрилансер не найден"),
+            @ApiResponse(responseCode = "500", description = "Ошибка сервера")
+    })
+    @PutMapping("/freelancers/{userId}/activate")
+    public ResponseEntity<DefaultResponse> activateFreelancer(@PathVariable Long userId) {
+        adminService.activateFreelancer(userId);
+        return ResponseEntity.ok(new DefaultResponse("Фрилансер успешно активирован"));
+    }
+
+    @Operation(
+            summary = "Активировать заказчика",
+            description = "Меняет статус заказчика на активный (isActive=true)"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Заказчик успешно активирован"),
+            @ApiResponse(responseCode = "401", description = "Не аутентифицирован или нет прав"),
+            @ApiResponse(responseCode = "404", description = "Заказчик не найден"),
+            @ApiResponse(responseCode = "500", description = "Ошибка сервера")
+    })
+    @PutMapping("/clients/{userId}/activate")
+    public ResponseEntity<DefaultResponse> activateClient(@PathVariable Long userId) {
+        adminService.activateClient(userId);
+        return ResponseEntity.ok(new DefaultResponse("Заказчик успешно активирован"));
+    }
+
+    @Operation(
+            summary = "Деактивировать фрилансера",
+            description = "Меняет статус фрилансера на неактивный (isActive=false)"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Фрилансер успешно деактивирован"),
+            @ApiResponse(responseCode = "401", description = "Не аутентифицирован или нет прав"),
+            @ApiResponse(responseCode = "404", description = "Фрилансер не найден"),
+            @ApiResponse(responseCode = "500", description = "Ошибка сервера")
+    })
+    @PutMapping("/freelancers/{userId}/deactivate")
+    public ResponseEntity<DefaultResponse> deactivateFreelancer(@PathVariable Long userId) {
+        adminService.deactivateFreelancer(userId);
+        return ResponseEntity.ok(new DefaultResponse("Фрилансер успешно деактивирован"));
+    }
+
+    @Operation(
+            summary = "Деактивировать заказчика",
+            description = "Меняет статус заказчика на неактивный (isActive=false)"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Заказчик успешно деактивирован"),
+            @ApiResponse(responseCode = "401", description = "Не аутентифицирован или нет прав"),
+            @ApiResponse(responseCode = "404", description = "Заказчик не найден"),
+            @ApiResponse(responseCode = "500", description = "Ошибка сервера")
+    })
+    @PutMapping("/clients/{userId}/deactivate")
+    public ResponseEntity<DefaultResponse> deactivateClient(@PathVariable Long userId) {
+        adminService.deactivateClient(userId);
+        return ResponseEntity.ok(new DefaultResponse("Заказчик успешно деактивирован"));
+    }
+
+    @Operation(summary = "Получить проекты, где фрилансер является исполнителем")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Проекты успешно получены"),
+            @ApiResponse(responseCode = "401", description = "Нет прав"),
+            @ApiResponse(responseCode = "404", description = "Фрилансер не найден"),
+            @ApiResponse(responseCode = "500", description = "Ошибка сервера")
+    })
+    @GetMapping("/freelancers/{userId}/projects")
+    public ResponseEntity<List<ProjectDto>> getFreelancerProjects(@PathVariable Long userId) {
+        return ResponseEntity.ok(adminService.getFreelancerProjects(userId));
     }
 }

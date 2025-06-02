@@ -1,5 +1,6 @@
 package com.example.jobsyserver.features.search.service.impl;
 
+import com.example.jobsyserver.features.common.enums.ProjectStatus;
 import com.example.jobsyserver.features.freelancer.projection.FreelancerListItem;
 import com.example.jobsyserver.features.freelancer.repository.FreelancerProfileRepository;
 import com.example.jobsyserver.features.project.projection.ProjectListItem;
@@ -52,17 +53,18 @@ public class SearchServiceImpl implements SearchService {
     ) {
         boolean hasTerm = term != null && !term.isBlank();
         boolean hasSkills = skillIds != null && !skillIds.isEmpty();
+        ProjectStatus open = ProjectStatus.OPEN;
 
         if (hasTerm && hasSkills) {
-            return projectRepo.findBySkillsAndTerm(skillIds, term, pageable);
+            return projectRepo.findBySkillsAndTermStatus(skillIds, term, pageable, open);
         }
         if (hasTerm) {
-            return projectRepo.findByTerm(term, pageable);
+            return projectRepo.findByTermStatus(term, pageable, open);
         }
         if (hasSkills) {
-            return projectRepo.findBySkills(skillIds, pageable);
+            return projectRepo.findBySkillsStatus(skillIds, pageable, open);
         }
-        return projectRepo.findAllProjectedBy(pageable);
+        return projectRepo.findAllProjectedByStatus(open, pageable);
     }
 
 }

@@ -7,7 +7,6 @@ import com.example.jobsyserver.features.auth.dto.response.TokenRefreshResponse;
 import com.example.jobsyserver.features.auth.service.AuthenticationService;
 import com.example.jobsyserver.features.auth.service.JwtService;
 import com.example.jobsyserver.features.common.dto.response.DefaultResponse;
-import com.example.jobsyserver.features.common.exception.BadRequestException;
 import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
 import com.example.jobsyserver.features.refresh.model.RefreshToken;
 import com.example.jobsyserver.features.refresh.service.RefreshTokenService;
@@ -23,6 +22,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Locale;
+
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
@@ -36,18 +37,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticationResponse login(AuthenticationRequest request) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            request.getEmail(),
-                            request.getPassword()
-                    )
-            );
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        } catch (Exception ex) {
-            throw new BadRequestException("Неверные учётные данные или пользователь не найден");
-        }
-        User user = userRepository.findByEmail(request.getEmail())
+        String normalized = request.getEmail().trim().toLowerCase(Locale.ROOT);
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        normalized,
+                        request.getPassword()
+                )
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        User user = userRepository.findByEmail(normalized)
                 .orElseThrow(() -> new ResourceNotFoundException("Пользователь"));
         String accessToken = jwtService.generateToken(user.getEmail());
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
