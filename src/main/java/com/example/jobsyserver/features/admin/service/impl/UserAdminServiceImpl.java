@@ -2,7 +2,6 @@ package com.example.jobsyserver.features.admin.service.impl;
 
 import com.example.jobsyserver.features.admin.service.UserAdminService;
 import com.example.jobsyserver.features.common.enums.UserRole;
-import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
 import com.example.jobsyserver.features.user.dto.UserDto;
 import com.example.jobsyserver.features.user.mapper.UserMapper;
 import com.example.jobsyserver.features.user.model.User;
