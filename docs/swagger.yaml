@@ -1208,7 +1208,7 @@ paths:
   /projects/drafts:
     post:
       tags:
-        - Project Drafts
+        - project
       summary: Создать черновик проекта
       description: Создает новый черновик проекта (только для клиентов)
       operationId: createProjectDraft
@@ -1238,7 +1238,7 @@ paths:
   /projects/{draftId}/draft:
     put:
       tags:
-        - Project Drafts
+        - project
       summary: Обновить черновик проекта
       description: Обновляет существующий черновик проекта (только для клиентов)
       security:
@@ -1277,7 +1277,7 @@ paths:
   /projects/{draftId}/publish:
     post:
       tags:
-        - Project Drafts
+        - project
       summary: Опубликовать черновик
       description: Публикует черновик проекта (финальное редактирование + статус → OPEN)
       security:
@@ -1316,7 +1316,8 @@ paths:
   /admin/auth/login:
     post:
       tags:
-        - Admin Authentication
+        - admin
+        - auth
       summary: Запрос кода для входа админа
       requestBody:
         required: true
@@ -1338,7 +1339,8 @@ paths:
   /admin/auth/confirm:
     post:
       tags:
-        - Admin Authentication
+        - admin
+        - auth
       summary: Подтверждение кода и получение токена
       requestBody:
         required: true
@@ -1357,7 +1359,27 @@ paths:
           description: Неверный код подтверждения
         '401':
           description: Неверные учетные данные
-
+  /admin/auth/refresh:
+    post:
+      tags:
+        - admin
+        - auth
+      summary: Обновление токена
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+      responses:
+        '200':
+          description: Токен успешно обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefreshResponse'
+        '500':
+          description: Внутренняя ошибка сервера
   /admin/freelancers:
     get:
       tags:
@@ -1412,26 +1434,100 @@ paths:
     delete:
       tags:
         - admin
-      summary: Деактивировать аккаунт фрилансера
-      description: Администратор может деактивировать аккаунт фрилансера по его ID, что эквивалентно удалению аккаунта из системы
-      security:
-        - bearerAuth: []
+      summary: Удалить фрилансера
+      description: Удаляет профиль фрилансера по userId
       parameters:
         - name: userId
           in: path
-          description: ID фрилансера для деактивации
           required: true
           schema:
             type: integer
       responses:
         '200':
-          description: Аккаунт фрилансера успешно деактивирован
+          description: Фрилансер успешно деактивирован
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DefaultResponse'
+        '401':
+          description: Пользователь не аутентифицирован или не имеет прав
+        '404':
+          description: Профиль не найден
+        '500':
+          description: Внутренняя ошибка сервера
+    put:
+      tags:
+        - admin
+      summary: Активировать/деактивировать фрилансера
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Операция выполнена успешно
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+        '401':
+          description: Не аутентифицирован или нет прав
         '404':
           description: Фрилансер не найден
+        '500':
+          description: Внутренняя ошибка сервера
+  /admin/freelancers/{userId}/activate:
+    put:
+      tags:
+        - admin
+      summary: Активировать фрилансера
+      description: Меняет статус фрилансера на активный (isActive=true)
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Фрилансер успешно активирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+        '401':
+          description: Не аутентифицирован или нет прав
+        '404':
+          description: Фрилансер не найден
+        '500':
+          description: Внутренняя ошибка сервера
+  /admin/freelancers/{userId}/deactivate:
+    put:
+      tags:
+        - admin
+      summary: Деактивировать фрилансера
+      description: Меняет статус фрилансера на неактивный (isActive=false)
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Фрилансер успешно деактивирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+        '401':
+          description: Не аутентифицирован или нет прав
+        '404':
+          description: Фрилансер не найден
+        '500':
+          description: Внутренняя ошибка сервера
   /admin/clients:
     get:
       tags:
@@ -1455,6 +1551,33 @@ paths:
           description: Клиенты не найдены
         '500':
           description: Внутренняя ошибка сервера
+  /admin/freelancers/{userId}/projects:
+    get:
+      tags:
+        - admin
+      summary: Получить проекты, где фрилансер является исполнителем
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Проекты успешно получены
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+        '401':
+          description: Нет прав
+        '404':
+          description: Фрилансер не найден
+        '500':
+          description: Ошибка сервера
   /admin/clients/{userId}:
     get:
       tags:
@@ -1486,26 +1609,77 @@ paths:
     delete:
       tags:
         - admin
-      summary: Деактивировать аккаунт клиента
-      description: Администратор может деактивировать аккаунт клиента по его ID (например, установив is_active = false)
-      security:
-        - bearerAuth: []
+      summary: Удалить заказчика
+      description: Удаляет профиль пользователя по userId с ролью CLIENT
       parameters:
         - name: userId
           in: path
-          description: ID клиента для деактивации
           required: true
           schema:
             type: integer
       responses:
         '200':
-          description: Аккаунт клиента успешно деактивирован
+          description: Заказчик успешно удалён
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/DefaultResponse'
+        '401':
+          description: Пользователь не аутентифицирован или не имеет прав
         '404':
-          description: Клиент не найден
+          description: Профиль не найден
+        '500':
+          description: Внутренняя ошибка сервера
+  /admin/clients/{userId}/activate:
+    put:
+      tags:
+        - admin
+      summary: Активировать заказчика
+      description: Меняет статус заказчика на активный (isActive=true)
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Заказчик успешно активирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+        '401':
+          description: Не аутентифицирован или нет прав
+        '404':
+          description: Заказчик не найден
+        '500':
+          description: Внутренняя ошибка сервера
+  /admin/clients/{userId}/deactivate:
+    put:
+      tags:
+        - admin
+      summary: Деактивировать заказчика
+      description: Меняет статус заказчика на неактивный (isActive=false)
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Заказчик успешно деактивирован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultResponse'
+        '401':
+          description: Не аутентифицирован или нет прав
+        '404':
+          description: Заказчик не найден
+        '500':
+          description: Внутренняя ошибка сервера
   /admin/clients/{id}/projects:
     get:
       tags:
@@ -1542,21 +1716,172 @@ paths:
         - admin
       summary: Получить список всех проектов
       description: Возвращает список всех проектов в системе
-      security:
-        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Pageable'
       responses:
         '200':
           description: Список проектов получен успешно
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Project'
+                $ref: '#/components/schemas/Page_ProjectAdminListItem_'
         '401':
-          description: Нет прав
+          description: Пользователь не аутентифицирован или не имеет прав
         '500':
           description: Внутренняя ошибка сервера
+  /admin/users/search:
+    get:
+      tags:
+        - admin
+      summary: Поиск пользователей
+      description: Поиск пользователей с фильтрами
+      parameters:
+        - name: term
+          in: query
+          description: Поисковый запрос
+          required: false
+          schema:
+            type: string
+        - name: role
+          in: query
+          description: Роль пользователя
+          required: false
+          schema:
+            type: string
+            enum: [client, freelancer, admin]
+        - name: registeredFrom
+          in: query
+          description: Дата регистрации от (формат ISO 8601)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: registeredTo
+          in: query
+          description: Дата регистрации до (формат ISO 8601)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - $ref: '#/components/parameters/Pageable'
+      responses:
+        '200':
+          description: Успешный поиск
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page_UserDto_'
+        '400':
+          description: Неверные параметры запроса
+        '500':
+          description: Ошибка сервера
+  /admin/projects/search:
+    get:
+      tags:
+        - admin
+      summary: Поиск проектов
+      description: Поиск проектов с фильтрами
+      parameters:
+        - name: term
+          in: query
+          description: Поисковый запрос
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Статус проекта
+          required: false
+          schema:
+            type: string
+        - name: createdFrom
+          in: query
+          description: Дата создания от (формат ISO 8601)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: createdTo
+          in: query
+          description: Дата создания до (формат ISO 8601)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - $ref: '#/components/parameters/Pageable'
+      responses:
+        '200':
+          description: Успешный поиск
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page_ProjectAdminListItem_'
+        '400':
+          description: Неверные параметры запроса
+        '500':
+          description: Ошибка сервера
+  /admin/portfolios:
+    get:
+      tags:
+        - admin
+      summary: Список портфолио (минимальная проекция) с пагинацией
+      description: Возвращает ID, заголовок, имя/фамилию фрилансера и дату создания
+      parameters:
+        - $ref: '#/components/parameters/Pageable'
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page_PortfolioAdminListItem_'
+        '500':
+          description: Ошибка сервера
+  /admin/portfolios/search:
+    get:
+      tags:
+        - admin
+      summary: Поиск портфолио
+      description: Поиск портфолио с фильтрами
+      parameters:
+        - name: term
+          in: query
+          description: Поисковый запрос
+          required: false
+          schema:
+            type: string
+        - name: freelancerName
+          in: query
+          description: Имя фрилансера
+          required: false
+          schema:
+            type: string
+        - name: createdFrom
+          in: query
+          description: Дата создания от (формат ISO 8601)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: createdTo
+          in: query
+          description: Дата создания до (формат ISO 8601)
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - $ref: '#/components/parameters/Pageable'
+      responses:
+        '200':
+          description: Успешный поиск
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page_PortfolioAdminListItem_'
+        '400':
+          description: Неверные параметры запроса
+        '500':
+          description: Ошибка сервера
   /admin/projects/{id}:
     get:
       tags:
@@ -1701,27 +2026,6 @@ paths:
                 $ref: '#/components/schemas/DefaultResponse'
         '404':
           description: Элемент портфолио не найден
-  /admin/portfolios:
-    get:
-      tags:
-        - admin
-      summary: Список портфолио
-      description: Возвращает список портфолио
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Информация о проекте получена успешно
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/FreelancerPortfolio'
-        '401':
-          description: Нет прав
-        '500':
-          description: Внутренняя ошибка сервера
   /admin/portfolios/{portfolioId}:
     get:
       tags:
@@ -2033,7 +2337,7 @@ paths:
           description: Внутренняя ошибка сервера
     put:
       tags:
-        - Categories
+        - categories
       summary: Обновить категорию
       description: Обновляет данные категории по указанному id
       parameters:
@@ -2658,6 +2962,30 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+  parameters:
+    Pageable:
+      name: pageable
+      in: query
+      description: Параметры пагинации
+      required: false
+      style: form
+      explode: true
+      schema:
+        type: object
+        properties:
+          page:
+            type: integer
+            description: Номер страницы (0-based)
+            default: 0
+          size:
+            type: integer
+            description: Количество элементов на странице
+            default: 20
+          sort:
+            type: string
+            description: Параметры сортировки в формате `поле,направление`
+            default: "createdAt,desc"
+
   schemas:
     AdminLoginRequest:
       type: object
@@ -2681,6 +3009,39 @@ components:
       required:
         - email
         - code
+    ProjectAdminListItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+        clientFirstName:
+          type: string
+        clientLastName:
+          type: string
+
+    PortfolioAdminListItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        firstName:
+          type: string
+        lastName:
+          type: string
     User:
       type: object
       properties:
@@ -2705,7 +3066,7 @@ components:
           example: "79991234567"
         role:
           type: string
-          enum: [client, freelancer]
+          enum: [client, freelancer, admin]
           example: "client"
         is_verified:
           type: boolean
@@ -2716,6 +3077,111 @@ components:
         created_at:
           type: string
           format: date-time
+    Page_ProjectAdminListItem_:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectAdminListItem'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        last:
+          type: boolean
+        size:
+          type: integer
+        number:
+          type: integer
+        sort:
+          $ref: '#/components/schemas/SortObject'
+        first:
+          type: boolean
+        numberOfElements:
+          type: integer
+        empty:
+          type: boolean
+    Page_PortfolioAdminListItem_:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/PortfolioAdminListItem'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        last:
+          type: boolean
+        size:
+          type: integer
+        number:
+          type: integer
+        sort:
+          $ref: '#/components/schemas/SortObject'
+        first:
+          type: boolean
+        numberOfElements:
+          type: integer
+        empty:
+          type: boolean
+    Page_UserDto_:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        last:
+          type: boolean
+        size:
+          type: integer
+        number:
+          type: integer
+        sort:
+          $ref: '#/components/schemas/SortObject'
+        first:
+          type: boolean
+        numberOfElements:
+          type: integer
+        empty:
+          type: boolean
+    PageableObject:
+      type: object
+      properties:
+        pageNumber:
+          type: integer
+        pageSize:
+          type: integer
+        offset:
+          type: integer
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
+        sort:
+          $ref: '#/components/schemas/SortObject'
+    SortObject:
+      type: object
+      properties:
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
+        empty:
+          type: boolean
     PublicUser:
       type: object
       properties:
@@ -2751,7 +3217,7 @@ components:
           example: "+79991234567"
         role:
           type: string
-          enum: [client, freelancer]
+          enum: [client, freelancer, admin]
           example: "client"
       required:
         - email
@@ -2825,6 +3291,26 @@ components:
         - email
         - reset_code
         - new_password
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+      required:
+        - refreshToken
+    TokenRefreshResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6..."
+        refreshToken:
+          type: string
+          example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        refreshTokenExpiry:
+          type: string
+          example: "2025-06-01T12:00:00Z"
     DefaultResponse:
       type: object
       properties:
