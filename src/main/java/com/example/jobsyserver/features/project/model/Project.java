@@ -120,11 +120,7 @@ public class Project {
     @Builder.Default
     private boolean freelancerCompleted = false;
 
-    @OneToMany(
-            mappedBy = "project",
-            cascade = CascadeType.REMOVE,
-            orphanRemoval = true
-    )
+    @OneToMany(mappedBy = "project")
     @Builder.Default
     private Set<AiRequest> aiRequests = new HashSet<>();
 }
