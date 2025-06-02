@@ -1,5 +1,6 @@
 package com.example.jobsyserver.features.project.model;
 
+import com.example.jobsyserver.features.ai.model.AiRequest;
 import com.example.jobsyserver.features.common.enums.*;
 import com.example.jobsyserver.features.category.model.Category;
 import com.example.jobsyserver.features.client.model.ClientProfile;
@@ -7,6 +8,7 @@ import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
 import com.example.jobsyserver.features.skill.model.Skill;
 import com.example.jobsyserver.features.specialization.model.Specialization;
 import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Table;
 import lombok.*;
 import org.hibernate.annotations.*;
@@ -117,4 +119,12 @@ public class Project {
     @Column(name = "freelancer_completed", nullable = false)
     @Builder.Default
     private boolean freelancerCompleted = false;
+
+    @OneToMany(
+            mappedBy = "project",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true
+    )
+    @Builder.Default
+    private Set<AiRequest> aiRequests = new HashSet<>();
 }
