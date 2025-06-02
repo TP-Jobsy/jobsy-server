@@ -26,6 +26,5 @@ public class FreelancerPortfolioCreateDto {
     @URL(protocol = "https", message  = "Ссылка должна быть HTTPS")
     private String projectLink;
 
-    @Max(value = 5, message = "Нельзя указывать более 5 навыков")
     private List<Long> skillIds;
 }
