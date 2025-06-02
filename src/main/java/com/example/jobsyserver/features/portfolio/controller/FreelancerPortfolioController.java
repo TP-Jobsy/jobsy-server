@@ -23,7 +23,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 @Tag(name = "freelancer", description = "Панель фрилансера: портфолио")
-@PreAuthorize("hasRole('FREELANCER')")
 public class FreelancerPortfolioController {
 
     private final FreelancerPortfolioService service;
@@ -34,10 +33,26 @@ public class FreelancerPortfolioController {
             @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован или не имеет роли FREELANCER"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
-    @PreAuthorize("hasRole('CLIENT')")
+    @PreAuthorize("hasRole('FREELANCER')")
     @GetMapping
     public ResponseEntity<List<FreelancerPortfolioDto>> getPortfolio() {
         return ResponseEntity.ok(service.getMyPortfolio());
+    }
+    
+    @Operation(summary = "Получить портфолио произвольного фрилансера (для клиента)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Список элементов портфолио успешно получен"),
+            @ApiResponse(responseCode = "401", description = "Не авторизован или не роль CLIENT"),
+            @ApiResponse(responseCode = "404", description = "Фрилансер не найден"),
+            @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
+    })
+    @PreAuthorize("hasRole('CLIENT')")
+    @GetMapping("/public/{freelancerProfileId}")
+    public ResponseEntity<List<FreelancerPortfolioDto>> getPortfolioByFreelancer(
+            @PathVariable Long freelancerProfileId
+    ) {
+        List<FreelancerPortfolioDto> list = service.getByFreelancerProfileId(freelancerProfileId);
+        return ResponseEntity.ok(list);
     }
 
     @Operation(summary = "Добавить новый элемент портфолио")
@@ -47,6 +62,7 @@ public class FreelancerPortfolioController {
             @ApiResponse(responseCode = "401", description = "Пользователь не аутентифицирован или не имеет роли FREELANCER"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
+    @PreAuthorize("hasRole('FREELANCER')")
     @PostMapping
     public ResponseEntity<FreelancerPortfolioDto> create(
             @Valid @RequestBody FreelancerPortfolioCreateDto dto
@@ -63,6 +79,7 @@ public class FreelancerPortfolioController {
             @ApiResponse(responseCode = "404", description = "Элемент портфолио не найден"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
+    @PreAuthorize("hasRole('FREELANCER')")
     @PutMapping("/{id}")
     public ResponseEntity<FreelancerPortfolioDto> update(
             @PathVariable Long id,
@@ -78,6 +95,7 @@ public class FreelancerPortfolioController {
             @ApiResponse(responseCode = "404", description = "Элемент портфолио не найден"),
             @ApiResponse(responseCode = "500", description = "Внутренняя ошибка сервера")
     })
+    @PreAuthorize("hasRole('FREELANCER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.deletePortfolio(id);

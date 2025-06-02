@@ -11,4 +11,5 @@ public interface FreelancerPortfolioService {
     FreelancerPortfolioDto createPortfolio(FreelancerPortfolioCreateDto dto);
     FreelancerPortfolioDto updatePortfolio(Long id, FreelancerPortfolioUpdateDto dto);
     void deletePortfolio(Long id);
+    List<FreelancerPortfolioDto> getByFreelancerProfileId(Long freelancerProfileId);
 }
