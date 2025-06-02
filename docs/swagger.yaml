@@ -1208,7 +1208,7 @@ paths:
   /projects/drafts:
     post:
       tags:
-        - Project Drafts
+        - project
       summary: Создать черновик проекта
       description: Создает новый черновик проекта (только для клиентов)
       operationId: createProjectDraft
@@ -1238,7 +1238,7 @@ paths:
   /projects/{draftId}/draft:
     put:
       tags:
-        - Project Drafts
+        - project
       summary: Обновить черновик проекта
       description: Обновляет существующий черновик проекта (только для клиентов)
       security:
@@ -1277,7 +1277,7 @@ paths:
   /projects/{draftId}/publish:
     post:
       tags:
-        - Project Drafts
+        - project
       summary: Опубликовать черновик
       description: Публикует черновик проекта (финальное редактирование + статус → OPEN)
       security:
@@ -1316,7 +1316,8 @@ paths:
   /admin/auth/login:
     post:
       tags:
-        - Admin Authentication
+        - admin
+        - auth
       summary: Запрос кода для входа админа
       requestBody:
         required: true
@@ -1338,7 +1339,8 @@ paths:
   /admin/auth/confirm:
     post:
       tags:
-        - Admin Authentication
+        - admin
+        - auth
       summary: Подтверждение кода и получение токена
       requestBody:
         required: true
@@ -1357,7 +1359,26 @@ paths:
           description: Неверный код подтверждения
         '401':
           description: Неверные учетные данные
-
+  /admin/auth/refresh:
+    post:
+      tags:
+        - admin
+        - auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+      responses:
+        '200':
+          description: Токен успешно обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefreshResponse'
+        '500':
+          description: Внутренняя ошибка сервера
   /admin/freelancers:
     get:
       tags:
@@ -1544,19 +1565,316 @@ paths:
       description: Возвращает список всех проектов в системе
       security:
         - bearerAuth: []
+      parameters:
+        - name: term
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: clientName
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            default: "createdAt,desc"
       responses:
         '200':
-          description: Список проектов получен успешно
+          description: Список проектов успешно получен
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Project'
-        '401':
-          description: Нет прав
-        '500':
-          description: Внутренняя ошибка сервера
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProjectAdminListItem'
+                  pageable:
+                    $ref: '#/components/schemas/Pageable'
+                  totalElements:
+                    type: integer
+                  totalPages:
+                    type: integer
+                  last:
+                    type: boolean
+                  size:
+                    type: integer
+                  number:
+                    type: integer
+                  sort:
+                    $ref: '#/components/schemas/Sort'
+                  first:
+                    type: boolean
+                  numberOfElements:
+                    type: integer
+                  empty:
+                    type: boolean
+          '401':
+            description: Нет прав
+          '500':
+            description: Внутренняя ошибка сервера
+  /admin/users/search:
+    get:
+      tags:
+        - admin
+      summary: Получить список пользователей в поиске
+      description: Возвращает список список пользователей в поиске
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: email
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: firstName
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: lastName
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: phone
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: role
+          in: query
+          required: false
+          schema:
+            type: string
+          enum: [client, freelancer, admin]
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            default: "createdAt,desc"
+      responses:
+        '200':
+          description: Список пользователей успешно получен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserDto'
+                  pageable:
+                    $ref: '#/components/schemas/Pageable'
+                  totalElements:
+                    type: integer
+                  totalPages:
+                    type: integer
+                  last:
+                    type: boolean
+                  size:
+                    type: integer
+                  number:
+                    type: integer
+                  sort:
+                    $ref: '#/components/schemas/Sort'
+                  first:
+                    type: boolean
+                  numberOfElements:
+                    type: integer
+                  empty:
+                    type: boolean
+          '401':
+            description: Нет прав
+          '500':
+            description: Внутренняя ошибка сервера
+  /admin/projects/search:
+    get:
+      tags:
+        - admin
+      summary: Получить список всех проектов
+      description: Возвращает список всех проектов в системе
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: term
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: clientName
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            default: "createdAt,desc"
+      responses:
+        '200':
+          description: Список проектов успешно получен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProjectAdminListItem'
+                  pageable:
+                    $ref: '#/components/schemas/Pageable'
+                  totalElements:
+                    type: integer
+                  totalPages:
+                    type: integer
+                  last:
+                    type: boolean
+                  size:
+                    type: integer
+                  number:
+                    type: integer
+                  sort:
+                    $ref: '#/components/schemas/Sort'
+                  first:
+                    type: boolean
+                  numberOfElements:
+                    type: integer
+                  empty:
+                    type: boolean
+          '401':
+            description: Нет прав
+          '500':
+            description: Внутренняя ошибка сервера
+  /admin/portfolios/search:
+    get:
+      tags:
+        - admin
+      summary: Получить список портфолио в поске
+      description: Возвращает список всех проектов в поиске
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: term
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: freelancerName
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            default: "createdAt,desc"
+      responses:
+        '200':
+          description: Список проектов успешно получен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PortfolioAdminListItem'
+                  pageable:
+                    $ref: '#/components/schemas/Pageable'
+                  totalElements:
+                    type: integer
+                  totalPages:
+                    type: integer
+                  last:
+                    type: boolean
+                  size:
+                    type: integer
+                  number:
+                    type: integer
+                  sort:
+                    $ref: '#/components/schemas/Sort'
+                  first:
+                    type: boolean
+                  numberOfElements:
+                    type: integer
+                  empty:
+                    type: boolean
+          '401':
+            description: Нет прав
+          '500':
+            description: Внутренняя ошибка сервера
   /admin/projects/{id}:
     get:
       tags:
@@ -2681,6 +2999,72 @@ components:
       required:
         - email
         - code
+    ProjectAdminListItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 123
+        title:
+          type: string
+          example: "Проект А"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2025-06-01T12:00:00Z"
+        status:
+          type: string
+          enum: [open, in_progress, completed]
+          example: "open"
+        clientFirstName:
+          type: string
+          example: "Иван"
+        clientLastName:
+          type: string
+          example: "Иванов"
+    Pageable:
+      type: object
+      properties:
+        pageNumber:
+          type: integer
+        pageSize:
+          type: integer
+        offset:
+          type: integer
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
+        sort:
+          $ref: '#/components/schemas/Sort'
+      Sort:
+        type: object
+        properties:
+          sorted:
+            type: boolean
+          unsorted:
+            type: boolean
+          empty:
+            type: boolean
+    PortfolioAdminListItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 456
+        title:
+          type: string
+          example: "Mobile App Design"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-02-20T14:15:00Z"
+        firstName:
+          type: string
+          example: "Иван"
+        lastName:
+          type: string
+          example: "Иванов"
     User:
       type: object
       properties:
@@ -2705,7 +3089,7 @@ components:
           example: "79991234567"
         role:
           type: string
-          enum: [client, freelancer]
+          enum: [client, freelancer, admin]
           example: "client"
         is_verified:
           type: boolean
@@ -2751,7 +3135,7 @@ components:
           example: "+79991234567"
         role:
           type: string
-          enum: [client, freelancer]
+          enum: [client, freelancer, admin]
           example: "client"
       required:
         - email
@@ -2825,6 +3209,26 @@ components:
         - email
         - reset_code
         - new_password
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+      required:
+        - refreshToken
+    TokenRefreshResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6..."
+        refreshToken:
+          type: string
+          example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+        refreshTokenExpiry:
+          type: string
+          example: "2025-06-01T12:00:00Z"
     DefaultResponse:
       type: object
       properties:
