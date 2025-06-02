@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface PortfolioAdminService {
-    List<FreelancerPortfolioDto> getByFreelancer(Long freelancerId);
+    List<FreelancerPortfolioDto> getByFreelancer(Long userId);
 
     void delete(Long freelancerId, Long portfolioId);
 
