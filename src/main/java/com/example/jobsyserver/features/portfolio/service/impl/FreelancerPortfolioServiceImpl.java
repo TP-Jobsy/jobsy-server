@@ -39,6 +39,16 @@ public class FreelancerPortfolioServiceImpl implements FreelancerPortfolioServic
     }
 
     @Override
+    public List<FreelancerPortfolioDto> getByFreelancerProfileId(Long freelancerProfileId) {
+        if (!profileRepo.existsById(freelancerProfileId)) {
+            throw new ResourceNotFoundException("FreelancerProfile", freelancerProfileId);
+        }
+        return repo.findByFreelancerId(freelancerProfileId).stream()
+                .map(mapper::toDto)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public FreelancerPortfolioDto createPortfolio(FreelancerPortfolioCreateDto dto) {
         Long frId = security.getCurrentFreelancerProfileId();

@@ -2,6 +2,8 @@ package com.example.jobsyserver.features.admin.service.impl;
 
 import com.example.jobsyserver.features.admin.service.ProjectAdminService;
 import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
+import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
+import com.example.jobsyserver.features.freelancer.repository.FreelancerProfileRepository;
 import com.example.jobsyserver.features.project.dto.ProjectDto;
 import com.example.jobsyserver.features.project.mapper.ProjectMapper;
 import com.example.jobsyserver.features.project.model.Project;
@@ -26,6 +28,7 @@ public class ProjectAdminServiceImpl implements ProjectAdminService {
 
     private final ProjectRepository projectRepo;
     private final ProjectMapper mapper;
+    private final FreelancerProfileRepository freelancerProfileRepo;
 
     @Override
     public List<ProjectDto> getByClient(Long clientProfileId) {
@@ -35,8 +38,13 @@ public class ProjectAdminServiceImpl implements ProjectAdminService {
     }
 
     @Override
-    public List<ProjectDto> getByFreelancer(Long freelancerProfileId) {
-        return projectRepo.findByAssignedFreelancerId(freelancerProfileId).stream()
+    public List<ProjectDto> getByFreelancer(Long userId) {
+        FreelancerProfile profile = freelancerProfileRepo
+                .findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("FreelancerProfile", userId));
+        return projectRepo
+                .findByAssignedFreelancerId(profile.getId())
+                .stream()
                 .map(mapper::toDto)
                 .toList();
     }

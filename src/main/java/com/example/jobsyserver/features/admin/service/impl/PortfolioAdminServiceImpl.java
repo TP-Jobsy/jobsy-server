@@ -2,6 +2,8 @@ package com.example.jobsyserver.features.admin.service.impl;
 
 import com.example.jobsyserver.features.admin.service.PortfolioAdminService;
 import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
+import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
+import com.example.jobsyserver.features.freelancer.repository.FreelancerProfileRepository;
 import com.example.jobsyserver.features.portfolio.dto.FreelancerPortfolioDto;
 import com.example.jobsyserver.features.portfolio.mapper.FreelancerPortfolioMapper;
 import com.example.jobsyserver.features.portfolio.model.FreelancerPortfolio;
@@ -26,17 +28,24 @@ public class PortfolioAdminServiceImpl implements PortfolioAdminService {
 
     private final FreelancerPortfolioRepository repo;
     private final FreelancerPortfolioMapper mapper;
+    private final FreelancerProfileRepository freelancerProfileRepo;
 
     @Override
-    public List<FreelancerPortfolioDto> getByFreelancer(Long freelancerProfileId) {
-        return repo.findByFreelancerId(freelancerProfileId).stream()
+    public List<FreelancerPortfolioDto> getByFreelancer(Long userId) {
+        FreelancerProfile profile = freelancerProfileRepo
+                .findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("FreelancerProfile", userId));
+        return repo.findByFreelancerId(profile.getId()).stream()
                 .map(mapper::toDto)
                 .toList();
     }
 
     @Override
-    public void delete(Long freelancerId, Long portfolioId) {
-        FreelancerPortfolio p = repo.findByIdAndFreelancerId(portfolioId, freelancerId)
+    public void delete(Long userId, Long portfolioId) {
+        FreelancerProfile profile = freelancerProfileRepo
+                .findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("FreelancerProfile", userId));
+        FreelancerPortfolio p = repo.findByIdAndFreelancerId(portfolioId, profile.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Портфолио", portfolioId));
         repo.delete(p);
     }

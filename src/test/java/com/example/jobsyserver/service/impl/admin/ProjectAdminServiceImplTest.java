@@ -2,6 +2,8 @@ package com.example.jobsyserver.service.impl.admin;
 
 import com.example.jobsyserver.features.admin.service.impl.ProjectAdminServiceImpl;
 import com.example.jobsyserver.features.common.exception.ResourceNotFoundException;
+import com.example.jobsyserver.features.freelancer.model.FreelancerProfile;
+import com.example.jobsyserver.features.freelancer.repository.FreelancerProfileRepository;
 import com.example.jobsyserver.features.project.dto.ProjectDto;
 import com.example.jobsyserver.features.project.mapper.ProjectMapper;
 import com.example.jobsyserver.features.project.model.Project;
@@ -9,6 +11,7 @@ import com.example.jobsyserver.features.project.projection.ProjectAdminListItem;
 import com.example.jobsyserver.features.project.repository.ProjectRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,6 +29,8 @@ class ProjectAdminServiceImplTest {
 
     @Mock private ProjectRepository repo;
     @Mock private ProjectMapper mapper;
+    @Mock
+    private FreelancerProfileRepository freelancerProfileRepo;
     @InjectMocks private ProjectAdminServiceImpl service;
 
     @Test
@@ -42,12 +47,23 @@ class ProjectAdminServiceImplTest {
 
     @Test
     void getByFreelancer_ShouldMapAll() {
-        Project p = new Project(); p.setId(7L);
+        FreelancerProfile profile = new FreelancerProfile();
+        profile.setId(20L);
+        when(freelancerProfileRepo.findByUserId(20L))
+                .thenReturn(Optional.of(profile));
+        Project p = new Project();
+        p.setId(7L);
+        when(repo.findByAssignedFreelancerId(20L))
+                .thenReturn(List.of(p));
         ProjectDto dto = new ProjectDto();
-        when(repo.findByAssignedFreelancerId(20L)).thenReturn(List.of(p));
         when(mapper.toDto(p)).thenReturn(dto);
         var list = service.getByFreelancer(20L);
         assertThat(list).containsExactly(dto);
+        InOrder inOrder = inOrder(freelancerProfileRepo, repo, mapper);
+        inOrder.verify(freelancerProfileRepo).findByUserId(20L);
+        inOrder.verify(repo).findByAssignedFreelancerId(20L);
+        inOrder.verify(mapper).toDto(p);
+        inOrder.verifyNoMoreInteractions();
     }
 
     @Test

@@ -11,7 +11,7 @@ import java.util.List;
 public interface ProjectAdminService {
     List<ProjectDto> getByClient(Long clientId);
 
-    List<ProjectDto> getByFreelancer(Long freelancerId);
+    List<ProjectDto> getByFreelancer(Long userId);
 
     ProjectDto getById(Long id);
 
