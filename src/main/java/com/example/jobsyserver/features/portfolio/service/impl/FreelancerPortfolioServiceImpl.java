@@ -11,6 +11,8 @@ import com.example.jobsyserver.features.portfolio.repository.FreelancerPortfolio
 import com.example.jobsyserver.features.freelancer.repository.FreelancerProfileRepository;
 import com.example.jobsyserver.features.portfolio.service.FreelancerPortfolioService;
 import com.example.jobsyserver.features.auth.service.SecurityService;
+import com.example.jobsyserver.features.skill.model.Skill;
+import com.example.jobsyserver.features.skill.repository.SkillRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +27,7 @@ public class FreelancerPortfolioServiceImpl implements FreelancerPortfolioServic
     private final FreelancerPortfolioRepository repo;
     private final FreelancerProfileRepository profileRepo;
     private final FreelancerPortfolioMapper mapper;
+    private final SkillRepository skillRepo;
     private final SecurityService security;
 
     @Override
@@ -43,6 +46,10 @@ public class FreelancerPortfolioServiceImpl implements FreelancerPortfolioServic
                 .orElseThrow(() -> new ResourceNotFoundException("FreelancerProfile", frId));
         FreelancerPortfolio entity = mapper.toEntity(dto);
         entity.setFreelancer(profile);
+        if (dto.getSkillIds() != null && !dto.getSkillIds().isEmpty()) {
+            List<Skill> skills = skillRepo.findAllById(dto.getSkillIds());
+            entity.getSkills().addAll(skills);
+        }
         FreelancerPortfolio saved = repo.save(entity);
         return mapper.toDto(saved);
     }
@@ -55,6 +62,13 @@ public class FreelancerPortfolioServiceImpl implements FreelancerPortfolioServic
                 .filter(p -> p.getFreelancer().getId().equals(frId))
                 .orElseThrow(() -> new ResourceNotFoundException("Portfolio", id));
         mapper.updateFromDto(dto, entity);
+        if (dto.getSkillIds() != null) {
+            entity.getSkills().clear();
+            if (!dto.getSkillIds().isEmpty()) {
+                List<Skill> skills = skillRepo.findAllById(dto.getSkillIds());
+                entity.getSkills().addAll(skills);
+            }
+        }
         FreelancerPortfolio updated = repo.save(entity);
         return mapper.toDto(updated);
     }

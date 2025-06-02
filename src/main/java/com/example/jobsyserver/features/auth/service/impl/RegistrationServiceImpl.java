@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDateTime;
+import java.util.Locale;
 
 @Slf4j
 @Service
@@ -32,14 +33,15 @@ public class RegistrationServiceImpl implements RegistrationService {
     @Transactional
     public RegistrationResponse register(RegistrationRequest request) {
         log.info("Регистрация пользователя с email: {}", request.getEmail());
-        if (userRepository.existsByEmail(request.getEmail())) {
+        String normalizedEmail = request.getEmail().trim().toLowerCase(Locale.ROOT);
+        if (userRepository.existsByEmail(normalizedEmail)) {
             throw new BadRequestException("Пользователь с таким email уже зарегистрирован");
         }
 
         User user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
-                .email(request.getEmail())
+                .email(normalizedEmail)
                 .phone(request.getPhone())
                 .dateBirth(request.getDateBirth())
                 .role(request.getRole())

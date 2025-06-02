@@ -38,7 +38,8 @@ public interface ProjectMapper {
             @Mapping(target = "assignedFreelancer", ignore = true),
             @Mapping(target = "clientCompleted", ignore = true),
             @Mapping(target = "freelancerCompleted", ignore = true),
-            @Mapping(target = "skills", ignore = true)
+            @Mapping(target = "skills", ignore = true),
+            @Mapping(target = "aiRequests", ignore = true)
     })
     Project toEntity(ProjectCreateDto dto);
 
@@ -54,7 +55,8 @@ public interface ProjectMapper {
             @Mapping(target = "status", ignore = true),
             @Mapping(target = "clientCompleted", ignore = true),
             @Mapping(target = "freelancerCompleted", ignore = true),
-            @Mapping(target = "skills", ignore = true)
+            @Mapping(target = "skills", ignore = true),
+            @Mapping(target = "aiRequests", ignore = true)
     })
     Project toEntity(ProjectUpdateDto dto, @MappingTarget Project project);
 
