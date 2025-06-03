@@ -577,6 +577,35 @@ paths:
                   $ref: '#/components/schemas/Skill'
         '500':
           description: Внутренняя ошибка сервера
+  /profile/freelancer/portfolio/public/{freelancerProfileId}:
+    get:
+      tags:
+        - freelancer
+      summary: Получить портфолио произвольного фрилансера (для клиента)
+      description: Возвращает список элементов портфолио для фрилансера
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: freelancerProfileId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список элементов портфолио получен успешно
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FreelancerPortfolio'
+        '401':
+          description: Не авторизован или не роль CLIENT
+        '404':
+          description: Портфолио или навык не найдены
+        '500':
+          description: Внутренняя ошибка сервера
   /profile/freelancer/skills/{skillId}:
     post:
       tags:
