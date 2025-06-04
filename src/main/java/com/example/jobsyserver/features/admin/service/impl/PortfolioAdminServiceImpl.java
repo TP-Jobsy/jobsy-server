@@ -41,12 +41,13 @@ public class PortfolioAdminServiceImpl implements PortfolioAdminService {
     }
 
     @Override
-    public void delete(Long userId, Long portfolioId) {
+    public void delete(Long profileId, Long portfolioId) {
         FreelancerProfile profile = freelancerProfileRepo
-                .findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("FreelancerProfile", userId));
+                .findById(profileId)
+                .orElseThrow(() -> new ResourceNotFoundException("FreelancerProfile", profileId));
         FreelancerPortfolio p = repo.findByIdAndFreelancerId(portfolioId, profile.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Портфолио", portfolioId));
+
         repo.delete(p);
     }
 
