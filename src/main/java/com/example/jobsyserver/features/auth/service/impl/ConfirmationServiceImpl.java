@@ -65,5 +65,17 @@ public class ConfirmationServiceImpl implements ConfirmationService {
         return repo.findFirstByUserEmailAndActionAndUsedFalseOrderByExpiresAtDesc(email, action)
                 .filter(c -> c.getExpiresAt().isAfter(LocalDateTime.now()));
     }
+
+    @Override
+    public void validateOnly(String email, String code, ConfirmationAction action) {
+        Confirmation conf = repo.findFirstByUserEmailAndActionAndUsedFalseOrderByExpiresAtDesc(email, action)
+                .orElseThrow(() -> new BadRequestException("Код не найден или уже использован"));
+        if (conf.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("Срок действия кода истёк");
+        }
+        if (!conf.getConfirmationCode().equals(code)) {
+            throw new BadRequestException("Неверный код подтверждения");
+        }
+    }
 }
 

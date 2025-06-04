@@ -58,6 +58,6 @@ public class PasswordResetController {
             @RequestParam String email,
             @RequestParam String code
     ) {
-        confirmationService.validateAndUse(email, code, ConfirmationAction.PASSWORD_RESET);
+        confirmationService.validateOnly(email, code, ConfirmationAction.PASSWORD_RESET);
     }
 }
