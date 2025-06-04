@@ -1,14 +1,17 @@
 package com.example.jobsyserver.features.auth.controller;
 
 import com.example.jobsyserver.features.auth.dto.request.PasswordResetRequest;
+import com.example.jobsyserver.features.auth.service.ConfirmationService;
 import com.example.jobsyserver.features.common.dto.response.DefaultResponse;
 import com.example.jobsyserver.features.auth.dto.request.PasswordResetConfirmRequest;
 import com.example.jobsyserver.features.auth.service.PasswordResetService;
+import com.example.jobsyserver.features.common.enums.ConfirmationAction;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class PasswordResetController {
 
     private final PasswordResetService passwordResetService;
+    private final ConfirmationService confirmationService;
 
     @Operation(summary = "Запрос на восстановление пароля",
             description = "Инициирует процесс восстановления пароля, отправляя 4-значный код на e-mail пользователя")
@@ -46,5 +50,14 @@ public class PasswordResetController {
     public ResponseEntity<DefaultResponse> confirmPasswordReset(@RequestBody PasswordResetConfirmRequest request) {
         passwordResetService.confirmPasswordReset(request.getEmail(), request.getResetCode(), request.getNewPassword());
         return ResponseEntity.ok(new DefaultResponse("Пароль успешно обновлён"));
+    }
+
+    @PostMapping("/validate-reset-code")
+    @ResponseStatus(HttpStatus.OK)
+    public void validateResetCode(
+            @RequestParam String email,
+            @RequestParam String code
+    ) {
+        confirmationService.validateAndUse(email, code, ConfirmationAction.PASSWORD_RESET);
     }
 }
